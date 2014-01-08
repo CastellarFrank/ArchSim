@@ -1,0 +1,687 @@
+package VerilogCompiler;
+import java_cup.runtime.*;
+import java.util.*;
+import VerilogCompiler.SemanticCheck.ErrorHandler;
+import VerilogCompiler.SyntacticTree.*;      
+import VerilogCompiler.SyntacticTree.CaseItems.*;
+import VerilogCompiler.SyntacticTree.Declarations.*;
+import VerilogCompiler.SyntacticTree.Expressions.*;
+import VerilogCompiler.SyntacticTree.ModuleItems.*;
+import VerilogCompiler.SyntacticTree.Others.*;
+import VerilogCompiler.SyntacticTree.Statements.*;
+
+
+parser code {:
+
+    public void report_error(String message, Object info) {
+   
+        StringBuffer m = new StringBuffer("Error");
+   
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            
+            if (s.left >= 0) {       
+                
+                m.append(" in line "+(s.left+1));   
+                if (s.right >= 0){
+                    m.append(", column "+(s.right+1));
+                    ErrorHandler.getInstance().handleError(s.left, s.right, message);
+                }
+            }
+        }
+
+        m.append(" : "+message);
+        //System.err.println(m);        
+    }
+   
+    public void report_fatal_error(String message, Object info) {
+        //report_error(message, info);
+        //System.exit(1);
+    }
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+terminal String     IDENTIFIER;
+terminal            BIT_AND, BIT_XOR, BIT_XNOR, BIT_OR, BIT_NOR, BIT_NAND, LOG_AND, LOG_OR;
+terminal            REL_EQ, REL_NOTEQ;
+terminal            REL_GRT, REL_LST, REL_GRTEQ, REL_LSTEQ;
+terminal            R_SHIFT, L_SHIFT, R_ARIT_SHIFT, L_ARIT_SHIFT;
+terminal            OP_MINUS, OP_ADD;
+terminal            OP_TIMES, OP_DIV, OP_MOD;
+terminal            LOG_NEG, BIT_NEG;
+
+terminal            KW_ALWAYS;
+terminal            KW_AND;
+terminal            KW_ASSIGN;
+terminal            KW_BEGIN;
+terminal            KW_CASE;
+terminal            KW_DEASSIGN;
+terminal            KW_DEFAULT;
+terminal            KW_EDGE;
+terminal            KW_ELSE;
+terminal            KW_END;
+terminal            KW_ENDCASE;
+terminal            KW_ENDMODULE;
+terminal            KW_FOR;
+terminal            KW_FOREVER;
+terminal            KW_IF;
+terminal            KW_INITIAL;
+terminal            KW_INOUT;
+terminal            KW_INTEGER;
+terminal            KW_INPUT;
+terminal            KW_MODULE;
+terminal            KW_NAND;
+terminal            KW_NEGEDGE;
+terminal            KW_NOR;
+terminal            KW_OUTPUT;
+terminal            KW_OR;
+terminal            KW_PARAMETER;
+terminal            KW_POSEDGE;
+terminal            KW_REG;
+terminal            KW_REPEAT;
+terminal            KW_SIGNED;
+terminal            KW_SUPPLY0;
+terminal            KW_SUPPLY1;
+terminal            KW_WAND;
+terminal            KW_WOR;
+terminal            KW_UNSIGNED;
+terminal            KW_WAIT;
+terminal            KW_WHILE;
+terminal            KW_WIRE;
+terminal            KW_XNOR;
+terminal            KW_XOR;
+
+terminal            L_CURLY, R_CURLY;
+terminal            L_BRACKET, R_BRACKET;
+terminal            L_PARENTHESIS, R_PARENTHESIS;
+
+terminal            DECIMAL_BASE, OCTAL_BASE, BINARY_BASE, HEX_BASE;
+terminal Integer    UNSIGNED_NUMBER;
+
+terminal            QUESTION_MARK;
+terminal            AT_SIGN;
+terminal            COLON, SEMICOLON, COMMA;
+terminal            SHARP;
+terminal            EQUALS;
+
+terminal String     STRING;
+
+non terminal  Expression                  expr, index, terminal_exp, constant_exp, module_port_connection, scalar_event_expression;
+non terminal  Statement                   statement, blocking_statement, non_blocking_statement, statement_or_null, seq_block;
+non terminal  CaseItem                    case_item;
+non terminal  ArrayList<CaseItem>         case_item_list;
+non terminal  Port                        port;
+non terminal  PortDirection               port_direction;
+non terminal  NetType                     data_type_or_null, data_type;
+non terminal  ArrayList<Port>             port_list, port_list_or_null;
+non terminal  Operator                    unary_operator;
+non terminal  ArrayList<Expression>       exp_list, terminal_list, indexes;
+non terminal  PrimaryExpression           primary;
+non terminal  ArrayList<Statement>        statement_list;
+non terminal  NumberExpression            NUMBER;
+non terminal  Base                        BASE;
+non terminal  ModuleDecl                  module;
+non terminal  ArrayList<ModuleItem>       module_item_list;
+non terminal  ModuleItem                  module_item, parameter_declaration, input_declaration, output_declaration, inout_declaration, net_declaration;
+non terminal  ModuleItem                  reg_declaration, gate_declaration, module_instantiation, continuous_assign, initial_block, always_block;
+non terminal  ModuleInstance              module_instance;
+non terminal  ArrayList<ModuleInstance>   module_instance_list;
+non terminal  ArrayList<Expression>       module_connections_list;
+non terminal  SensitiveList               sensitive_list_or_all;
+non terminal  SensitiveList               sensitive_list;
+non terminal  EventExpression             sensitive_item;
+non terminal  Range                       range;
+non terminal  ArrayList<Variable>         variables_list;
+non terminal  NetType                     nettype;
+non terminal  Assignment                  assignment;
+non terminal  ArrayList<Assignment>       assignments_list;
+non terminal  GateType                    gatetype;
+non terminal  LValue                      lvalue, concatenation;
+non terminal  ParameterAssign             param_assign;
+non terminal  ArrayList<ParameterAssign>  param_assign_list;
+non terminal  GateInstance                gate_instance;
+non terminal  ArrayList<GateInstance>     gate_instance_list;
+non terminal  GateInstanceName            gate_instance_name;
+non terminal  ArrayList<RegVariable>      reg_variable_list;
+non terminal  RegVariable                 reg_variable;
+non terminal  DelayControlStatement       delay_control;
+non terminal  EventControlStatement       event_control;
+non terminal  EventExpression             event_expression;
+
+precedence left QUESTION_MARK, COLON;
+precedence left LOG_OR, KW_OR;
+precedence left LOG_AND;
+precedence left BIT_OR;
+precedence left BIT_XOR, BIT_XNOR;
+precedence left BIT_AND;
+precedence left REL_EQ, REL_NOTEQ;
+precedence left REL_GRT, REL_GRTEQ, REL_LST, REL_LSTEQ;
+precedence left R_SHIFT, L_SHIFT, R_ARIT_SHIFT, L_ARIT_SHIFT;
+precedence left OP_TIMES, OP_DIV, OP_MOD;
+precedence right L_CURLY, R_CURLY;
+precedence right OP_ADD, OP_MINUS;
+precedence right LOG_NEG, BIT_NEG;
+precedence left L_PARENTHESIS, R_PARENTHESIS;
+precedence left L_BRACKET, R_BRACKET;
+precedence right DECIMAL_BASE, BINARY_BASE, HEX_BASE, OCTAL_BASE;
+precedence right KW_ELSE;
+
+
+module ::= KW_MODULE IDENTIFIER:name L_PARENTHESIS port_list_or_null:ports R_PARENTHESIS SEMICOLON
+            module_item_list:items
+           KW_ENDMODULE {: RESULT = new ModuleDecl(name, ports, items, nameleft, nameright); :}
+;
+
+port_list_or_null ::= port_list:ports     {: RESULT = ports; :}
+                      |                   {: RESULT = new ArrayList<Port>(); :}
+;
+
+port_list ::= port_list:ports COMMA port:port        
+                {: ports.add(port); 
+                   RESULT = ports; 
+                :}
+            | port:port                              
+                {: ArrayList<Port> ports = new ArrayList<Port>();
+                   ports.add(port); 
+                   RESULT = ports;
+                :}
+;
+
+port ::= port_direction:dir data_type_or_null:type IDENTIFIER:name 
+            {: RESULT = new Port(dir, type, name, null, null, dirleft, dirright); :}
+        |port_direction:dir data_type_or_null:type IDENTIFIER:name L_BRACKET constant_exp:min R_BRACKET
+            {: RESULT = new Port(dir, type, name, min, null, dirleft, dirright); :}
+        |port_direction:dir data_type_or_null:type IDENTIFIER:name L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET
+            {: RESULT = new Port(dir, type, name, min, max, dirleft, dirright); :}
+;
+
+port_direction ::= KW_INPUT     {: RESULT = PortDirection.INPUT; :}
+                  |KW_OUTPUT    {: RESULT = PortDirection.OUTPUT; :}
+                  |KW_INOUT     {: RESULT = PortDirection.INOUT; :}
+;
+
+data_type_or_null ::= data_type:data {: RESULT = data; :}
+                     |               {: RESULT = null; :}
+;
+
+data_type ::= nettype:net       {: RESULT = net; :}
+             |KW_REG            {: RESULT = NetType.DATA_TYPE_REG; :}
+             |KW_INTEGER        {: RESULT = NetType.DATA_TYPE_INTEGER; :}
+;
+
+module_item_list ::= module_item_list:moduleItems module_item:item    
+                        {: moduleItems.add(item); RESULT = moduleItems; :}
+                    |module_item:item                                       
+                        {: ArrayList<ModuleItem> moduleItems = new ArrayList<ModuleItem>(); 
+                           moduleItems.add(item);
+                           RESULT = moduleItems;
+                        :}
+;
+
+module_item ::= parameter_declaration:mi   {: RESULT = mi; :}
+                |input_declaration:mi      {: RESULT = mi; :}
+                |output_declaration:mi     {: RESULT = mi; :}
+		|inout_declaration:mi      {: RESULT = mi; :}
+		|reg_declaration:mi        {: RESULT = mi; :}
+                |net_declaration:mi        {: RESULT = mi; :}
+		|gate_declaration:mi       {: RESULT = mi; :}
+		|module_instantiation:mi   {: RESULT = mi; :}
+		|continuous_assign:mi      {: RESULT = mi; :}
+		|initial_block:mi          {: RESULT = mi; :}
+		|always_block:mi           {: RESULT = mi; :}
+;
+
+input_declaration ::= KW_INPUT range:range variables_list:variables SEMICOLON
+                        {: RESULT = new InputDecl(range, variables, rangeleft, rangeright); :}
+                     |KW_INPUT variables_list:variables SEMICOLON
+                        {: RESULT = new InputDecl(null, variables, variablesleft, variablesright); :}
+;
+
+range ::= L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET 
+            {: RESULT = new Range(min, max, minleft, minright); :}
+;
+
+variables_list ::= variables_list:variables COMMA IDENTIFIER:name   
+                    {: variables.add(new Variable(name, nameleft, nameright)); RESULT = variables; :}
+                 | IDENTIFIER:name                                       
+                    {: ArrayList<Variable> variables = new ArrayList<Variable>();
+                       variables.add(new Variable(name, nameleft, nameright));
+                       RESULT = variables;
+                    :}
+                 | IDENTIFIER:name range:range
+                    {: ArrayList<Variable> variables = new ArrayList<Variable>();
+                       variables.add(new Variable(name, range, nameleft, nameright));
+                       RESULT = variables;
+                    :}
+;
+
+nettype ::= KW_WIRE        {: RESULT = NetType.WIRE; :}
+           |KW_WAND        {: RESULT = NetType.WAND; :}
+           |KW_WOR         {: RESULT = NetType.WOR; :}
+           |KW_SUPPLY0     {: RESULT = NetType.SUPPLY0; :}
+           |KW_SUPPLY1     {: RESULT = NetType.SUPPLY1; :}
+;
+
+assignments_list ::= assignments_list:assignments COMMA assignment:assignment 
+                        {: assignments.add(assignment); RESULT = assignments; :}
+                    |assignment:assigment
+                        {: ArrayList<Assignment> assignments = new ArrayList<Assignment>();
+                           assignments.add(assigment);
+                           RESULT = assignments;
+                        :}
+;
+
+assignment ::= lvalue:lvalue EQUALS expr:expr       
+                {: RESULT = new Assignment(lvalue, expr, lvalueleft, lvalueright); :}
+;
+
+lvalue ::=  IDENTIFIER:name 
+                {: RESULT = new SimpleLValue(name, nameleft, nameright); :}
+            |IDENTIFIER:name L_BRACKET expr:expr  R_BRACKET
+                {: RESULT = new OneIndexLValue(name, expr, nameleft, nameright); :}
+            |IDENTIFIER:name L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET
+                {: RESULT = new RangeLValue(name, new Range(min, max, minleft, minright), nameleft, nameright); :}
+            |concatenation:concat
+                {: RESULT = concat; :}
+;
+
+constant_exp ::= expr:expr {: RESULT = expr; :}
+;
+
+concatenation ::= L_CURLY:curl exp_list:expressions R_CURLY   
+                    {: 
+                        RESULT = new Concatenation(expressions, curlleft, curlright); 
+                    :}
+;
+
+continuous_assign ::= KW_ASSIGN assignments_list:assignments SEMICOLON
+                        {: RESULT = new SimpleContinuousAssign(assignments, assignmentsleft, assignmentsright); :}
+                     |nettype:type assignments_list:assignments SEMICOLON
+                        {: RESULT = new NetTypeContinuousAssign(type, assignments, typeleft, typeright); :}
+;
+
+net_declaration ::= nettype:type variables_list:variables SEMICOLON
+                    {: RESULT = new NetDecl(type, null, variables, typeleft, typeright); :}
+                   |nettype:type range:range variables_list:variables SEMICOLON
+                    {: RESULT = new NetDecl(type, range, variables, typeleft, typeright); :}
+;
+
+parameter_declaration ::= KW_PARAMETER:param param_assign_list:params SEMICOLON
+                            {: RESULT = new ParameterDecl(params, paramleft, paramright); :}
+;
+
+param_assign_list ::= param_assign_list:list COMMA param_assign:param   
+                        {: list.add(param); RESULT = list; :}
+		     |param_assign:param
+                        {: ArrayList<ParameterAssign> params = new ArrayList<ParameterAssign>(); 
+                           params.add(param);
+                           RESULT = params;
+                        :}
+;
+
+param_assign ::= IDENTIFIER:name EQUALS constant_exp:expr
+                    {: RESULT = new ParameterAssign(name, expr, nameleft, nameright); :}
+;
+
+gate_declaration ::= gatetype:type gate_instance_list:instances SEMICOLON
+                        {: RESULT = new GateDecl(type, instances, typeleft, typeright); :}
+;
+
+gate_instance_list ::= gate_instance_list:list COMMA gate_instance:item  
+                        {: list.add(item); RESULT = list; :}
+                      |gate_instance:item 
+                        {: ArrayList<GateInstance> list = new ArrayList<GateInstance>(); 
+                           list.add(item);
+                           RESULT = list;
+                        :}
+;
+
+gate_instance ::= gate_instance_name:name L_PARENTHESIS terminal_list:list R_PARENTHESIS 
+                    {: RESULT = new GateInstance(name, list, nameleft, nameright); :}
+		 |L_PARENTHESIS terminal_list:list R_PARENTHESIS
+                    {: RESULT = new GateInstance(null, list, listleft, listright); :}
+;
+
+gate_instance_name ::= IDENTIFIER:name range:range    
+                        {: RESULT = new GateInstanceName(name, range, nameleft, nameright); :}
+		   |IDENTIFIER:name                   
+                        {: RESULT = new GateInstanceName(name, null, nameleft, nameright); :}
+;
+
+terminal_list ::= terminal_list:list COMMA terminal_exp:item     
+                    {: list.add(item); RESULT = list; :} 
+                 |terminal_exp:item
+                    {: ArrayList<Expression> list = new ArrayList<Expression>();
+                       list.add(item);
+                       RESULT = list;
+                    :}
+;
+
+terminal_exp ::= expr:expr  {: RESULT = expr; :}
+;
+
+output_declaration ::= KW_OUTPUT range:range variables_list:variables SEMICOLON
+                        {: RESULT = new OutputDecl(range, variables, rangeleft, rangeright); :}
+		      |KW_OUTPUT:out variables_list:variables SEMICOLON
+                        {: RESULT = new OutputDecl(null, variables, outleft, outright); :}
+;
+
+inout_declaration ::= KW_INOUT range:range variables_list:variables SEMICOLON
+                        {: RESULT = new InOutDecl(range, variables, rangeleft, rangeright); :}
+                     |KW_INOUT:in variables_list:variables SEMICOLON
+                        {: RESULT = new InOutDecl(null, variables, inleft, inright); :}
+;
+
+reg_declaration ::= KW_REG range:range reg_variable_list:variables SEMICOLON
+                        {: RESULT = new RegDecl(range, variables, rangeleft, rangeright); :}
+		   |KW_REG:reg reg_variable_list:variables SEMICOLON
+                        {: RESULT = new RegDecl(null, variables, regleft, regright); :}
+;
+
+reg_variable_list ::= reg_variable_list:regVariables COMMA reg_variable:regVar
+                        {: regVariables.add(regVar); RESULT = regVariables; :}
+                     |reg_variable:regVar 
+                        {: ArrayList<RegVariable> list = new ArrayList<RegVariable>(); 
+                           list.add(regVar);
+                           RESULT = list;
+                        :}
+;
+
+reg_variable ::= IDENTIFIER:name             
+                    {: RESULT = new RegVariable(name, null, nameleft, nameright); :}
+		|IDENTIFIER:name range:range 
+                    {: RESULT = new RegVariable(name, range, nameleft, nameright); :}
+;
+
+module_instantiation ::= IDENTIFIER:name module_instance_list:list SEMICOLON
+                            {: RESULT = new ModuleInstantiation(name, list, nameleft, nameright); :}
+;
+
+module_instance_list ::= module_instance_list:list COMMA module_instance:instance
+                        {: list.add(instance); RESULT = list; :}
+                        |module_instance:instance
+                        {: ArrayList<ModuleInstance> list = new ArrayList<ModuleInstance>();
+                           list.add(instance);
+                           RESULT = list;
+                        :}
+;
+
+module_instance ::= IDENTIFIER:name L_PARENTHESIS module_connections_list:list R_PARENTHESIS
+                    {: RESULT = new ModuleInstance(name, list, nameleft, nameright); :}
+;
+
+module_connections_list ::= module_connections_list:list COMMA module_port_connection:item
+                            {: list.add(item); RESULT = list; :}
+                           |module_port_connection:item
+                            {: ArrayList<Expression> list = new ArrayList<Expression>();
+                               if (item != null) {
+                                 list.add(item);
+                               }
+                               RESULT = list;
+                            :}
+;
+
+module_port_connection ::= expr:expr   {: RESULT = expr; :}
+                           |           {: RESULT = null; :}
+;
+
+always_block ::= KW_ALWAYS AT_SIGN L_PARENTHESIS sensitive_list_or_all:list R_PARENTHESIS statement:stmt 
+                {: RESULT = new AlwaysBlock(list, stmt, listleft, listright); :}
+;
+
+sensitive_list_or_all ::= sensitive_list:list
+                          {: RESULT = list; :}
+                         |OP_TIMES:op
+                          {: SensitiveList list = new SensitiveList(opleft, opright);
+                             list.setAcceptAll(true);
+                             RESULT = list;
+                          :}
+;
+
+sensitive_list ::= sensitive_list:list COMMA sensitive_item:item
+                    {: list.addSensitiveItem(item);
+                       RESULT = list;
+                    :}
+                  |sensitive_item:item
+                    {: SensitiveList list = new SensitiveList(itemleft, itemright); 
+                        list.addSensitiveItem(item);
+                        RESULT = list;
+                    :}
+;
+
+sensitive_item ::= event_expression:expre
+                    {: RESULT = expre; :}
+;
+
+statement ::= blocking_statement:st SEMICOLON
+                {: RESULT = st; :}
+              |non_blocking_statement:st SEMICOLON
+                {: RESULT = st; :}
+              |KW_IF L_PARENTHESIS expr:expr  R_PARENTHESIS statement_or_null:stmt
+                {: RESULT = new IfStatement(expr, stmt, null, exprleft, exprright); :}
+              |KW_IF L_PARENTHESIS expr:expr  R_PARENTHESIS statement_or_null:trueS KW_ELSE statement_or_null:falseS
+                {: RESULT = new IfStatement(expr, trueS, falseS, exprleft, exprright); :}
+              |KW_CASE L_PARENTHESIS expr:expr  R_PARENTHESIS case_item_list:list KW_ENDCASE
+                {: RESULT = new CaseStatement(expr, list, exprleft, exprright); :}
+              |KW_FOREVER L_PARENTHESIS statement:stmt R_PARENTHESIS
+                {: RESULT = new ForeverStatement(stmt, stmtleft, stmtright); :}
+              |KW_REPEAT L_PARENTHESIS expr:expr  R_PARENTHESIS statement:stmt
+                {: RESULT = new RepeatStatement(expr, stmt, exprleft, exprright); :}
+              |KW_WHILE L_PARENTHESIS expr:expr  R_PARENTHESIS statement:stmt
+                {: RESULT = new WhileStatement(expr, stmt, exprleft, exprright); :}
+              |KW_FOR L_PARENTHESIS assignment:init SEMICOLON expr:expr  SEMICOLON assignment:increment R_PARENTHESIS statement:body
+                {: RESULT = new ForStatement(init, expr, increment, body, initleft, initright); :}
+              |seq_block:st
+                {: RESULT = st; :}
+              |KW_ASSIGN assignment:assignment SEMICOLON
+                {: RESULT = new AssignStatement(assignment, assignmentleft, assignmentright); :}
+              |KW_WAIT L_PARENTHESIS expr:expr  R_PARENTHESIS statement_or_null:stmt
+                {: RESULT = new WaitStatement(expr, stmt, exprleft, exprright); :}
+              |delay_control statement_or_null
+                {: /*ok*/ :}
+              |event_control statement_or_null
+                {: /*ok*/ :}
+;
+
+blocking_statement ::= lvalue:lvalue EQUALS expr:expr 
+                        {: RESULT = new BlockingStatement(lvalue, expr, lvalueleft, lvalueright); :}
+;
+
+non_blocking_statement ::= lvalue:lvalue REL_LSTEQ expr:expr
+                            {: RESULT = new NonBlockingStatement(lvalue, expr, lvalueleft, lvalueright); :}
+;
+
+case_item_list ::= case_item_list:list case_item:item 
+                    {: list.add(item); RESULT = list; :}
+                  |case_item:item
+                    {: ArrayList<CaseItem> list = new ArrayList<CaseItem>();
+                       list.add(item);
+                       RESULT = list;
+                    :}
+; 
+
+case_item ::= exp_list:list COLON statement_or_null:stmt
+                {: RESULT = new NumCaseItem(list, stmt, stmtleft, stmtright); :}
+              |KW_DEFAULT COLON statement_or_null:stmt
+                {: RESULT = new DefaultCaseItem(stmt, stmtleft, stmtright); :}
+;
+
+statement_or_null ::= statement:st                     {: RESULT = st; :}
+;
+
+statement_list ::= statement_list:list statement:item
+                    {: list.add(item); RESULT = list; :}
+                   |statement:item
+                    {: ArrayList<Statement> list = new ArrayList<Statement>();
+                       list.add(item);
+                       RESULT = list;
+                    :}
+;
+
+initial_block ::= KW_INITIAL  AT_SIGN L_PARENTHESIS sensitive_list_or_all:list R_PARENTHESIS statement:stmt 
+                  {: RESULT = new InitialBlock(list, stmt, listleft, listright); :}
+;
+
+seq_block ::= KW_BEGIN:beg KW_END                          
+                {: RESULT = new SeqBlock(begleft, begright); :}
+             |KW_BEGIN:beg statement_list:stmt KW_END      
+                {: RESULT = new SeqBlock(stmt, begleft, begright); :}
+;
+
+delay_control ::= SHARP NUMBER:num         
+                    {: RESULT = new NumberDelayControl(num, numleft, numright); :}
+                 |SHARP IDENTIFIER:id      
+                    {: RESULT = new IdentifierDelayControl(id, idleft, idright); :}
+;
+
+event_control ::= AT_SIGN IDENTIFIER:id
+                    {: RESULT = new IdentifierEventControl(id, idleft, idright); :}
+                 |AT_SIGN L_PARENTHESIS event_expression:expr R_PARENTHESIS
+                    {: RESULT = new ExpressionEventControl(expr, exprleft, exprright); :}
+;
+
+event_expression ::= expr:expr
+                        {: RESULT = new SimpleEventExpression(expr, exprleft, exprright); :}
+                     |KW_POSEDGE scalar_event_expression:expr
+                        {: RESULT = new PosEdgeEventExpression(expr, exprleft, exprright); :}
+                     |KW_NEGEDGE scalar_event_expression:expr
+                        {: RESULT = new NegEdgeEventExpression(expr, exprleft, exprright); :}
+                     |event_expression:left KW_OR event_expression:right
+                        {: RESULT = new ComposedEventExpression(left, right, leftleft, leftright); :}
+;
+
+scalar_event_expression ::= expr:expr {: RESULT = expr; :}
+;
+
+gatetype ::= KW_AND        {: RESULT = GateType.AND; :}
+            |KW_OR         {: RESULT = GateType.OR; :}
+            |KW_NAND       {: RESULT = GateType.NAND; :}
+            |KW_NOR        {: RESULT = GateType.NOR; :}
+            |KW_XOR        {: RESULT = GateType.XOR; :}
+            |KW_XNOR       {: RESULT = GateType.XNOR; :}
+;
+
+expr  ::=  primary:p
+                {: RESULT = p; :}
+            |unary_operator:op primary:p
+                {: RESULT = new UnaryExpression(op, p, opleft, opright); :}
+            |expr:left  OP_ADD expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_ADD, right, leftleft, leftright); :}
+            |expr:left  OP_MINUS expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_MINUS, right, leftleft, leftright); :}
+            |expr:left  OP_TIMES expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_TIMES, right, leftleft, leftright); :}
+            |expr:left  OP_DIV expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_DIV, right, leftleft, leftright); :}
+            |expr:left  OP_MOD expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_MOD, right, leftleft, leftright); :}
+            |expr:left  REL_EQ expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_EQ, right, leftleft, leftright); :}
+            |expr:left  REL_NOTEQ expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_NOTEQ, right, leftleft, leftright); :}
+            |expr:left  LOG_AND expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_LOG_AND, right, leftleft, leftright); :}
+            |expr:left  LOG_OR expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_LOG_OR, right, leftleft, leftright); :}
+            |expr:left  REL_LST expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_LST, right, leftleft, leftright); :}
+            |expr:left  REL_LSTEQ expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_LSTEQ, right, leftleft, leftright); :}
+            |expr:left  REL_GRT expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_GRT, right, leftleft, leftright); :}
+            |expr:left  REL_GRTEQ expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_GRTEQ, right, leftleft, leftright); :}
+            |expr:left  BIT_AND expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_BIT_AND, right, leftleft, leftright); :}
+            |expr:left  BIT_OR expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_BIT_OR, right, leftleft, leftright); :}
+            |expr:left  BIT_XOR expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_BIT_XOR, right, leftleft, leftright); :}
+            |expr:left  BIT_XNOR expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_BIT_XNOR, right, leftleft, leftright); :}
+            |expr:left  L_SHIFT expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_L_SHIFT, right, leftleft, leftright); :}
+            |expr:left  R_SHIFT expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_R_SHIFT, right, leftleft, leftright); :}
+            |expr:left  L_ARIT_SHIFT expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_L_ARIT_SHIFT, right, leftleft, leftright); :}
+            |expr:left  R_ARIT_SHIFT expr:right
+                {: RESULT = new BinaryExpression(left, Operator._OP_R_ARIT_SHIFT, right, leftleft, leftright); :}
+            |expr:condition  QUESTION_MARK expr:t  COLON expr:f
+                {: RESULT = new TernaryExpression(condition, t, f, conditionleft, conditionright); :}
+            |STRING:string
+                {: RESULT = new StringExpression(string, stringleft, stringright); :}
+            |L_PARENTHESIS expr:expr  R_PARENTHESIS
+                {: RESULT = expr; :}
+;
+
+primary ::= NUMBER:number
+                {: RESULT = number; :}
+            |IDENTIFIER:id
+                {: RESULT = new IdentifierExpression(id, idleft, idright); :}
+            |IDENTIFIER:id index:expr
+                {: RESULT = new IndexExpression(id, expr, idleft, idright); :}
+            |IDENTIFIER:id L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET
+                {: RESULT = new RangeExpression(id, min, max, idleft, idright); :}
+            | IDENTIFIER:id indexes:indexes range:range
+                {: RESULT = new MultiIndexExpression(id, indexes, range, idleft, idright); :}
+            | IDENTIFIER:id index:index indexes:indexes
+                {:  indexes.add(index);
+                    RESULT = new MultiIndexExpression(id, indexes, null, idleft, idright); 
+                :}
+;
+
+indexes ::=   indexes:list index:item
+                {: list.add(item); RESULT = list; :}
+            | index:item
+                {: ArrayList<Expression> list = new ArrayList<Expression>();
+                   list.add(item);
+                   RESULT = list;
+                :}
+;
+
+index ::= L_BRACKET expr:expr  R_BRACKET
+            {: RESULT = expr; :}
+;
+
+NUMBER ::=  UNSIGNED_NUMBER:num
+            {: RESULT = new SimpleNumberExpression(num, numleft, numright); :}
+	    |UNSIGNED_NUMBER:size BASE:base UNSIGNED_NUMBER:num
+            {: RESULT = new SizedNumberExpression(size, base, num, sizeleft, sizeright); :}
+            |UNSIGNED_NUMBER:size BASE:base IDENTIFIER:hexNum
+            {: RESULT = new SizedHexNumberExpression(size, base, hexNum, sizeleft, sizeright); :}
+	    |BASE:base UNSIGNED_NUMBER:num
+            {: RESULT = new SizedNumberExpression(32, base, num, baseleft, baseright); :}
+            |BASE:base IDENTIFIER:hexNum
+            {: RESULT = new SizedHexNumberExpression(32, base, hexNum, baseleft, baseright); :}
+;
+
+BASE ::=  DECIMAL_BASE      {: RESULT = Base.DECIMAL; :}
+	 |BINARY_BASE       {: RESULT = Base.BINARY; :}
+	 |HEX_BASE          {: RESULT = Base.HEXADECIMAL; :}
+	 |OCTAL_BASE        {: RESULT = Base.OCTAL; :}
+;
+
+unary_operator ::=  OP_ADD       {: RESULT = Operator._OP_ADD; :}
+                    |OP_MINUS    {: RESULT = Operator._OP_MINUS; :}
+                    |LOG_NEG     {: RESULT = Operator._OP_LOG_NEG; :}
+                    |BIT_NEG     {: RESULT = Operator._OP_BIT_NEG; :}
+                    |BIT_AND     {: RESULT = Operator._OP_BIT_AND; :}
+                    |BIT_NAND    {: RESULT = Operator._OP_BIT_NAND; :}
+                    |BIT_OR      {: RESULT = Operator._OP_BIT_OR; :}
+                    |BIT_NOR     {: RESULT = Operator._OP_BIT_NOR; :}
+                    |BIT_XOR     {: RESULT = Operator._OP_BIT_XOR; :}
+                    |BIT_XNOR    {: RESULT = Operator._OP_BIT_XNOR; :}
+;
+
+exp_list ::=  exp_list:list COMMA expr:item
+                {: list.add(item); RESULT = list; :}
+	     |expr:item
+                {: ArrayList<Expression> list = new ArrayList<Expression>();
+                   list.add(item);
+                   RESULT = list;
+                :}
+;

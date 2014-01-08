@@ -1,0 +1,41 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package VerilogCompiler.SyntacticTree.Statements;
+
+import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.Expressions.EventExpression;
+
+/**
+ *
+ * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ */
+public class ExpressionEventControl extends EventControlStatement {
+    EventExpression eventExpression;
+
+    public ExpressionEventControl(EventExpression eventExpression, int line, int column) {
+        super(line, column);
+        this.eventExpression = eventExpression;
+    }
+
+    public EventExpression getEventExpression() {
+        return eventExpression;
+    }
+
+    public void setEventExpression(EventExpression eventExpression) {
+        this.eventExpression = eventExpression;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("@(%s)", eventExpression.toString());
+    }
+
+    @Override
+    public ExpressionType validateSemantics() {
+        eventExpression.validateSemantics();
+        return null;
+    }
+    
+}

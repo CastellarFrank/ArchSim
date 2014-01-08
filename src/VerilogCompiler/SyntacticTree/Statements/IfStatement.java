@@ -1,0 +1,66 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package VerilogCompiler.SyntacticTree.Statements;
+
+import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.Expressions.Expression;
+
+/**
+ *
+ * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ */
+public class IfStatement extends Statement {
+    Expression condition;
+    Statement trueBlock;
+    Statement falseBlock;
+
+    public IfStatement(Expression condition, Statement trueBlock, Statement falseBlock, int line, int column) {
+        super(line, column);
+        this.condition = condition;
+        this.trueBlock = trueBlock;
+        this.falseBlock = falseBlock;
+    }
+
+    public Expression getCondition() {
+        return condition;
+    }
+
+    public void setCondition(Expression condition) {
+        this.condition = condition;
+    }
+
+    public Statement getTrueBlock() {
+        return trueBlock;
+    }
+
+    public void setTrueBlock(Statement trueBlock) {
+        this.trueBlock = trueBlock;
+    }
+
+    public Statement getFalseBlock() {
+        return falseBlock;
+    }
+
+    public void setFalseBlock(Statement falseBlock) {
+        this.falseBlock = falseBlock;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("if (%s) %s %s", condition, trueBlock, 
+                falseBlock != null? " else " + falseBlock:"");
+    }
+
+    @Override
+    public ExpressionType validateSemantics() {
+        condition.validateSemantics();
+        trueBlock.validateSemantics();
+        if (falseBlock != null)
+            falseBlock.validateSemantics();
+        
+        return null;
+    }
+    
+}

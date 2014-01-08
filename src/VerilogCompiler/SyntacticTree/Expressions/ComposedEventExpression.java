@@ -1,0 +1,59 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package VerilogCompiler.SyntacticTree.Expressions;
+
+import VerilogCompiler.SemanticCheck.ErrorHandler;
+import VerilogCompiler.SemanticCheck.ExpressionType;
+
+/**
+ *
+ * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ */
+public class ComposedEventExpression extends EventExpression{
+    EventExpression left;
+    EventExpression right;
+
+    public ComposedEventExpression(EventExpression left, EventExpression right, int line, int column) {
+        super(line, column);
+        this.left = left;
+        this.right = right;
+    }
+
+    public EventExpression getLeft() {
+        return left;
+    }
+
+    public void setLeft(EventExpression left) {
+        this.left = left;
+    }
+
+    public EventExpression getRight() {
+        return right;
+    }
+
+    public void setRight(EventExpression right) {
+        this.right = right;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s or %s", left, right);
+    }
+
+    @Override
+    public ExpressionType validateSemantics() {
+        ExpressionType leftType = left.validateSemantics();
+        ExpressionType rightType = right.validateSemantics();
+        
+        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER)
+            return ExpressionType.INTEGER;
+        else {
+            ErrorHandler.getInstance().handleError(line, column, 
+                    "left and right operands must be integer");
+            return ExpressionType.ERROR;
+        }
+    }
+    
+}

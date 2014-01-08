@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><moduleInfo><name>Full_Adder</name><ports><port name="out" type="OUTPUT"/><port name="clk" type="INPUT"/></ports></moduleInfo>

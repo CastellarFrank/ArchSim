@@ -1,0 +1,62 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package VerilogCompiler.SyntacticTree.Expressions;
+
+import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.Base;
+import VerilogCompiler.Utils.StringUtils;
+
+/**
+ *
+ * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ */
+public class SizedNumberExpression extends NumberExpression {
+    int size;
+    Base base;
+    int value;
+
+    public SizedNumberExpression(int size, Base base, int value, int line, int column) {
+        super(line, column);
+        this.size = size;
+        this.base = base;
+        this.value = value;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public Base getBase() {
+        return base;
+    }
+
+    public void setBase(Base base) {
+        this.base = base;
+    }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s%s%s", size, 
+                StringUtils.getInstance().BaseToString(base), value);
+    }
+
+    @Override
+    public ExpressionType validateSemantics() {
+        return ExpressionType.INTEGER;
+    }
+    
+}
