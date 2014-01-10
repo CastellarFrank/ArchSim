@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Base;
@@ -67,6 +68,12 @@ public class SizedHexNumberExpression extends NumberExpression {
                     hexNumber + " is not a valid hexadecimal number");
             return ExpressionType.ERROR;
         }        
+    }
+
+    @Override
+    public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
+    String moduleName) {
+        return new ExpressionValue(evaluatedValue, size);
     }
     
 }

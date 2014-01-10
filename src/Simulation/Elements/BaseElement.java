@@ -6,9 +6,9 @@ package Simulation.Elements;
 
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
-import Simulation.Configuration;
 import GUI.Edit.EditInfo;
 import GUI.Edit.Editable;
+import Simulation.Configuration;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -48,6 +48,8 @@ public abstract class BaseElement implements Editable {
     public boolean noDiagonal;
     public double current, curcount;
     private boolean isMovable = true;
+    
+    private String id;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -130,6 +132,14 @@ public abstract class BaseElement implements Editable {
 
         // draw second lead
         drawThickLine(g, lead2, point2);
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    public void setId(String id) {
+        this.id = id;
     }
     //</editor-fold>
 
@@ -529,6 +539,21 @@ public abstract class BaseElement implements Editable {
 
     public boolean isCenteredText() {
         return false;
+    }
+    
+    public void drawText(Graphics g, String text) {
+        FontMetrics fm = g.getFontMetrics();
+        int w = fm.stringWidth(text);
+        int textX = x2, oldTextX = x2;
+        
+        if (x < x2) {
+            //textX += w;
+        } else {
+            textX -= w;
+        }
+        
+        g.drawString(text, textX, (int)(y2 + fm.getAscent() / 4.0) );
+        adjustBbox(textX, y - fm.getAscent() / 2, oldTextX, y + fm.getAscent() / 2);
     }
 
     public void drawCenteredText(Graphics g, String s, int x, int y, boolean cx) {

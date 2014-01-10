@@ -4,17 +4,15 @@
  */
 package GUI.Design;
 
-import Exceptions.ArchException;
+import DataStructures.CircuitGenerator;
 import GUI.ErrorPanel;
 import GUI.MainWindow;
 import Simulation.Configuration;
-import Simulation.Elements.Inputs.LogicInput;
-import Simulation.Elements.Wire;
+import Simulation.Elements.BaseElement;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import VerilogCompiler.SyntacticTree.Others.Port;
-import VerilogCompiler.SyntacticTree.PortDirection;
 import VerilogCompiler.VerilogLexer;
 import VerilogCompiler.parser;
 import java.io.File;
@@ -275,30 +273,9 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
     
     public void generateCircuitFromModule(ModuleDecl module) {
-        ArrayList<Port> ports = module.getPortList();        
-        int wireDefaultLenght = 20, inputsDefaultLenght = 20, verticalSpacing = 20;
-        int currentX = 0, currentY = 20, currentX2 = 50, currentY2 = 20;
-        for (Port port : ports) {
-            try {
-                if (port.getDirection() == PortDirection.INPUT) {
-                    LogicInput portInput = new LogicInput(currentX2, currentY2, 
-                            currentX, currentY, new String[] { "false" });
-                    preview.addElement(portInput);
-                    currentX += currentX2;
-                    currentX2 *= 2;                    
-                } else {
-                    
-                }
-                Wire portWire = new Wire(currentX, currentY, currentX2, currentY2, null);
-                preview.addElement(portWire);
-                
-                currentX2 /= 2;
-                currentX -= currentX2;
-                currentY += verticalSpacing;
-                currentY2 += verticalSpacing;
-            } catch (ArchException ex) {
-                Logger.getLogger(DesignWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        ArrayList<BaseElement> elements = CircuitGenerator.getInstance().generateFromModule(module);
+        for (BaseElement baseElement : elements) {
+            preview.addElement(baseElement);
         }
         
         preview.prepareForAnalysis();

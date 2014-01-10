@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -12,6 +14,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
  */
 public class PosEdgeEventExpression extends EventExpression {
     Expression expression;
+    ExpressionValue previousValue = new ExpressionValue(1, 1);
 
     public PosEdgeEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -35,6 +38,20 @@ public class PosEdgeEventExpression extends EventExpression {
     public ExpressionType validateSemantics() {
         expression.validateSemantics();
         return ExpressionType.EDGE;
+    }
+
+    @Override
+    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue newValue = expression.evaluate(simulationScope, moduleName);
+        Integer nValue = Integer.parseInt(newValue.value.toString());
+        Integer oldValue = Integer.parseInt(previousValue.value.toString());
+        
+        previousValue = newValue;
+        
+        if (oldValue == 0 && nValue == 1)
+            return new ExpressionValue(1, 1);
+        else 
+            return new ExpressionValue(0, 1);
     }
     
 }

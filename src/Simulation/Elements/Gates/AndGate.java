@@ -20,7 +20,7 @@ public class AndGate extends GateElement {
     }
 
     public AndGate(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
-        super(x, y, x2, y2, extraParams);
+        super(x, y, x2, y2, extraParams);        
     }
 
     @Override

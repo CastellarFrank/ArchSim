@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
@@ -54,6 +55,17 @@ public class ComposedEventExpression extends EventExpression{
                     "left and right operands must be integer");
             return ExpressionType.ERROR;
         }
+    }
+
+    @Override
+    public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
+        ExpressionValue l = left.evaluate(simulationScope, moduleName);
+        ExpressionValue r = right.evaluate(simulationScope, moduleName);
+        
+        Integer leftValue = Integer.parseInt(l.toString());
+        Integer rightValue = Integer.parseInt(r.toString());
+        
+        return new ExpressionValue(leftValue == 1 || rightValue == 1, 1);
     }
     
 }

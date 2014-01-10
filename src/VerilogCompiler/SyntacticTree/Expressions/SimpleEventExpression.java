@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -34,6 +36,14 @@ public class SimpleEventExpression extends EventExpression {
     @Override
     public ExpressionType validateSemantics() {
         return expression.validateSemantics();
+    }
+
+    @Override
+    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue exp = expression.evaluate(simulationScope, moduleName);
+        Integer intValue = Integer.parseInt(exp.value.toString());
+        
+        return new ExpressionValue(intValue == 0 ? 0 : 1, 1);
     }
     
 }

@@ -523,6 +523,8 @@ statement_list ::= statement_list:list statement:item
 
 initial_block ::= KW_INITIAL  AT_SIGN L_PARENTHESIS sensitive_list_or_all:list R_PARENTHESIS statement:stmt 
                   {: RESULT = new InitialBlock(list, stmt, listleft, listright); :}
+                 |KW_INITIAL statement:stmt
+                  {: RESULT = new InitialBlock(null, stmt, stmtleft, stmtright);:}
 ;
 
 seq_block ::= KW_BEGIN:beg KW_END                          
@@ -626,7 +628,7 @@ primary ::= NUMBER:number
                 {: RESULT = new IndexExpression(id, expr, idleft, idright); :}
             |IDENTIFIER:id L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET
                 {: RESULT = new RangeExpression(id, min, max, idleft, idright); :}
-            | IDENTIFIER:id indexes:indexes range:range
+            | IDENTIFIER:id index:index indexes:indexes range:range
                 {: RESULT = new MultiIndexExpression(id, indexes, range, idleft, idright); :}
             | IDENTIFIER:id index:index indexes:indexes
                 {:  indexes.add(index);

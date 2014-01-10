@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class Concatenation extends LValue {
     ArrayList<Expression> expressionList;
-
+    
     public Concatenation(ArrayList<Expression> expressionList, int line, int column) {
         super(line, column);
         this.expressionList = expressionList;

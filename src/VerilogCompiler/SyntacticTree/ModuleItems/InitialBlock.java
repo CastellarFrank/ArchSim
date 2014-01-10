@@ -39,10 +39,14 @@ public class InitialBlock extends ModuleItem {
     @Override
     public ExpressionType validateSemantics() {
         SemanticCheck.getInstance().setInsideProceduralBlock(true);
-        sensitiveList.validateSemantics();
+        if (sensitiveList != null)
+            sensitiveList.validateSemantics();
         statement.validateSemantics();
         SemanticCheck.getInstance().setInsideProceduralBlock(false);
         return null;
     }
     
+    public void execute() {
+    
+    }
 }

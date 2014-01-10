@@ -6,9 +6,9 @@ package GUI.Design;
 
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
-import GUI.Simulation.DrilldownWindow;
 import GUI.MainWindow;
 import GUI.MouseMode;
+import GUI.Simulation.DrilldownWindow;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Elements.Gates.AndGate;

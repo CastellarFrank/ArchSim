@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -37,14 +39,25 @@ public class IdentifierExpression extends PrimaryExpression {
     public ExpressionType validateSemantics() {
         if (SemanticCheck.getInstance().variableIsRegistered(identifier)) {
             if (SemanticCheck.getInstance().variableIsArray(identifier))
-                return ExpressionType.ARRAY;
+                return type = ExpressionType.ARRAY;
             else
-                return ExpressionType.INTEGER;
+                return type = ExpressionType.INTEGER;
         } else {
             ErrorHandler.getInstance().handleError(line, column, 
                     identifier + " is not declared");
         }
         return null;
+    }
+
+    @Override
+    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
+        switch (type) {
+            case ERROR: return null;
+            case INTEGER: 
+            case ARRAY:
+                return simulationScope.getVariableValue(moduleName, identifier);
+            default: return null;
+        }
     }
     
 }

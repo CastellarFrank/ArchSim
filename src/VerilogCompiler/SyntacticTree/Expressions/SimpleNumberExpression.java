@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -34,6 +35,11 @@ public class SimpleNumberExpression extends NumberExpression {
     @Override
     public ExpressionType validateSemantics() {
         return ExpressionType.INTEGER;
+    }
+
+    @Override
+    public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
+        return new ExpressionValue(unsignedNumber, 32);
     }
     
 }

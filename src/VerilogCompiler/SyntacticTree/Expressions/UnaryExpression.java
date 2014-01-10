@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.MathHelper;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Operator;
 import VerilogCompiler.Utils.StringUtils;
@@ -48,6 +50,38 @@ public class UnaryExpression extends Expression {
     @Override
     public ExpressionType validateSemantics() {
         return expression.validateSemantics();
+    }
+
+    @Override
+    public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+        Integer intValue = Integer.parseInt(value.value.toString());
+        
+        switch (expressionOperator) {
+            case _OP_ADD:
+                return new ExpressionValue(intValue, value.bits);
+            case _OP_MINUS:
+                return new ExpressionValue(-intValue, value.bits);
+            case _OP_LOG_NEG:
+                return new ExpressionValue(intValue == 0 ? 1: 0, 1);
+            case _OP_BIT_NEG:
+                return new ExpressionValue(~intValue, value.bits);
+            case _OP_BIT_AND:
+                return new ExpressionValue(MathHelper.unaryAnd(intValue), value.bits);
+            case _OP_BIT_OR:
+                return new ExpressionValue(MathHelper.unaryOr(intValue), value.bits);
+            case _OP_BIT_NAND:
+                return new ExpressionValue(~MathHelper.unaryAnd(intValue), value.bits);
+            case _OP_BIT_NOR:
+                return new ExpressionValue(~MathHelper.unaryOr(intValue), value.bits);
+            case _OP_BIT_XOR:
+                return new ExpressionValue(MathHelper.unaryXor(intValue), value.bits);
+            case _OP_BIT_XNOR:
+                return new ExpressionValue(~MathHelper.unaryXor(intValue), value.bits);
+            default:
+                return null;
+        }
+        
     }
     
 }

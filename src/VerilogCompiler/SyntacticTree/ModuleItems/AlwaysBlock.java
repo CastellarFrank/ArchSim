@@ -45,4 +45,8 @@ public class AlwaysBlock extends ModuleItem {
         return null;
     }
     
+    public void execute() {
+    
+    }
+    
 }

@@ -5,6 +5,7 @@
 package VerilogCompiler.SyntacticTree.Declarations;
 
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.ModuleItems.GateDecl;
 import VerilogCompiler.SyntacticTree.ModuleItems.ModuleItem;
 import VerilogCompiler.SyntacticTree.Others.Port;
 import VerilogCompiler.Utils.StringUtils;
@@ -23,6 +24,9 @@ public class ModuleDecl extends Declaration {
     int inputPortCount = 0;
     int outputPortCount = 0;
     int inoutPortCount = 0;
+    
+    ArrayList<GateDecl> gates;
+    
     //</editor-fold>
 
     public ModuleDecl(String moduleName, ArrayList<Port> portList, ArrayList<ModuleItem> moduleItemList, int line, int column) {
@@ -44,6 +48,18 @@ public class ModuleDecl extends Declaration {
 
     public ArrayList<Port> getPortList() {
         return portList;
+    }
+    
+    public ArrayList<GateDecl> getGates() {
+        if (gates == null) {
+            gates = new ArrayList<GateDecl>();
+            for (ModuleItem moduleItem : moduleItemList) {
+                if (moduleItem instanceof GateDecl)
+                    gates.add((GateDecl) moduleItem);
+            }
+        }
+        
+        return gates;
     }
 
     public void setPortList(ArrayList<Port> portList) {

@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -58,6 +59,25 @@ public class TernaryExpression extends Expression {
         falseExpression.validateSemantics();
         
         return ExpressionType.INTEGER;
+    }
+
+    @Override
+    public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
+        ExpressionValue cond = condition.evaluate(simulationScope, moduleName);
+        ExpressionValue trueValue = trueExpression.evaluate(simulationScope, moduleName);
+        ExpressionValue falseValue = falseExpression.evaluate(simulationScope, moduleName);
+        
+        Object value;
+        int bits;
+        if (Integer.parseInt(cond.value.toString()) == 1) {
+            value = trueValue.value;
+            bits = trueValue.bits;
+        } else {
+            value = falseValue.value;
+            bits = falseValue.bits;
+        }
+        
+        return new ExpressionValue(value, bits);
     }
     
 }

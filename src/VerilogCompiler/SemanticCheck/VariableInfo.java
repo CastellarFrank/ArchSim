@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SemanticCheck;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import java.util.ArrayList;
 
 /**
@@ -18,9 +19,19 @@ public class VariableInfo {
     public boolean isBigEndian = false; /*BIG ENDIAN = MSB...LSB; */
     public DataType type;
     public ArrayList<DataType> acceptedTypes = new ArrayList<DataType>();
+    public ExpressionValue value;
+    
+    public int MSB = 0, LSB = 0;
     
     public void addAcceptedType(DataType type) {
         if (!acceptedTypes.contains(type))
             acceptedTypes.add(type);
+    }
+    
+    public void setLimits(int LSB, int MSB) {
+        this.LSB = LSB;
+        this.MSB = MSB;
+        if (LSB < MSB)
+            isBigEndian = true;
     }
 }

@@ -4,6 +4,7 @@
  */
 package GUI;
 
+import DataStructures.CircuitGenerator;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Joint;
@@ -12,10 +13,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.lang.reflect.Constructor;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -89,60 +87,26 @@ public class ContainerPanel extends JCanvas {
     }
 
     public BaseElement constructElement(String type, int x, int y) {
-        Class[] proto = new Class[2];
-        proto[0] = proto[1] = int.class;
-
-        Class baseElementClass;
-        try {
-            baseElementClass = Class.forName(type);
-            Constructor constructor = baseElementClass.getConstructor(proto);
-
-            Object[] params = new Object[2];
-            params[0] = snapGrid(x);
-            params[1] = snapGrid(y);
-
-            BaseElement element = (BaseElement) constructor.newInstance(params);
+        
+        BaseElement element = CircuitGenerator.getInstance().constructElement(type, 
+                snapGrid(x), snapGrid(y));
+        
+        if (element != null)
             element.containerPanel = this;
-            return element;
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        
+        return element;
     }
 
     public BaseElement constructElement(String type,
             int x, int y, int x2, int y2, String[] extraParams) {
-        Class[] proto = new Class[5];
-        proto[0] = proto[1] = proto[2] = proto[3] = int.class;
-        proto[4] = String[].class;
-
-        Class baseElementClass;
-        try {
-            baseElementClass = Class.forName(type);
-            Constructor constructor = baseElementClass.getConstructor(proto);
-
-            Object[] params = new Object[5];
-            params[0] = x;
-            params[1] = y;
-            params[2] = x2;
-            params[3] = y2;
-            params[4] = extraParams;
-
-            BaseElement element = (BaseElement) constructor.newInstance(params);
+        
+        BaseElement element = CircuitGenerator.getInstance().constructElement(type, 
+                x, y, x2, y2, extraParams);
+        
+        if (element != null)
             element.containerPanel = this;
-            return element;
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
-            Logger.getLogger(ContainerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+        
+        return element;
     }
 
     public void constructAndAddElement(String type,
