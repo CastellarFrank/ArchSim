@@ -14,18 +14,18 @@ import VerilogCompiler.Utils.StringUtils;
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
 public class SizedNumberExpression extends NumberExpression {
-    int size;
+    long size;
     Base base;
-    int value;
+    long value;
 
-    public SizedNumberExpression(int size, Base base, int value, int line, int column) {
+    public SizedNumberExpression(long size, Base base, long value, int line, int column) {
         super(line, column);
         this.size = size;
         this.base = base;
         this.value = value;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
@@ -41,7 +41,7 @@ public class SizedNumberExpression extends NumberExpression {
         this.base = base;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 

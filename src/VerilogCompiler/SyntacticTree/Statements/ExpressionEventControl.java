@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.EventExpression;
 
@@ -36,6 +37,11 @@ public class ExpressionEventControl extends EventControlStatement {
     public ExpressionType validateSemantics() {
         eventExpression.validateSemantics();
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        eventExpression.evaluate(simulationScope, moduleName);
     }
     
 }

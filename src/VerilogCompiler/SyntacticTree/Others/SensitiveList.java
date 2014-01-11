@@ -4,9 +4,11 @@
  */
 package VerilogCompiler.SyntacticTree.Others;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.EventExpression;
-import VerilogCompiler.SyntacticTree.VNode;
+import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -14,7 +16,7 @@ import java.util.ArrayList;
  *
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
-public class SensitiveList extends VNode {
+public class SensitiveList extends Expression {
 
     boolean acceptAll;
     ArrayList<EventExpression> items;
@@ -70,6 +72,22 @@ public class SensitiveList extends VNode {
             eventExpression.validateSemantics();
         }
         return null;
+    }
+
+    @Override
+    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
+        if (acceptAll)
+            return new ExpressionValue(1, 1);
+        int result = 1;
+        for (EventExpression eventExpression : items) {
+            ExpressionValue val = eventExpression.evaluate(simulationScope, moduleName);
+            Integer intValue = Integer.parseInt(val.value.toString());
+            if (intValue != 1) {
+                result = 0;
+                break;
+            }
+        }
+        return new ExpressionValue(result, 1);
     }
     
 }

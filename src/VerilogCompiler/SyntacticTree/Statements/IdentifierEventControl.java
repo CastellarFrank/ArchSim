@@ -4,6 +4,9 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import Exceptions.UnsuportedFeature;
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -40,6 +43,14 @@ public class IdentifierEventControl extends EventControlStatement {
                     identifier + " is not defined");
         }
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = simulationScope.getVariableValue(moduleName, identifier);
+        Integer intValue = Integer.parseInt(value.value.toString());
+        /*TODO*/
+        throw new UnsuportedFeature("identifier event control statement not supported");
     }
     
 }

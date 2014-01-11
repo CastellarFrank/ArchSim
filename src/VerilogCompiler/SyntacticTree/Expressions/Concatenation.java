@@ -4,6 +4,11 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import Exceptions.UnsuportedFeature;
+import Simulation.Configuration;
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.MathHelper;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.Utils.StringUtils;
@@ -44,6 +49,29 @@ public class Concatenation extends LValue {
             }
         }
         return ExpressionType.ARRAY;
+    }
+
+    @Override
+    public void setValue(SimulationScope simulationScope, 
+            String moduleName,Object value) {
+        String binaryRep = Integer.toBinaryString((Integer)value);
+        if (Configuration.DEBUG_MODE)
+            System.out.println("binary number " + binaryRep);
+        int intValue = (Integer) value;
+        int currentPos = 31;
+        for (int i = expressionList.size() - 1; i >= 0; i--) {
+            if (currentPos < 0) break;
+            IdentifierExpression expression = (IdentifierExpression) expressionList.get(i);
+            if (expression == null)
+                throw new UnsuportedFeature("concatenation members can only be identifiers");
+            ExpressionValue loc = simulationScope.getVariableValue(moduleName, expression.getIdentifier());
+            long min = currentPos - loc.bits + 1;
+            if (min < 0) min = 0;
+            long portion = MathHelper.getBitSelection(intValue, min, currentPos);
+            loc.value = new Long(portion);
+            
+            currentPos -= min - 1;
+        }
     }
     
 }

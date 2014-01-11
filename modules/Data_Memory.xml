@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" type="Simulation.Elements.NamedWire" x="240" x2="192" y="112" y2="112"/><element id="0" type="Simulation.Elements.Wire" x="240" x2="288" y="112" y2="112"/><element id="0" type="Simulation.Elements.NamedWire" x="240" x2="192" y="136" y2="136"/><element id="0" type="Simulation.Elements.Wire" x="240" x2="288" y="136" y2="136"/><element id="0" type="Simulation.Elements.NamedWire" x="240" x2="192" y="152" y2="152"/><element id="0" type="Simulation.Elements.Wire" x="240" x2="288" y="152" y2="152"/><element id="0" type="Simulation.Elements.NamedWire" x="240" x2="192" y="176" y2="176"/><element id="0" type="Simulation.Elements.Wire" x="240" x2="288" y="176" y2="176"/><element id="0" type="Simulation.Elements.Wire" x="192" x2="240" y="192" y2="192"/><element id="0" type="Simulation.Elements.NamedWire" x="216" x2="168" y="216" y2="216"/><element id="0" type="Simulation.Elements.Wire" x="192" x2="240" y="216" y2="216"/></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    21:53:16 05/15/2012 
+// Design Name: 
+// Module Name:    Data_Memory 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Data_Memory(input MemWrite,
+						 input MemRead,
+						 input [15:0] Write_Data,
+						 input [15:0] Addr,
+						 output reg [15:0] Read_Data, 
+						 input clk
+    );
+	 
+	 reg [15:0] memory[1023:0]; //porque se direccionara con 16 bits
+	 
+	 always @ (negedge clk)
+		if(MemWrite == 1)
+			memory[Addr] = Write_Data;
+	 
+	 always @ (MemRead or MemWrite or Addr or Write_Data)
+	 begin
+		if(MemRead == 1)
+			Read_Data &lt;= memory[Addr[9:0]];
+		else
+			Read_Data &lt;= 16'b0;
+	 end
+
+
+endmodule
+</behaviour></module>

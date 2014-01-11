@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -55,7 +56,9 @@ public class OneIndexLValue extends LValue {
                     identifier + " is not a vector/array");
             return ExpressionType.ERROR;
         }
-        if (expression.validateSemantics() != ExpressionType.INTEGER) {
+        ExpressionType result = expression.validateSemantics();
+        if (result != ExpressionType.INTEGER && 
+                result != ExpressionType.VECTOR) {
             ErrorHandler.getInstance().handleError(line, column, 
                     "index must be an integer");
             return ExpressionType.ERROR;
@@ -64,6 +67,11 @@ public class OneIndexLValue extends LValue {
                 !SemanticCheck.getInstance().variableIsArray(identifier))
             return ExpressionType.INTEGER;
         return ExpressionType.VECTOR;
+    }
+
+    @Override
+    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Others.SensitiveList;
@@ -45,8 +47,13 @@ public class AlwaysBlock extends ModuleItem {
         return null;
     }
     
-    public void execute() {
-    
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = sensitiveList.evaluate(simulationScope, moduleName);
+        Integer condition = Integer.parseInt(value.value.toString());
+        
+        if (condition == 1) {
+            statement.execute(simulationScope, moduleName);
+        }
     }
     
 }

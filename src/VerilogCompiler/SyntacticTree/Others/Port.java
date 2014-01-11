@@ -25,6 +25,7 @@ public class Port extends VNode {
     String        identifier;
     Expression    minExpression;
     Expression    maxExpression;
+    boolean       isVector;
 
     public Port(PortDirection direction, NetType dataType, String identifier, Expression minExpression, Expression maxExpression, int line, int column) {
         super(line, column);
@@ -33,6 +34,19 @@ public class Port extends VNode {
         this.identifier = identifier;
         this.minExpression = minExpression;
         this.maxExpression = maxExpression;
+        this.isVector = false;
+    }
+    
+    public Port(PortDirection direction, NetType dataType, 
+            String identifier, Expression minExpression, 
+            Expression maxExpression, boolean isArray, int line, int column) {
+        super(line, column);
+        this.direction = direction;
+        this.dataType = dataType;
+        this.identifier = identifier;
+        this.minExpression = minExpression;
+        this.maxExpression = maxExpression;
+        this.isVector = isArray;
     }
 
     public PortDirection getDirection() {
@@ -101,8 +115,9 @@ public class Port extends VNode {
             if (direction == PortDirection.OUTPUT)
                 info.addAcceptedType(DataType.VARIABLE);
             
-            if (minExpression != null)
+            if (minExpression != null && !isVector)
                 info.isArray = true;
+            if (isVector) info.isVector = true;
             SemanticCheck.getInstance().registerVariable(identifier, info);
         }
         if (minExpression != null)

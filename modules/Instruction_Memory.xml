@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" type="Simulation.Elements.NamedWire" x="224" x2="176" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="224" x2="272" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="176" x2="224" y="192" y2="192"/></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    21:51:19 05/15/2012 
+// Design Name: 
+// Module Name:    Instruction_Memory 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Instruction_Memory(input [15:0] Read_Addr,
+					 output reg [15:0] Instruction
+    );
+	 
+	 //reg [15:0] iMemory[65535:0];
+	 reg [15:0] iMemory[255:0];
+	 integer i;
+	 
+	 always @ (Read_Addr)
+	 begin
+		Instruction = iMemory[Read_Addr];
+	 end
+	 
+	 initial
+	 begin
+	 
+		for(i = 0;i&lt;256;i=i+1)
+			iMemory[i] = 16'b0000100100100000;
+		
+		
+		iMemory[0] = 16'b1101000000000000;
+		iMemory[1] = 16'b1101001000000010;
+		iMemory[2] = 16'b1100000000000101;
+		iMemory[3] = 16'b1101000000000000;
+		iMemory[4] = 16'b1101000000000000;
+		iMemory[5] = 16'b0000000000011000;
+		iMemory[6] = 16'b0001000001100000;
+		iMemory[7] = 16'b1001000011000000;
+		iMemory[8] = 16'b1001001001000000;
+		iMemory[9] = 16'b0010001100011000;
+		iMemory[10] = 16'b1101110000011110;
+		iMemory[11] = 16'b1101101000110100;
+		iMemory[12] = 16'b0011101110101000;
+		iMemory[13] = 16'b1101100000000000;
+		iMemory[14] = 16'b0000000001000000;
+		iMemory[15] = 16'b0000101011101000;
+		iMemory[16] = 16'b0110100101010000;
+		iMemory[17] = 16'b1011010111111000;
+		iMemory[18] = 16'b1010100000000010;
+		iMemory[19] = 16'b0000100100100000;
+		iMemory[20] = 16'b0001000001111000;
+				
+	 end
+
+
+endmodule
+</behaviour></module>

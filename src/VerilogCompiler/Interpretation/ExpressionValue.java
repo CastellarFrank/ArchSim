@@ -10,12 +10,12 @@ package VerilogCompiler.Interpretation;
  */
 public class ExpressionValue {
     public Object value;
-    public int bits;
+    public long bits;
 
     public ExpressionValue() {
     }
 
-    public ExpressionValue(Object value, int bits) {
+    public ExpressionValue(Object value, long bits) {
         this.value = value;
         this.bits = bits;
     }

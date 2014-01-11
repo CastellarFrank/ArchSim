@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -35,6 +36,13 @@ public class ForeverStatement extends Statement {
     public ExpressionType validateSemantics() {
         statement.validateSemantics();
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        while (true) {
+            statement.execute(simulationScope, moduleName);
+        }
     }
     
 }

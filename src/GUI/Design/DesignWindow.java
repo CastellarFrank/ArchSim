@@ -91,11 +91,12 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         this.tabs.addTab("Error Log", errors);
 
         addTabChangeListener();
+        this.tabs.setSelectedIndex(1);
         pack();
 
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        setCustomTitle();
+        setCustomTitle();  
     }
 
     private void setCustomTitle() {
@@ -215,6 +216,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
+        parent.needsRefresh = true;
     }
 
     public void destroyFrame() {
@@ -267,6 +269,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             ModuleDecl module = (ModuleDecl) result.value;
             return module;
         } catch (Exception ex) {
+            System.err.println(ex.getMessage());
             showErrorPanel(ErrorHandler.getInstance().getErrors());
             return null;
         }
@@ -336,6 +339,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
             }
             public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameOpened(evt);
             }
         });
 
@@ -401,7 +405,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 525, Short.MAX_VALUE)
+            .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
         );
 
         pack();
@@ -437,6 +441,10 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     private void closeMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeMenuActionPerformed
         closeLogic();
     }//GEN-LAST:event_closeMenuActionPerformed
+
+    private void formInternalFrameOpened(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameOpened
+        source.setSelected();
+    }//GEN-LAST:event_formInternalFrameOpened
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem clearLogsMenu;

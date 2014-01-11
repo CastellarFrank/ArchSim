@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.CaseItems.CaseItem;
@@ -56,6 +58,20 @@ public class CaseStatement extends Statement {
         }
         SemanticCheck.getInstance().popDefaultcaseItemFound();
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+        for (CaseItem caseItem : caseItemList) {
+            ArrayList<Integer> result = caseItem.getValue(simulationScope, moduleName);
+            if (result == null) { //default
+                caseItem.execute(simulationScope, moduleName);
+            } else if (result.contains(Integer.parseInt(value.value.toString()))) {
+                caseItem.execute(simulationScope, moduleName);
+                break;
+            }
+        }
     }
     
 }

@@ -16,4 +16,5 @@ public abstract class Statement extends VNode {
         super(line, column);
     }
     
+    public abstract void execute(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName);
 }

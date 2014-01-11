@@ -4,7 +4,9 @@
  */
 package VerilogCompiler.SyntacticTree.CaseItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SyntacticTree.VNode;
+import java.util.ArrayList;
 
 /**
  *
@@ -18,4 +20,8 @@ public abstract class CaseItem extends VNode {
     
     @Override
     public abstract String toString();
+    
+    public abstract ArrayList<Integer> getValue(SimulationScope simulationScope, String moduleName);
+    
+    public abstract void execute(SimulationScope simulationScope, String moduleName);
 }

@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -59,6 +60,11 @@ public class RangeLValue extends LValue {
         if (SemanticCheck.getInstance().variableIsVector(identifier))
             return ExpressionType.VECTOR;
         return ExpressionType.INTEGER; /*En realidad un vector de tamaño 1*/
+    }
+
+    @Override
+    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

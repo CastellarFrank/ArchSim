@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" type="Simulation.Elements.Wire" x="16" x2="96" y="16" y2="96"/><element id="0" type="Simulation.Elements.Gates.AndGate" x="32" x2="96" y="32" y2="96"/><element id="0" type="Simulation.Elements.ModuleChip" x="48" x2="48" y="192" y2="296"><param>Full_Adder</param></element><element id="0" type="Simulation.Elements.Wire" x="16" x2="96" y="16" y2="96"/><element id="0" type="Simulation.Elements.Gates.AndGate" x="32" x2="96" y="32" y2="96"/><element id="0" type="Simulation.Elements.ModuleChip" x="48" x2="48" y="192" y2="296"><param>Full_Adder</param></element></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    18:51:05 05/15/2012 
+// Design Name: 
+// Module Name:    ALU 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module ALU(
+    input [15:0] operand1,
+    input [15:0] operand2,
+    input [2:0] ALU_Control,
+    output reg [15:0] result,
+    output reg zero,
+    output reg overflow
+    );
+	 
+	 always @ (operand1 or operand2 or ALU_Control)
+	 begin
+		case(ALU_Control)
+			3'b000:
+				{overflow,result} = operand1 + operand2;
+			
+			3'b001:
+				{overflow,result} = operand1 - operand2;
+			
+			3'b010:
+				result = operand1 * operand2;
+			
+			3'b011:
+				result = operand1 &amp; operand2;
+			
+			3'b100:
+				result = operand1 | operand2;
+			
+			3'b101: //seq
+				result = (operand1==operand2)?1:0;
+				
+			3'b110: //slt
+				result = operand1&lt;operand2?1:0;
+			
+			3'b111: //sne
+				result = (operand1!=operand2)?1:0;
+		endcase
+		zero = (result==16'b0)?1:0;
+	 end
+
+
+endmodule
+</behaviour></module>

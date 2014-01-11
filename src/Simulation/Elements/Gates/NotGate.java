@@ -5,7 +5,9 @@
 package Simulation.Elements.Gates;
 
 import Exceptions.ArchException;
+import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
@@ -47,12 +49,22 @@ public class NotGate extends BaseElement {
 
     @Override
     public void draw(Graphics g) {
-        drawPosts(g);
-        draw2Leads(g);
+        if (Configuration.DEBUG_MODE) {
+            Color old = g.getColor();
+            g.setColor(Color.BLUE);
+            g.drawRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
+            g.setColor(old);
+        }
+        
+        Color old = g.getColor();
         g.setColor(needsHighlight() ? BaseElement.selectedColor : 
                 BaseElement.defaultColor);
         drawThickPolygon(g, polygon);
+        draw2Leads(g);        
         drawThickCircle(g, littleCircle.x, littleCircle.y, 3);
+        
+        g.setColor(old);
+        drawPosts(g);
     }
 
     @Override

@@ -1099,7 +1099,8 @@ public class VerilogLexer implements java_cup.runtime.Scanner {
           }
         case 153: break;
         case 4: 
-          { return symbol(sym.UNSIGNED_NUMBER, new Integer(yytext()));
+          { 
+              return symbol(sym.UNSIGNED_NUMBER, new Long(yytext()));
           }
         case 154: break;
         case 11: 

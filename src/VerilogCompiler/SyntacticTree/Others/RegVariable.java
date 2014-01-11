@@ -48,14 +48,15 @@ public class RegVariable extends VNode {
 
     @Override
     public ExpressionType validateSemantics() {
-        if (SemanticCheck.getInstance().variableIsRegistered(identifier)) {
-            ErrorHandler.getInstance().handleError(line, column, 
-                    identifier + " is already defined");
-            return ExpressionType.ERROR;
-        }
-        if (range != null)
+        if (range != null) {
             range.validateSemantics();
-        return null;
+            SemanticCheck.getInstance().setVariableIsArray(identifier, true);
+        }
+        if (SemanticCheck.getInstance().variableIsArrayOrVector(identifier))
+            return ExpressionType.ARRAY;
+        if (SemanticCheck.getInstance().variableIsNumeric(identifier))
+            return ExpressionType.INTEGER;
+        return ExpressionType.ERROR;
     }
     
 }

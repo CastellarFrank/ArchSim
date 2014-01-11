@@ -15,20 +15,20 @@ import VerilogCompiler.Utils.StringUtils;
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
 public class SizedHexNumberExpression extends NumberExpression {
-    int size;
+    long size;
     Base base;
     String hexNumber;
     
     Long evaluatedValue;
 
-    public SizedHexNumberExpression(int size, Base base, String hexNumber, int line, int column) {
+    public SizedHexNumberExpression(long size, Base base, String hexNumber, int line, int column) {
         super(line, column);
         this.size = size;
         this.base = base;
         this.hexNumber = hexNumber;
     }
     
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 

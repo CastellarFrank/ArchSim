@@ -40,4 +40,8 @@ public class MathHelper {
     public static int getBit(int value, int position) {
         return (value >> position) & 1;
     }
+    /*   010 1010 000000 */
+    public static long getBitSelection(long value, long left, long right) {
+        return (value << left) >> (31 - right + left);
+    }
 }

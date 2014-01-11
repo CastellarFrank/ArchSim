@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Expressions.LValue;
@@ -48,6 +50,13 @@ public class NonBlockingStatement extends Statement {
         lvalue.validateSemantics();
         expression.validateSemantics();
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+        /*TODO: Registrar la asignacion para futura ejecucion, 
+         * solo se evalua la expression para tener el valor listo*/
     }
     
 }

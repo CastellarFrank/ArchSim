@@ -68,7 +68,7 @@ public class TernaryExpression extends Expression {
         ExpressionValue falseValue = falseExpression.evaluate(simulationScope, moduleName);
         
         Object value;
-        int bits;
+        long bits;
         if (Integer.parseInt(cond.value.toString()) == 1) {
             value = trueValue.value;
             bits = trueValue.bits;

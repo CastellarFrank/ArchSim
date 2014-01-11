@@ -99,7 +99,7 @@ terminal            L_BRACKET, R_BRACKET;
 terminal            L_PARENTHESIS, R_PARENTHESIS;
 
 terminal            DECIMAL_BASE, OCTAL_BASE, BINARY_BASE, HEX_BASE;
-terminal Integer    UNSIGNED_NUMBER;
+terminal Long       UNSIGNED_NUMBER;
 
 terminal            QUESTION_MARK;
 terminal            AT_SIGN;
@@ -125,7 +125,7 @@ non terminal  NumberExpression            NUMBER;
 non terminal  Base                        BASE;
 non terminal  ModuleDecl                  module;
 non terminal  ArrayList<ModuleItem>       module_item_list;
-non terminal  ModuleItem                  module_item, parameter_declaration, input_declaration, output_declaration, inout_declaration, net_declaration;
+non terminal  ModuleItem                  module_item, parameter_declaration, input_declaration, output_declaration, inout_declaration, net_declaration, int_declaration;
 non terminal  ModuleItem                  reg_declaration, gate_declaration, module_instantiation, continuous_assign, initial_block, always_block;
 non terminal  ModuleInstance              module_instance;
 non terminal  ArrayList<ModuleInstance>   module_instance_list;
@@ -192,10 +192,12 @@ port_list ::= port_list:ports COMMA port:port
 
 port ::= port_direction:dir data_type_or_null:type IDENTIFIER:name 
             {: RESULT = new Port(dir, type, name, null, null, dirleft, dirright); :}
+        |port_direction:dir data_type_or_null:type L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET IDENTIFIER:name
+            {: RESULT = new Port(dir, type, name, min, max, true, dirleft, dirright); :}
         |port_direction:dir data_type_or_null:type IDENTIFIER:name L_BRACKET constant_exp:min R_BRACKET
             {: RESULT = new Port(dir, type, name, min, null, dirleft, dirright); :}
         |port_direction:dir data_type_or_null:type IDENTIFIER:name L_BRACKET constant_exp:min COLON constant_exp:max R_BRACKET
-            {: RESULT = new Port(dir, type, name, min, max, dirleft, dirright); :}
+            {: RESULT = new Port(dir, type, name, min, max, false, dirleft, dirright); :}
 ;
 
 port_direction ::= KW_INPUT     {: RESULT = PortDirection.INPUT; :}
@@ -232,6 +234,11 @@ module_item ::= parameter_declaration:mi   {: RESULT = mi; :}
 		|continuous_assign:mi      {: RESULT = mi; :}
 		|initial_block:mi          {: RESULT = mi; :}
 		|always_block:mi           {: RESULT = mi; :}
+                |int_declaration:mi        {: RESULT = mi; :}
+;
+
+int_declaration ::= KW_INTEGER variables_list:variables SEMICOLON
+                    {: RESULT = new IntDeclaration(variables, variablesleft, variablesright); :}
 ;
 
 input_declaration ::= KW_INPUT range:range variables_list:variables SEMICOLON

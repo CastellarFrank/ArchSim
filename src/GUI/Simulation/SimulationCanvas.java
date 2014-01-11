@@ -119,14 +119,14 @@ public class SimulationCanvas extends ContainerPanel implements
                 constructAndAddElement(draggingClass, x, y, x + 50, y, draggingExtraParams);
                 draggingClass = null;
                 draggingExtraParams = null;
-                repaint();
+                prepareForReanalysis();
             }
         }
 
         if (e.getClickCount() == 1 && deleting && mouseComponent != null) {
             this.elements.remove(mouseComponent);
             mouseComponent = null;
-            repaint();
+            prepareForReanalysis();
         }
 
         if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {

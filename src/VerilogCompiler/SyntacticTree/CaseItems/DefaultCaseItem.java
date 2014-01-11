@@ -4,10 +4,12 @@
  */
 package VerilogCompiler.SyntacticTree.CaseItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Statements.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -43,6 +45,16 @@ public class DefaultCaseItem extends CaseItem {
             SemanticCheck.getInstance().setDefaultCaseItemFound(true);
         }
         statement.validateSemantics();
+        return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        statement.execute(simulationScope, moduleName);
+    }
+
+    @Override
+    public ArrayList<Integer> getValue(SimulationScope simulationScope, String moduleName) {
         return null;
     }
     

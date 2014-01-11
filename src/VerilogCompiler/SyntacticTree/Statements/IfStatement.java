@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 
@@ -61,6 +63,16 @@ public class IfStatement extends Statement {
             falseBlock.validateSemantics();
         
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = condition.evaluate(simulationScope, moduleName);
+        Integer intValue = Integer.parseInt(value.value.toString());
+        if (intValue == 1)
+            trueBlock.execute(simulationScope, moduleName);
+        else if (falseBlock != null)
+            falseBlock.execute(simulationScope, moduleName);
     }
     
 }

@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
@@ -45,6 +46,13 @@ public class SeqBlock extends  Statement {
             statement.validateSemantics();
         }
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        for (Statement statement : statementList) {
+            statement.execute(simulationScope, moduleName);
+        }
     }
     
 }

@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><moduleInfo><name>Program_Counter</name><ports><port name="newPC" type="INPUT"/><port name="clk" type="INPUT"/><port name="PC" type="OUTPUT"/><port name="reset" type="INPUT"/></ports></moduleInfo>

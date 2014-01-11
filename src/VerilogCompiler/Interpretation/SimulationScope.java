@@ -6,6 +6,7 @@ package VerilogCompiler.Interpretation;
 
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  *
@@ -39,5 +40,19 @@ public class SimulationScope {
     
     public VariableInfo getVariableInfo(String moduleName, String variable) {
         return scopes.get(moduleName).getVariableInfo(variable);
+    }
+    
+    public void init() {
+        Set<String> keys = scopes.keySet();
+        for (String key : keys) {
+            scopes.get(key).init();
+        }
+    }
+    
+    public void runStep() {
+        Set<String> keys = scopes.keySet();
+        for (String key : keys) {
+            scopes.get(key).runStep(this, key);
+        }
     }
 }

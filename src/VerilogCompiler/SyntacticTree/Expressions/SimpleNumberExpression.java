@@ -12,14 +12,14 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
 public class SimpleNumberExpression extends NumberExpression {
-    int unsignedNumber;
+    long unsignedNumber;
 
-    public SimpleNumberExpression(int unsignedNumber, int line, int column) {
+    public SimpleNumberExpression(long unsignedNumber, int line, int column) {
         super(line, column);
         this.unsignedNumber = unsignedNumber;
     }
 
-    public int getUnsignedNumber() {
+    public long getUnsignedNumber() {
         return unsignedNumber;
     }
 
@@ -29,7 +29,7 @@ public class SimpleNumberExpression extends NumberExpression {
 
     @Override
     public String toString() {
-        return Integer.toString(unsignedNumber);
+        return Long.toString(unsignedNumber);
     }
 
     @Override

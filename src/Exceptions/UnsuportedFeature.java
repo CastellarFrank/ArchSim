@@ -8,9 +8,9 @@ package Exceptions;
  *
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
-public class ArchException extends RuntimeException {
+public class UnsuportedFeature extends ArchException{
 
-    public ArchException(String message) {
+    public UnsuportedFeature(String message) {
         super(message);
     }
     

@@ -58,7 +58,9 @@ public class IndexExpression extends PrimaryExpression {
                     identifier + " is not a vector/array");
             return ExpressionType.ERROR;
         }
-        if (expression.validateSemantics() != ExpressionType.INTEGER) {
+        ExpressionType result = expression.validateSemantics();
+        if (result != ExpressionType.INTEGER &&
+                result != ExpressionType.VECTOR) {
             ErrorHandler.getInstance().handleError(line, column, 
                     "index must be an integer");
             return ExpressionType.ERROR;

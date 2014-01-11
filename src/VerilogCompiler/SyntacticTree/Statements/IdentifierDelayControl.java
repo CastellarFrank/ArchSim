@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -40,6 +42,13 @@ public class IdentifierDelayControl extends DelayControlStatement {
                     identifier + " is not defined");
         }
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = simulationScope.getVariableValue(moduleName, identifier);
+        Integer intValue = Integer.parseInt(value.value.toString());
+        /*Esperar intValue unidades de tiempo*/
     }
     
 }

@@ -5,7 +5,10 @@
 package VerilogCompiler.Interpretation;
 
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.SyntacticTree.ModuleItems.AlwaysBlock;
+import VerilogCompiler.SyntacticTree.ModuleItems.InitialBlock;
 import java.util.HashMap;
+import java.util.Vector;
 
 /**
  *
@@ -14,6 +17,8 @@ import java.util.HashMap;
 public class ModuleScope {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
     private HashMap<String, VariableInfo> declaredVariables;
+    Vector<InitialBlock> initialBlocks = new Vector<InitialBlock>();
+    Vector<AlwaysBlock> alwaysBlocks = new Vector<AlwaysBlock>();
     //</editor-fold>
 
     public ModuleScope() {
@@ -30,5 +35,17 @@ public class ModuleScope {
     
     public VariableInfo getVariableInfo(String variable) {
         return declaredVariables.get(variable);
+    }
+    
+    public void init() {
+        for (InitialBlock initialBlock : initialBlocks) {
+            initialBlock.execute();
+        }
+    }
+    
+    public void runStep(SimulationScope scope, String moduleName) {
+        for (AlwaysBlock alwaysBlock : alwaysBlocks) {
+            alwaysBlock.execute(scope, moduleName);
+        }
     }
 }

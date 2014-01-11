@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
@@ -34,6 +35,11 @@ public class AssignStatement extends Statement {
     @Override
     public ExpressionType validateSemantics() {
         return assignment.validateSemantics();
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        assignment.execute(simulationScope, moduleName);
     }
     
 }

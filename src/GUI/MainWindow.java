@@ -12,6 +12,8 @@ import GUI.Simulation.SimulationWindow;
 import java.awt.Dimension;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +32,8 @@ import org.w3c.dom.NodeList;
 public class MainWindow extends javax.swing.JFrame {
 
     SettingsEditor settingsEditor = null;
-    public Set<String> moduleNames = null;
+    public ArrayList<String> moduleNames = null;
+    public boolean needsRefresh = false;
     
     /**
      * Creates new form MainWindow
@@ -42,7 +45,14 @@ public class MainWindow extends javax.swing.JFrame {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         Loader.getInstance().setup();
         
-        moduleNames = ModuleRepository.getInstance().getModuleNames();
+        moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
+        Collections.sort(moduleNames);
+    }
+    
+    public void refreshModules() {
+        Loader.getInstance().loadModules();
+        moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
+        Collections.sort(moduleNames);
     }
     
     public void addDrilldownWindow(DrilldownWindow one) {        

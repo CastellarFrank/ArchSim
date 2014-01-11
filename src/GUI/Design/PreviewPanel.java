@@ -39,7 +39,7 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
         addMouseListener(this);
         addMouseMotionListener(this);
         
-        Wire wire;
+        /*Wire wire;
         try {
             wire = new Wire(20, 20, 100, 100, null);
             addElement(wire);
@@ -52,7 +52,7 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
         } catch (ArchException ex) {
             Logger.getLogger(PreviewPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+        */
     }
 
     @Override

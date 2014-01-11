@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -55,5 +56,10 @@ public class SimpleLValue extends LValue {
         }
 
         return ExpressionType.INTEGER;
+    }
+
+    @Override
+    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

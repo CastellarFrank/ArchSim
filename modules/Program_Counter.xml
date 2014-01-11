@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" type="Simulation.Elements.NamedWire" x="232" x2="184" y="144" y2="144"/><element id="0" type="Simulation.Elements.Wire" x="232" x2="280" y="144" y2="144"/><element id="0" type="Simulation.Elements.NamedWire" x="232" x2="184" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="232" x2="280" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="184" x2="232" y="184" y2="184"/><element id="0" type="Simulation.Elements.NamedWire" x="208" x2="160" y="208" y2="208"/><element id="0" type="Simulation.Elements.Wire" x="184" x2="232" y="208" y2="208"/></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    22:08:58 05/15/2012 
+// Design Name: 
+// Module Name:    Program_Counter 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Program_Counter(
+    input [15:0] newPC,
+    input clk,
+    output reg [15:0] PC,
+	 input reset
+    );
+	 
+	 always @ (posedge clk)
+	 begin
+		if(reset)
+			PC = 16'b0;
+		else
+			PC = newPC;
+	 end
+	 
+	 initial
+	 begin
+		PC = 16'b0;
+	 end	
+
+
+endmodule</behaviour></module>

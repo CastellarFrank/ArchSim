@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import Exceptions.UnsuportedFeature;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.NumberExpression;
 
@@ -36,6 +38,11 @@ public class NumberDelayControl extends DelayControlStatement {
     public ExpressionType validateSemantics() {
         delay.validateSemantics();
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        throw new UnsuportedFeature("number delay control event on expression is not supported");
     }
     
 }

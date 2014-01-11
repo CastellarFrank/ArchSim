@@ -48,7 +48,10 @@ public class ComposedEventExpression extends EventExpression{
         ExpressionType leftType = left.validateSemantics();
         ExpressionType rightType = right.validateSemantics();
         
-        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER)
+        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER ||
+                leftType == ExpressionType.VECTOR && rightType == ExpressionType.INTEGER ||
+                leftType == ExpressionType.INTEGER && rightType == ExpressionType.VECTOR ||
+                leftType == ExpressionType.VECTOR && rightType == ExpressionType.VECTOR)
             return ExpressionType.INTEGER;
         else {
             ErrorHandler.getInstance().handleError(line, column, 

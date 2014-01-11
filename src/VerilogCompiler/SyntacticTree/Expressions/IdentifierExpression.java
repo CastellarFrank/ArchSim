@@ -40,8 +40,12 @@ public class IdentifierExpression extends PrimaryExpression {
         if (SemanticCheck.getInstance().variableIsRegistered(identifier)) {
             if (SemanticCheck.getInstance().variableIsArray(identifier))
                 return type = ExpressionType.ARRAY;
-            else
-                return type = ExpressionType.INTEGER;
+            else {
+                if (SemanticCheck.getInstance().variableIsVector(identifier))
+                    return type = ExpressionType.VECTOR;
+                else
+                    return type = ExpressionType.INTEGER;
+            }
         } else {
             ErrorHandler.getInstance().handleError(line, column, 
                     identifier + " is not declared");

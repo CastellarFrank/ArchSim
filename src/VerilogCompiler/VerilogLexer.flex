@@ -159,7 +159,7 @@ edge_symbol	= [pn]
     {binary_base}        { return symbol(sym.BINARY_BASE); }
     {hex_base}           { return symbol(sym.HEX_BASE); }
 
-    {unsigned_number}    { return symbol(sym.UNSIGNED_NUMBER, new Integer(yytext())); }
+    {unsigned_number}    { return symbol(sym.UNSIGNED_NUMBER, new Long(yytext())); }
 
 
 }

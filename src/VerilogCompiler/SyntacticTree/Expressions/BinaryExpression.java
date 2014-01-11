@@ -62,7 +62,9 @@ public class BinaryExpression extends Expression {
         ExpressionType leftType = left.validateSemantics();
         ExpressionType rightType = right.validateSemantics();
         
-        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER)
+        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER ||
+                leftType == ExpressionType.VECTOR && rightType == ExpressionType.INTEGER ||
+                leftType == ExpressionType.INTEGER && rightType == ExpressionType.VECTOR)
             return ExpressionType.INTEGER;
         else {
             if (leftType == ExpressionType.ERROR || rightType == ExpressionType.ERROR)
@@ -81,7 +83,7 @@ public class BinaryExpression extends Expression {
         String leftValue = l.value.toString();
         String rightValue = r.value.toString();
         
-        int maxBits = Math.max(l.bits, r.bits);
+        long maxBits = Math.max(l.bits, r.bits);
         
         switch (expressionOperator) {
         case _OP_ADD:

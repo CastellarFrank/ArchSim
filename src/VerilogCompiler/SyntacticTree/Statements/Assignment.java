@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Expressions.LValue;
@@ -53,5 +54,10 @@ public class Assignment {
             return ExpressionType.ERROR;
         //TODO: ALGO FALTA AQUI!
         return null;
+    }
+    
+    public void execute(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+        lvalue.setValue(simulationScope, moduleName, value.value);
     }
 }

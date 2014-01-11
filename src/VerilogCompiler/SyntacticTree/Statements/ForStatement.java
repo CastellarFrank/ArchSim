@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 
@@ -70,6 +72,21 @@ public class ForStatement extends Statement {
         body.validateSemantics();
         
         return null;
+    }
+
+    @Override
+    public void execute(SimulationScope simulationScope, String moduleName) {
+        initialValue.execute(simulationScope, moduleName);
+        ExpressionValue cond = condition.evaluate(simulationScope, moduleName);
+        Integer intCondition = Integer.parseInt(cond.value.toString());
+        while (intCondition == 1) {
+            body.execute(simulationScope, moduleName);
+            
+            increment.execute(simulationScope, moduleName);
+            
+            cond = condition.evaluate(simulationScope, moduleName);
+            intCondition = Integer.parseInt(cond.value.toString());
+        }
     }
     
 }

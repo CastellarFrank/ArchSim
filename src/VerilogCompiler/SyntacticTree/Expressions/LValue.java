@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SyntacticTree.VNode;
 
 /**
@@ -16,5 +17,6 @@ public abstract class LValue extends VNode {
         super(line, column);
     }
     
-    //public abstract void getLocation();
+    public abstract void setValue(SimulationScope simulationScope, 
+            String moduleName, Object value);
 }

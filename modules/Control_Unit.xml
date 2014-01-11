@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements/><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    18:58:27 05/15/2012 
+// Design Name: 
+// Module Name:    Control_Unit 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module Control_Unit(input [3:0] opcode,
+			  output reg [2:0] ALUOp,
+			  output reg RegDst,
+			  output reg RegWrite,
+			  output reg ALUSrc,
+			  output reg MemWrite,
+			  output reg MemToReg,
+			  output reg MemRead,
+			  output reg Branch,
+			  output reg Jump,
+			  output reg Format,
+			  output reg Format2
+    );
+	 
+	 always @ (opcode)
+	 begin
+		if(opcode==4'b0001 //sub
+    		|| opcode==4'b0100 //or
+			|| opcode==4'b0101 //seq
+			|| opcode==4'b0110 //slt
+			|| opcode==4'b0010 //mult
+			|| opcode==4'b0000 //add
+			|| opcode==4'b0011 //and
+			)
+		begin
+			ALUOp = opcode[2:0];
+			RegWrite = 1;
+			RegDst = 0; //deja pasar Ins[5:3]
+			ALUSrc = 0;
+			MemWrite = 0;
+			MemToReg = 0;
+			MemRead = 0;
+			Branch = 0;
+			Jump = 0;
+			Format = 1; //no es li
+			Format2 = 1;
+		end
+		else
+		begin
+			case(opcode)
+			4'b0111: //mov
+				begin
+					ALUOp = 3'b000;//sumarle 0
+					RegWrite = 1;
+					RegDst = 1;
+					ALUSrc = 0;
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 0;
+					Jump = 0;
+					Format = 0;
+					Format2 = 1;
+				end
+			4'b1000: //lw
+				begin
+					ALUOp = 3'b000;					
+					RegDst = 1;
+					ALUSrc = 0;
+					MemWrite = 0;
+					MemToReg = 1;
+					MemRead = 1;
+					Branch = 0;
+					Jump = 0;
+					Format = 0;
+					Format2 = 1;
+					RegWrite = 1;
+				end
+			4'b1001: //sw
+				begin
+					ALUOp = 3'b000;
+					RegWrite = 0;
+					RegDst = 0; //la verdad no importa
+					ALUSrc = 0;					
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 0;
+					Jump = 0;
+					Format = 0;
+					Format2 = 1;
+					MemWrite = 1;
+				end
+				
+			4'b1010: //beqz---funcionando
+				begin
+					ALUOp = 3'b001;
+					RegWrite = 0;
+					RegDst = 0;
+					ALUSrc = 0;
+					
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 1;
+					Jump = 0;
+					Format = 0;
+					Format2 = 1;
+				end
+			4'b1011: //bnez
+				begin
+					ALUOp = 3'b101;
+					RegWrite = 0;
+					RegDst = 0;
+					ALUSrc = 0;
+					
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 1;
+					Jump = 0;
+					Format = 0;
+					Format2 = 1;
+				end
+			4'b1100: //j
+				begin
+					ALUOp = 3'b000;
+					RegWrite = 0;
+					RegDst = 0;
+					ALUSrc = 0;
+					
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 0;
+					Jump = 1;
+					Format = 1;
+					Format2 = 1;
+				end
+			4'b1101: //li---funcionando
+				begin
+					ALUOp = 3'b000;
+					RegWrite = 1;
+					RegDst = 1;
+					ALUSrc = 1;
+					
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 1;
+					Jump = 0;
+					Format = 1;
+					Format2 = 0;
+				end
+			default: //todo 0??? 
+				begin
+					ALUOp = 0;
+					RegWrite = 0;
+					RegDst = 0;
+					ALUSrc = 0;
+					MemWrite = 0;
+					MemToReg = 0;
+					MemRead = 0;
+					Branch = 0;
+					Jump = 0;
+					Format = 0;
+					Format2 = 0 ;
+				end
+		endcase
+		end
+			
+	 end
+
+endmodule
+</behaviour></module>
