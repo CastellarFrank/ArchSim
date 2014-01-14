@@ -64,6 +64,11 @@ public class LogicInput extends BasicSwitch {
         drawThickLine(g, point1, lead1);
         drawPosts(g);
     }
+    
+    @Override
+    public int getVoltageSourceCount() { 
+        return 1;
+    }
 
     @Override
     public void doStep() {

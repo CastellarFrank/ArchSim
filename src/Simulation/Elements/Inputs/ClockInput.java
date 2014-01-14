@@ -30,6 +30,11 @@ public class ClockInput extends BaseElement {
     public void draw(Graphics g) {
         
     }
+    
+    @Override
+    public int getVoltageSourceCount() { 
+        return 1;
+    }
 
     @Override
     public void doStep() {

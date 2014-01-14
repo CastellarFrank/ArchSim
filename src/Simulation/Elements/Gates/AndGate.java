@@ -48,10 +48,11 @@ public class AndGate extends GateElement {
     @Override
     boolean calcFunction() {
         int i;
-        boolean f = false;
+        boolean f = true;
         for (i = 0; i != inputCount; i++) {
             f &= getInput(i);
         }
+        System.out.println("AndGate output " + f);
         return f;
     }
     

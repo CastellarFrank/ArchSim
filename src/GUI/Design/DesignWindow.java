@@ -138,7 +138,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
 
     private void saveComponent() {
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(Configuration.MODULES_DIRECTORY_PATH);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int choose = fileChooser.showSaveDialog(this);
         

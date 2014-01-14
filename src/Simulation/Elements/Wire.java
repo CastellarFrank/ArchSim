@@ -34,6 +34,11 @@ public class Wire extends BaseElement {
         setBbox(point1, point2, 3);
         drawPosts(g);
     }
+    
+    @Override
+    public int getVoltageSourceCount() { 
+        return 1;
+    }
 
     @Override
     public void doStep() {

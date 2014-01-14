@@ -4,7 +4,6 @@
  */
 package Simulation.Elements;
 
-import Exceptions.ArchException;
 import Exceptions.OutOfRangeException;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -23,7 +22,7 @@ public class NamedWire extends BaseElement {
         super(x, y);
     }
 
-    public NamedWire(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
+    public NamedWire(int x, int y, int x2, int y2, String[] extraParams) {
         super(x, y, x2, y2, extraParams);
         if (extraParams == null || extraParams.length == 0)
             throw new OutOfRangeException("One extra param expected.");
@@ -41,7 +40,7 @@ public class NamedWire extends BaseElement {
     
     @Override
     public void draw(Graphics g) {
-        Font f = new Font("SansSerif", Font.BOLD, 20);
+        Font f = new Font("SansSerif", Font.BOLD, 12);
         g.setFont(f);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         setBbox(point1, lead1, 0);
@@ -60,6 +59,11 @@ public class NamedWire extends BaseElement {
     public Element getXmlElement(Document document) {
         Element element = super.getXmlElement(document);
         element.setAttribute("type", NamedWire.class.getName());
+        
+        Element extraParam0 = document.createElement("param");
+        extraParam0.setTextContent(text);
+        
+        element.appendChild(extraParam0);
         
         return element;
     }

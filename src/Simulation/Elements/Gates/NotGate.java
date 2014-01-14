@@ -66,9 +66,24 @@ public class NotGate extends BaseElement {
         g.setColor(old);
         drawPosts(g);
     }
+    
+    @Override
+    public int getVoltageSourceCount() { 
+        return 1;
+    }
+
+    @Override
+    public void stampVoltages() {
+        containerPanel.stampVoltageSource(0, joints[1], voltageSourceReference);
+    }
 
     @Override
     public void doStep() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        double output;
+        if (voltages[0] >= Configuration.LOGIC_1_VOLTAGE)
+            output = Configuration.LOGIC_0_VOLTAGE;
+        else
+            output = Configuration.LOGIC_1_VOLTAGE;
+        containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
 }

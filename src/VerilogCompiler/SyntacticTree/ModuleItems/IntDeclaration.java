@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
 /**
@@ -25,7 +26,7 @@ public class IntDeclaration extends ModuleItem {
         
     @Override
     public String toString() {
-        return "";
+        return "integer " + StringUtils.getInstance().ListToString(variables, ", ");
     }
 
     @Override

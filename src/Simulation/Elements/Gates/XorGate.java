@@ -29,6 +29,7 @@ public class XorGate extends OrGate {
         for (i = 0; i != inputCount; i++) {
             f ^= getInput(i);
         }
+        System.out.println("XorGate output " + f);
         return f;
     }
     

@@ -25,12 +25,7 @@ public class XnorGate extends XorGate {
     @Override
     public boolean isInverting() {
         return true;
-    }
-    
-    @Override
-    public boolean calcFunction() {
-        return !super.calcFunction();
-    }
+    }    
     
     @Override
     public Element getXmlElement(Document document) {

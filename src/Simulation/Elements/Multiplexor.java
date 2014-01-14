@@ -242,7 +242,7 @@ public class Multiplexor extends BaseElement {
         int i;
         for (i = 0; i != controlSignalCount; i++) {
             Point p = getSignal(i);
-            drawPost(g, p.x, p.y, nodes[inputCount + i + 1]);  
+            drawPost(g, p.x, p.y, joints[inputCount + i + 1]);  
         }
     }
 

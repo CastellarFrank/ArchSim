@@ -4,8 +4,13 @@
  */
 package GUI;
 
+import Simulation.Configuration;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.JFileChooser;
+import javax.swing.Timer;
 
 /**
  *
@@ -18,6 +23,21 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
      */
     public SettingsEditor() {
         initComponents();
+        
+        File mods = new File(Configuration.MODULES_DIRECTORY_PATH);
+        File metas = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH);
+        
+        this.compileOnSaveCB.setSelected(Configuration.COMPILE_ON_SAVE);
+        this.smallGridCB.setSelected(Configuration.SMALL_GRID);
+        this.debugModeCB.setSelected(Configuration.DEBUG_MODE);
+        this.asNumbersCB.setSelected(Configuration.LOGIC_VALUES_AS_NUMBER);
+        
+        this.lvalue0TF.setText(Configuration.LOGIC_0_VOLTAGE.toString());
+        this.lvalue1TF.setText(Configuration.LOGIC_1_VOLTAGE.toString());
+        this.pauseTF.setText(Configuration.REPAINT_PAUSE.toString());
+        
+        this.modulesDirectoryTF.setText(mods.getAbsolutePath());
+        this.modulesMetaDirectoryTF.setText(metas.getAbsolutePath());
     }
 
     /**
@@ -30,13 +50,30 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         tabs = new javax.swing.JTabbedPane();
+        jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         modulesDirectoryTF = new javax.swing.JTextField();
         browseButton = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        modulesMetaDirectoryTF = new javax.swing.JTextField();
+        browseButton1 = new javax.swing.JButton();
+        jSeparator2 = new javax.swing.JSeparator();
+        compileOnSaveCB = new javax.swing.JCheckBox();
+        smallGridCB = new javax.swing.JCheckBox();
+        debugModeCB = new javax.swing.JCheckBox();
+        asNumbersCB = new javax.swing.JCheckBox();
+        jSeparator3 = new javax.swing.JSeparator();
+        lvalue1TF = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        lvalue0TF = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        pauseTF = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
         saveButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        status = new javax.swing.JLabel();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -61,6 +98,19 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             }
         });
 
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 592, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 360, Short.MAX_VALUE)
+        );
+
+        tabs.addTab("Simulation Settings", jPanel2);
+
         jLabel1.setText("Module storage directory");
 
         browseButton.setText("...");
@@ -70,18 +120,91 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel2.setText("Module metadata storage directory");
+
+        browseButton1.setText("...");
+        browseButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                browseButton1ActionPerformed(evt);
+            }
+        });
+
+        compileOnSaveCB.setText("Compile on save");
+
+        smallGridCB.setText("Small size grid");
+
+        debugModeCB.setText("Debug Mode");
+
+        asNumbersCB.setText("Show logic values as numbers");
+
+        lvalue1TF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        lvalue1TF.setText("0");
+
+        jLabel3.setText("Logic value 1 voltage:");
+
+        lvalue0TF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel4.setText("Logic value 0 voltage:");
+
+        jLabel5.setText("Pause between repaints:");
+
+        pauseTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel6.setText("ms");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(modulesDirectoryTF, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(browseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(56, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator3)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(30, 30, 30)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(modulesMetaDirectoryTF, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(browseButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(modulesDirectoryTF, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(browseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(28, 28, 28)
+                        .addComponent(compileOnSaveCB)
+                        .addGap(18, 18, 18)
+                        .addComponent(smallGridCB)
+                        .addGap(18, 18, 18)
+                        .addComponent(debugModeCB)
+                        .addGap(18, 18, 18)
+                        .addComponent(asNumbersCB))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lvalue1TF, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(50, 50, 50))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel6)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
+                .addGap(18, 18, 18))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -91,23 +214,37 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addComponent(jLabel1)
                     .addComponent(modulesDirectoryTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(browseButton))
-                .addContainerGap(311, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(modulesMetaDirectoryTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(browseButton1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(compileOnSaveCB)
+                    .addComponent(smallGridCB)
+                    .addComponent(debugModeCB)
+                    .addComponent(asNumbersCB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lvalue1TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3)
+                    .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel5)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel6)))
+                .addContainerGap(155, Short.MAX_VALUE))
         );
 
         tabs.addTab("General Settings", jPanel1);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 571, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 360, Short.MAX_VALUE)
-        );
-
-        tabs.addTab("Simulation Settings", jPanel2);
 
         saveButton.setText("Save");
         saveButton.addActionListener(new java.awt.event.ActionListener() {
@@ -123,7 +260,11 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             .addComponent(tabs)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSeparator1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(status)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveButton)
                 .addGap(19, 19, 19))
@@ -135,8 +276,11 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(saveButton)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(20, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         pack();
@@ -147,7 +291,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_formInternalFrameClosing
 
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(Configuration.MODULES_DIRECTORY_PATH);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int choose = fileChooser.showOpenDialog(this);
         if (choose != JFileChooser.APPROVE_OPTION)
@@ -157,17 +301,67 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_browseButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        Configuration.MODULES_DIRECTORY_PATH = modulesDirectoryTF.getText();
+        Configuration.MODULE_METADATA_DIRECTORY_PATH = modulesMetaDirectoryTF.getText();
         
+        Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
+        Configuration.DEBUG_MODE = debugModeCB.isSelected();
+        Configuration.LOGIC_VALUES_AS_NUMBER = asNumbersCB.isSelected();
+        Configuration.SMALL_GRID = smallGridCB.isSelected();
+        
+        Configuration.LOGIC_0_VOLTAGE = Double.parseDouble(lvalue0TF.getText());
+        Configuration.LOGIC_1_VOLTAGE = Double.parseDouble(lvalue1TF.getText());
+        Configuration.REPAINT_PAUSE = Integer.parseInt(pauseTF.getText());
+        
+        Configuration.saveToFile(Configuration.CONFIG_FILE_NAME);
+        status.setText("Settings successfully saved.");
+        status.setForeground(Color.GREEN.darker());
+        
+        int delay = 5000; 
+        ActionListener taskPerformer = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                status.setText("");
+            }
+        };
+        new Timer(delay, taskPerformer).start();
     }//GEN-LAST:event_saveButtonActionPerformed
 
+    private void browseButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButton1ActionPerformed
+        JFileChooser fileChooser = new JFileChooser(Configuration.MODULE_METADATA_DIRECTORY_PATH);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int choose = fileChooser.showOpenDialog(this);
+        if (choose != JFileChooser.APPROVE_OPTION)
+            return;
+        File target = fileChooser.getSelectedFile();
+        modulesMetaDirectoryTF.setText(target.getAbsolutePath());
+    }//GEN-LAST:event_browseButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox asNumbersCB;
     private javax.swing.JButton browseButton;
+    private javax.swing.JButton browseButton1;
+    private javax.swing.JCheckBox compileOnSaveCB;
+    private javax.swing.JCheckBox debugModeCB;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JTextField lvalue0TF;
+    private javax.swing.JTextField lvalue1TF;
     private javax.swing.JTextField modulesDirectoryTF;
+    private javax.swing.JTextField modulesMetaDirectoryTF;
+    private javax.swing.JTextField pauseTF;
     private javax.swing.JButton saveButton;
+    private javax.swing.JCheckBox smallGridCB;
+    private javax.swing.JLabel status;
     private javax.swing.JTabbedPane tabs;
     // End of variables declaration//GEN-END:variables
 }

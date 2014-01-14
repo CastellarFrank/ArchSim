@@ -38,10 +38,10 @@ public abstract class BaseElement implements Editable {
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Instance Members">
-    public int ID;
+    public int ID, voltageSourceReference;
     public Rectangle boundingBox;
     public boolean selected;
-    public int x, y, x2, y2, flags, nodes[];
+    public int x, y, x2, y2, flags, joints[];
     public int dx, dy, dsign;
     public double dn, dpx1, dpy1;
     public Point point1, point2, lead1, lead2;
@@ -104,7 +104,7 @@ public abstract class BaseElement implements Editable {
     }
 
     public void allocNodes() {
-        nodes = new int[getPostCount() + getInternalNodeCount()];
+        joints = new int[getPostCount() + getInternalNodeCount()];
         voltages = new double[getPostCount() + getInternalNodeCount()];
     }
 
@@ -127,11 +127,16 @@ public abstract class BaseElement implements Editable {
     }
 
     public void draw2Leads(Graphics g) {
+        Color old = g.getColor();
         // draw first lead
+        setVoltageColor(g, voltages[0]);
         drawThickLine(g, point1, lead1);
 
         // draw second lead
+        setVoltageColor(g, voltages[1]);
         drawThickLine(g, lead2, point2);
+        
+        g.setColor(old);
     }
     
     public String getId() {
@@ -174,9 +179,28 @@ public abstract class BaseElement implements Editable {
             }
         }
     }
+    
+    public void setVoltage(int voltageIndex, double newVoltage) {
+        if (voltageIndex >= voltages.length || voltageIndex < 0)
+            return;
+        voltages[voltageIndex] = newVoltage;
+    }
+    
+    public void setVoltageSourceReference(int referenceIndex, int reference) {
+        if (referenceIndex > getVoltageSourceCount()) return;
+        voltageSourceReference = reference;
+    }
+    
+    public int getVoltageSourceReference() {
+        return voltageSourceReference;
+    }
+    
+    public void setCurrent(double current) { 
+        this.current = current; 
+    }
 
     public void setJointIndex(int postIndex, int jointIndex) {
-        nodes[postIndex] = jointIndex;
+        joints[postIndex] = jointIndex;
     }
     
     public boolean collidesWith(int x, int y) {
@@ -211,6 +235,10 @@ public abstract class BaseElement implements Editable {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Getters & Setters">
+    public int getVoltageSourceCount() {
+        return 0; 
+    }
+    
     Rectangle getBoundingBox() {
         return boundingBox;
     }
@@ -424,7 +452,7 @@ public abstract class BaseElement implements Editable {
         int i;
         for (i = 0; i != getPostCount(); i++) {
             Point p = getPost(i);
-            drawPost(g, p.x, p.y, nodes[i]);
+            drawPost(g, p.x, p.y, joints[i]);
         }
     }
 
@@ -604,6 +632,18 @@ public abstract class BaseElement implements Editable {
             double by = Math.sin((a + 20) * m) * r + cy;
             drawThickLine(g, (int) ax, (int) ay, (int) bx, (int) by);
         }
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Simulation">
+    public void stampVoltages () { }
+    
+    public boolean thereIsConnectionBetween(int elementA, int elementB) {
+        return true;
+    }
+    
+    public boolean hasGroundConnection(int index) { 
+        return false; 
     }
     //</editor-fold>
 }

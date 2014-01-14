@@ -9,12 +9,12 @@ import DataStructures.ModuleRepository;
 import GUI.Design.DesignWindow;
 import GUI.Simulation.DrilldownWindow;
 import GUI.Simulation.SimulationWindow;
+import Simulation.Configuration;
 import java.awt.Dimension;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -200,7 +200,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_simWindowActionPerformed
 
     private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooser = new JFileChooser(Configuration.MODULES_DIRECTORY_PATH);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int choose = fileChooser.showOpenDialog(this);
         

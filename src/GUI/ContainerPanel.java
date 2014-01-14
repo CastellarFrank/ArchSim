@@ -7,8 +7,14 @@ package GUI;
 import DataStructures.CircuitGenerator;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
+import Simulation.Elements.Gates.AndGate;
+import Simulation.Elements.Gates.GateElement;
+import Simulation.Elements.Gates.NotGate;
+import Simulation.Elements.Gates.XnorGate;
 import Simulation.Joint;
 import Simulation.JointReference;
+import Simulation.RowInfo;
+import Simulation.RowType;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -25,12 +31,16 @@ public class ContainerPanel extends JCanvas {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
 
     protected Vector<BaseElement> elements;
+    protected BaseElement[] voltageSourceElements;
     protected Vector<Joint> joints;
+    protected Vector<RowInfo> rowsInfo;
     public BaseElement newElementBeenDrawn, menuElm, mouseComponent, stopElm;
     public boolean needsAnalysis = false, isPaused = false;
-    protected boolean dragging = false;
-    protected int dragX, dragY, initDragX, initDragY;
+    protected boolean dragging = false, mapForStamp = false;
+    protected int dragX, dragY, initDragX, initDragY, matrixSize, matrixFullSize;
     protected int gridSize, gridMask, gridRound;
+    protected double voltageMatrix[][], temporalVoltageMatrix[][];
+    protected double temporalRightSideVoltages[], rightSideVoltages[], leftSideVoltages[];
     protected int draggingPost = -1;
     protected Rectangle selectedArea = null;
     protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
@@ -127,11 +137,18 @@ public class ContainerPanel extends JCanvas {
         }
 
         joints.clear();
+        
+        Joint globalGround = new Joint(-1, -1);
+        joints.add(globalGround);
 
         int elementIndex, postIndex, jointIndex;
+        int totalVoltageSourceCount = 0;
         for (elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
             BaseElement baseElement = getElement(elementIndex);
             int postCount = baseElement.getPostCount();
+            int voltageSourceCount = baseElement.getVoltageSourceCount();
+            
+            //<editor-fold defaultstate="collapsed" desc="Update joints">
             for (postIndex = 0; postIndex < postCount; postIndex++) {
                 Point post = baseElement.getPost(postIndex);
 
@@ -156,15 +173,240 @@ public class ContainerPanel extends JCanvas {
                     joint.references.add(jointRef);
 
                     baseElement.setJointIndex(postIndex, jointIndex);
+                    
+                    if (postIndex == 0)
+                        baseElement.setVoltage(postIndex, 0.0);
+                }
+            }
+            //</editor-fold>
+            
+            totalVoltageSourceCount += voltageSourceCount;
+        }
+        
+        voltageSourceElements = new BaseElement[totalVoltageSourceCount];
+        
+        int rowCount = joints.size() + totalVoltageSourceCount  - 1;
+        //<editor-fold defaultstate="collapsed" desc="Set voltage source references">
+        int voltageSourceCount, control = 0;
+        for (BaseElement baseElement : elements) {
+            voltageSourceCount = baseElement.getVoltageSourceCount();
+            for (int i = 0; i < voltageSourceCount; i++) {
+                baseElement.setVoltageSourceReference(i, control);                
+                voltageSourceElements[control] = baseElement;
+                control += 1;
+            }
+        }
+        
+        initializeRows(rowCount);
+        
+        temporalRightSideVoltages = new double[rowCount];
+        rightSideVoltages = new double[rowCount];
+        matrixSize = matrixFullSize = rowCount;
+        temporalVoltageMatrix = new double[rowCount][rowCount];
+        voltageMatrix = new double[rowCount][rowCount];
+        mapForStamp = false;
+        
+        for (BaseElement baseElement : elements) {
+            baseElement.stampVoltages();
+        }
+        
+        //<editor-fold defaultstate="collapsed" desc="Closures">
+        boolean closure[] = new boolean[joints.size()];
+        boolean changed = true;
+        closure[0] = true;
+        while (changed) {
+            changed = false;
+            for (int i = 0; i < elements.size(); i++) {
+                BaseElement baseElement = getElement(i);
+                
+                for (int j = 0; j < baseElement.getPostCount(); j++) {
+                    if (!closure[baseElement.joints[j]]) {
+                        if (baseElement.hasGroundConnection(j)) {
+                            closure[baseElement.joints[j]] = changed = true;
+                        }
+                        continue;
+                    }
+                    int k;
+                    for (k = 0; k != baseElement.getPostCount(); k++) {
+                        if (j == k) {
+                            continue;
+                        }
+                        int nodeK = baseElement.joints[k];
+                        if (baseElement.thereIsConnectionBetween(j, k) && !closure[nodeK]) {
+                            closure[nodeK] = true;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if (changed) {
+                continue;
+            }
+
+            for (int i = 0; i != joints.size(); i++) {
+                if (!closure[i]) {
+                    stampResistor(0, i, 1e8);
+                    closure[i] = true;
+                    changed = true;
+                    break;
                 }
             }
         }
+        //</editor-fold>
+        
+        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0, 
+                temporalRightSideVoltages.length);
+                
+        //<editor-fold defaultstate="collapsed" desc="Matrix reduction">
+        int index, innerIndex = 0;
+        for (index = 0; index < matrixSize; index++) {
+            int quantityM = -1, quantityP = -1;
+            double value = 0, constantsSum = 0;
+            
+            RowInfo rowInfo = rowsInfo.elementAt(index);
+            if (rowInfo.leftSideChanges || rowInfo.notUsedInMatrix || rowInfo.rightSideChanges)
+                continue;
+            
+            for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
+                double q = temporalVoltageMatrix[index][innerIndex];
+                if (rowsInfo.elementAt(innerIndex).type == RowType.CONSTANT) {
+                    constantsSum -= rowsInfo.elementAt(innerIndex).voltage * q;
+                    continue;
+                }
+                if (q == 0) {
+                    continue;
+                }
+                if (quantityP == -1) {
+                    quantityP = innerIndex;
+                    value = q;
+                    continue;
+                }
+                if (quantityM == -1 && q == -value) {
+                    quantityM = innerIndex;
+                    continue;
+                }
+                break;
+            }
+            if (innerIndex == matrixSize) {
+                if (quantityP == -1) {
+                    System.err.println("Error!");
+                    return;
+                }
+                RowInfo secondRowInfo = rowsInfo.elementAt(quantityP);
+                if (quantityM == -1) {
+                    secondRowInfo.type = RowType.CONSTANT;
+                    rowInfo.notUsedInMatrix = true;
+                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + constantsSum) / value;
+                    index = -1;
+                } else if (constantsSum + temporalRightSideVoltages[index] == 0) {
+                    secondRowInfo.type = RowType.EQUALS_TO_ANOTHER;
+                    rowInfo.notUsedInMatrix = true;
+                }
+            }
+        }
+        
+        
+        //</editor-fold>
+        
+        //<editor-fold defaultstate="collapsed" desc="Delete useless rows">
+        int newCol = 0;
+        for (int i = 0; i < matrixSize; i++) {
+            RowInfo rowInfo = rowsInfo.elementAt(i);
+            switch (rowInfo.type) {
+                case NORMAL:
+                    rowInfo.mappedColumn = newCol;
+                    newCol++;
+                    continue;
+                case CONSTANT:
+                    rowInfo.mappedColumn = -1;
+                    break;
+                case EQUALS_TO_ANOTHER:
+                    RowInfo piv = null;
+                    break;
+            }
+        }
+        
+        double newMatrix[][] = new double[newCol][newCol];
+        double newRightSides[] = new double[newCol];
+        
+        int newIndex = 0;
+        for (int i = 0; i < matrixSize; i++) {
+            RowInfo rowInfo = rowsInfo.elementAt(i);
+            if (rowInfo.notUsedInMatrix) {
+                rowInfo.mappedRow = -1;
+                continue;
+            }
+            newRightSides[newIndex] = temporalRightSideVoltages[i];
+            rowInfo.mappedRow = newIndex;
+            
+            for (int j = 0; j < matrixSize; j++) {
+                RowInfo rowInfoJ = rowsInfo.elementAt(j);
+                if (rowInfoJ.type == RowType.CONSTANT) {
+                    newRightSides[newIndex] -= rowInfoJ.voltage * temporalVoltageMatrix[i][j];
+                } else {
+                    newMatrix[newIndex][rowInfoJ.mappedColumn] += temporalVoltageMatrix[i][j];
+                }
+            }
+            newIndex++;
+        }
+        
+        temporalRightSideVoltages = newRightSides;
+        temporalVoltageMatrix = newMatrix;
+        matrixSize = newCol;
+        
+        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0, 
+                temporalRightSideVoltages.length);
+        
+        for (int i = 0; i < matrixSize; i++) {
+            System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
+        }
+        
+        //</editor-fold>
+        //</editor-fold>       
+        mapForStamp = true;
+    }
+    
+    public void initializeRows(int rowCount) {
+        rowsInfo = new Vector<RowInfo>(rowCount);
+        for (int i = 0; i < rowCount; i++)
+            rowsInfo.add(new RowInfo());
     }
 
     public void runStep() {
         if (elements.isEmpty()) return;
+        
+        for (int i = 0; i < matrixSize; i++) {
+            System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
+        }
+        
         for (BaseElement baseElement : elements) {
-            //baseElement.doStep();
+            if (baseElement instanceof NotGate || baseElement instanceof GateElement)
+                baseElement.doStep();
+        }
+        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0, 
+                temporalRightSideVoltages.length);
+        if (isPaused) return;
+        for (int rowIndex = 0; rowIndex < matrixFullSize; rowIndex++) {
+            RowInfo rowInfo = rowsInfo.get(rowIndex);
+            double newVoltage = 0;
+            if (rowInfo.type == RowType.CONSTANT) {
+                newVoltage = rowInfo.voltage;
+            } else {
+                newVoltage = rightSideVoltages[rowInfo.mappedColumn];
+            }
+            
+            if (Double.isNaN(newVoltage)) {
+            
+            }
+            if (rowIndex < joints.size() - 1) {
+                Joint joint = joints.elementAt(rowIndex + 1);
+                for (JointReference jointRef : joint.references) {
+                    jointRef.element.setVoltage(jointRef.postNumber, newVoltage);
+                }
+            } else {
+                int newIndex = rowIndex - (joints.size() - 1);
+                //voltageSourceElements[newIndex].setCurrent(newVoltage);
+            }
         }
     }
     
@@ -241,6 +483,7 @@ public class ContainerPanel extends JCanvas {
         elements.add(element);
     }
     
+    @Override
     public void removeAll() {
         elements.clear();
     }
@@ -365,4 +608,89 @@ public class ContainerPanel extends JCanvas {
     public boolean containsElements() {
         return !elements.isEmpty();
     }
+    
+    //<editor-fold defaultstate="collapsed" desc="Stamping">
+    
+    //<editor-fold defaultstate="collapsed" desc="Instant stamping">
+    public void stampVoltageSource(int fromNode, int toNode, 
+            int voltageSourceIndex, double newVoltage) {
+        int rowIndex = joints.size() + voltageSourceIndex;
+        stampVoltageMatrix(rowIndex, fromNode, -1);
+        stampVoltageMatrix(rowIndex, toNode, 1);
+        setRowInfoRightSideChanges(rowIndex, newVoltage);
+        stampVoltageMatrix(fromNode, rowIndex, 1);
+        stampVoltageMatrix(toNode, rowIndex, -1);
+    }
+    
+    public void setRowInfoRightSideChanges(int rowInfoIndex, double newVoltage) {
+        if (rowInfoIndex <= 0) return;
+        if (mapForStamp) {
+            rowInfoIndex = rowsInfo.elementAt(rowInfoIndex - 1).mappedRow;
+        } else {
+            rowInfoIndex -= 1;
+        }
+        temporalRightSideVoltages[rowInfoIndex] = newVoltage;
+    }
+    
+    public void setRowInfoLeftSideChanges(int rowInfoIndex, double newVoltage) {
+        if (rowInfoIndex <= 0) return;
+        if (mapForStamp) {
+            rowInfoIndex = rowsInfo.elementAt(rowInfoIndex - 1).mappedRow;
+        } else {
+            rowInfoIndex -= 1;
+        }
+        leftSideVoltages[rowInfoIndex] = newVoltage;
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Wait for next runStep">
+    public void stampVoltageSource(int fromNode, int toNode, int voltageSourceIndex) {
+        int rowIndex = joints.size() + voltageSourceIndex;
+        stampVoltageMatrix(rowIndex, fromNode, -1);
+        stampVoltageMatrix(rowIndex, toNode, 1);
+        setRowInfoRightSideChanges(rowIndex);
+        stampVoltageMatrix(fromNode, rowIndex, 1);
+        stampVoltageMatrix(toNode, rowIndex, -1);
+    }
+    
+    public void setRowInfoRightSideChanges(int rowInfoIndex) {
+        if (rowInfoIndex <= 0) return;
+        rowsInfo.get(rowInfoIndex - 1).rightSideChanges = true;
+    }
+    
+    public void setRowInfoLeftSideChanges(int rowInfoIndex) {
+        if (rowInfoIndex <= 0) return;
+        rowsInfo.get(rowInfoIndex - 1).leftSideChanges = true;
+    }
+    //</editor-fold>
+    
+    public void stampVoltageMatrix(int row, int column, double newVoltage) {
+        if (row <= 0 || column <= 0) return;
+        if (mapForStamp) {
+            row = rowsInfo.elementAt(row - 1).mappedRow;
+            column = rowsInfo.elementAt(column - 1).mappedColumn;
+        } else {
+            row -= 1;
+            column -= 1;
+        }
+        temporalVoltageMatrix[row][column] += newVoltage;
+    }
+    
+    public void stampResistor(int n1, int n2, double r) {
+        double r0 = 1 / r;
+        if (Double.isNaN(r0) || Double.isInfinite(r0)) {
+            int a = 0;
+            a /= a;
+        }
+        stampVoltageMatrix(n1, n1, r0);
+        stampVoltageMatrix(n2, n2, r0);
+        stampVoltageMatrix(n1, n2, -r0);
+        stampVoltageMatrix(n2, n1, -r0);
+    }
+    
+    public void updateVoltageSource(int voltageSourceIndex, double newVoltage) {
+        int voltageIndex = joints.size() + voltageSourceIndex;
+        setRowInfoRightSideChanges(voltageIndex, newVoltage);
+    }
+    //</editor-fold>
 }

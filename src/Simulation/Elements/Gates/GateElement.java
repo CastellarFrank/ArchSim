@@ -67,6 +67,11 @@ public abstract class GateElement extends BaseElement {
     }
     
     @Override
+    public int getVoltageSourceCount() { 
+        return 1;
+    }
+    
+    @Override
     public void draw(Graphics g) {
         
         if (Configuration.DEBUG_MODE) {
@@ -79,9 +84,11 @@ public abstract class GateElement extends BaseElement {
         int i;
         for (i = 0; i != inputCount; i++) {
             setVoltageColor(g, voltages[i]);
+            System.out.println("voltage[" + i + "] = " + voltages[i]);
             drawThickLine(g, inPosts[i], inGates[i]);
         }
         setVoltageColor(g, voltages[inputCount]);
+        System.out.println("voltage[inputCount] = " + voltages[inputCount]);
         drawThickLine(g, lead2, point2);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         drawThickPolygon(g, gatePolygon);
@@ -103,7 +110,11 @@ public abstract class GateElement extends BaseElement {
         if (needsHighlight()) {
             g.setColor(BaseElement.selectedColor);
         } else {
-            g.setColor(BaseElement.defaultColor);
+            if (voltage >= Configuration.LOGIC_1_VOLTAGE) {
+                g.setColor(BaseElement.highSignalColor);
+            } else {
+                g.setColor(BaseElement.lowSignalColor);
+            }
         }
     }
 
@@ -152,11 +163,26 @@ public abstract class GateElement extends BaseElement {
     }
 
     public boolean getInput(int index) {
-        return voltages[index] > Configuration.LOGIC_1_VOLTAGE;
+        return voltages[index] >= Configuration.LOGIC_1_VOLTAGE;
     }
 
     abstract boolean calcFunction();
 
+    @Override
+    public boolean thereIsConnectionBetween(int elementA, int elementB) {
+        return false;
+    }
+
+    @Override
+    public void stampVoltages() {
+        containerPanel.stampVoltageSource(0, joints[inputCount], voltageSourceReference);
+    }
+
+    @Override
+    public boolean hasGroundConnection(int index) {
+        return (index == inputCount);
+    }
+    
     @Override
     public void doStep() {
         boolean f = calcFunction();
@@ -164,8 +190,8 @@ public abstract class GateElement extends BaseElement {
             f = !f;
         }
         lastOutput = f;
-        double res = f ? 5 : 0;
-        //sim.updateVoltageSource(0, nodes[inputCount], voltSource, res);
+        double output = f ? 5 : 0;
+        containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
 
     @Override

@@ -186,7 +186,7 @@ public class ModuleChip extends BaseElement {
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         drawThickPolygon(g, rectPointsX, rectPointsY, 4);
         for (i = 0; i != getPostCount(); i++) {
-            drawPost(g, ports[i].post.x, ports[i].post.y, nodes[i]);
+            drawPost(g, ports[i].post.x, ports[i].post.y, joints[i]);
         }
         
         Font newFont = new Font("SansSerif", Font.BOLD, 11 * csize);
