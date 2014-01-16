@@ -50,6 +50,7 @@ public class AndGate extends GateElement {
         int i;
         boolean f = true;
         for (i = 0; i != inputCount; i++) {
+            System.out.println("getInput " + i + " = " + getInput(i));
             f &= getInput(i);
         }
         System.out.println("AndGate output " + f);
@@ -62,5 +63,10 @@ public class AndGate extends GateElement {
         element.setAttribute("type", AndGate.class.getName());
         
         return element;
+    }
+
+    @Override
+    public void setVoltage(int voltageIndex, double newVoltage) {
+        super.setVoltage(voltageIndex, newVoltage);
     }
 }

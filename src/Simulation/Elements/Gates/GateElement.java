@@ -5,6 +5,7 @@
 package Simulation.Elements.Gates;
 
 import Exceptions.ArchException;
+import GUI.ContainerPanel;
 import GUI.Edit.EditInfo;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
@@ -73,9 +74,9 @@ public abstract class GateElement extends BaseElement {
     
     @Override
     public void draw(Graphics g) {
-        
+        Color old;
         if (Configuration.DEBUG_MODE) {
-            Color old = g.getColor();
+            old = g.getColor();
             g.setColor(Color.BLUE);
             g.drawRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
             g.setColor(old);
@@ -83,15 +84,19 @@ public abstract class GateElement extends BaseElement {
         
         int i;
         for (i = 0; i != inputCount; i++) {
+            old = g.getColor();
             setVoltageColor(g, voltages[i]);
-            System.out.println("voltage[" + i + "] = " + voltages[i]);
+            ContainerPanel.DEBUG("voltage[" + i + "] = " + voltages[i]);
             drawThickLine(g, inPosts[i], inGates[i]);
+            g.setColor(old);
         }
+        old = g.getColor();
         setVoltageColor(g, voltages[inputCount]);
-        System.out.println("voltage[inputCount] = " + voltages[inputCount]);
+        ContainerPanel.DEBUG("voltage[inputCount] = " + voltages[inputCount]);
         drawThickLine(g, lead2, point2);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         drawThickPolygon(g, gatePolygon);
+        g.setColor(old);
         if (linePoints != null) {
             for (i = 0; i != linePoints.length - 1; i++) {
                 drawThickLine(g, linePoints[i], linePoints[i + 1]);
@@ -175,6 +180,7 @@ public abstract class GateElement extends BaseElement {
 
     @Override
     public void stampVoltages() {
+        ContainerPanel.DEBUG("stamping in gate element " + joints[inputCount]);
         containerPanel.stampVoltageSource(0, joints[inputCount], voltageSourceReference);
     }
 
@@ -191,6 +197,7 @@ public abstract class GateElement extends BaseElement {
         }
         lastOutput = f;
         double output = f ? 5 : 0;
+        ContainerPanel.DEBUG("output " + output);
         containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
 

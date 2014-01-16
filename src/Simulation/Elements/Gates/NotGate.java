@@ -76,6 +76,16 @@ public class NotGate extends BaseElement {
     public void stampVoltages() {
         containerPanel.stampVoltageSource(0, joints[1], voltageSourceReference);
     }
+    
+    @Override
+    public boolean hasGroundConnection(int index) {
+        return (index == 1);
+    }
+    
+    @Override
+    public boolean thereIsConnectionBetween(int elementA, int elementB) {
+        return false;
+    }
 
     @Override
     public void doStep() {
@@ -83,7 +93,7 @@ public class NotGate extends BaseElement {
         if (voltages[0] >= Configuration.LOGIC_1_VOLTAGE)
             output = Configuration.LOGIC_0_VOLTAGE;
         else
-            output = Configuration.LOGIC_1_VOLTAGE;
+            output = Configuration.LOGIC_1_VOLTAGE * 2;
         containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
 }

@@ -23,11 +23,6 @@ public class NandGate extends AndGate {
     }
     
     @Override
-    boolean calcFunction() {
-        return !super.calcFunction();
-    }    
-
-    @Override
     public boolean isInverting() {
         return true;
     }

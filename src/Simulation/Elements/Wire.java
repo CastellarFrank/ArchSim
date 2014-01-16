@@ -34,6 +34,11 @@ public class Wire extends BaseElement {
         setBbox(point1, point2, 3);
         drawPosts(g);
     }
+
+    @Override
+    public void stampVoltages() {
+        containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0);
+    }
     
     @Override
     public int getVoltageSourceCount() { 
@@ -42,7 +47,7 @@ public class Wire extends BaseElement {
 
     @Override
     public void doStep() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     @Override
