@@ -55,5 +55,11 @@ public class AlwaysBlock extends ModuleItem {
             statement.execute(simulationScope, moduleName);
         }
     }
+
+    @Override
+    public void executeModuleItem() {
+        super.executeModuleItem();
+        /*TODO*/
+    }
     
 }

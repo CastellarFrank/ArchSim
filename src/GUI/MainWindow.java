@@ -222,7 +222,7 @@ public class MainWindow extends javax.swing.JFrame {
                 openDesignFile(doc);
             }
         } catch (Exception ex) {
-            
+            System.err.println(ex.getMessage());
         }
     }//GEN-LAST:event_openMenuItemActionPerformed
 

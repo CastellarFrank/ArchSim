@@ -78,7 +78,6 @@ public class SimulationCanvas extends ContainerPanel implements
         } catch (ArchException ex) {
             Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 
     public void prepareForReanalysis() {
@@ -107,11 +106,13 @@ public class SimulationCanvas extends ContainerPanel implements
             }
             if (mouseComponent instanceof ModuleChip) {
                 ModuleChip chip = (ModuleChip) mouseComponent;
-                DrilldownWindow window = new DrilldownWindow(chip.getModuleInfo());
+                DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
                 parent.addDrilldownWindow(window);
             } else {
-                EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
-                dialog.setVisible(true);
+                if (mouseComponent.getEditInfo(0) != null) {
+                    EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
+                    dialog.setVisible(true);
+                }
             }
         } else {
             if (draggingClass != null) {
@@ -209,7 +210,7 @@ public class SimulationCanvas extends ContainerPanel implements
                 success = dragSelected(e.getX(), e.getY());
                 break;
             case POST_DRAG:
-                if (mouseComponent != null) {
+                if (mouseComponent != null && !(mouseComponent instanceof ModuleChip)) {
                     dragPost(snapGrid(e.getX()), snapGrid(e.getY()));
                 }
                 break;
@@ -219,6 +220,7 @@ public class SimulationCanvas extends ContainerPanel implements
         }
 
         if (newElementBeenDrawn != null) {
+            deleting = false;
             newElementBeenDrawn.movePoint2(snapGrid(e.getX()), snapGrid(e.getY()));
         }
 
@@ -291,6 +293,18 @@ public class SimulationCanvas extends ContainerPanel implements
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
         } else if (!deleting && e.getKeyCode() == KeyEvent.VK_DELETE) {
+            boolean anyRemoved = false;
+            for (int i = 0; i < elements.size(); i++) {
+                if (elements.get(i).isSelected()) {
+                    elements.remove(i);
+                    anyRemoved = true;
+                    i = i -1;
+                }
+            }
+            if (anyRemoved) { 
+                prepareForAnalysis();
+                return; 
+            }
             deleting = !deleting;
             this.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }

@@ -69,5 +69,10 @@ public class OutputDecl extends ModuleItem{
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

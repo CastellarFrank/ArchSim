@@ -11,6 +11,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -96,4 +98,13 @@ public class NotGate extends BaseElement {
             output = Configuration.LOGIC_1_VOLTAGE * 2;
         containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
+
+    @Override
+    public Element getXmlElement(Document document) {
+        Element element = super.getXmlElement(document);
+        element.setAttribute("type", NotGate.class.getName());
+        
+        return element;
+    }
+    
 }

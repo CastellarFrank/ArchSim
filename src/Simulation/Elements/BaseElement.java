@@ -48,7 +48,6 @@ public abstract class BaseElement implements Editable {
     public boolean noDiagonal;
     public double current, curcount;
     private boolean isMovable = true;
-    
     private String id;
     //</editor-fold>
 
@@ -73,19 +72,20 @@ public abstract class BaseElement implements Editable {
         this.flags = flags;
         allocNodes();
         initBoundingBox();
-    }    
-    
+    }
+
     /**
-     *If you are planning to define custom components you must overload this.
+     * If you are planning to define custom components you must overload this.
+     *
      * @param x starting point's x coordinate
      * @param y starting point's y coordinate
      * @param x2 final point's x coordinate
      * @param y2 final point's y coordinate
      * @param extraParams more params if needed for inheritance
-     * @throws ArchException 
+     * @throws ArchException
      */
     @SuppressWarnings("OverridableMethodCallInConstructor")
-    public BaseElement(int x, int y, int x2, int y2, String[] extraParams) throws ArchException  {
+    public BaseElement(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         this.x = x;
         this.y = y;
         this.x2 = x2;
@@ -135,14 +135,14 @@ public abstract class BaseElement implements Editable {
         // draw second lead
         setVoltageColor(g, voltages[1]);
         drawThickLine(g, lead2, point2);
-        
+
         g.setColor(old);
     }
-    
+
     public String getId() {
         return id;
     }
-    
+
     public void setId(String id) {
         this.id = id;
     }
@@ -179,30 +179,33 @@ public abstract class BaseElement implements Editable {
             }
         }
     }
-    
+
     public void setVoltage(int voltageIndex, double newVoltage) {
-        if (voltageIndex >= voltages.length || voltageIndex < 0)
+        if (voltageIndex >= voltages.length || voltageIndex < 0) {
             return;
+        }
         voltages[voltageIndex] = newVoltage;
     }
-    
+
     public void setVoltageSourceReference(int referenceIndex, int reference) {
-        if (referenceIndex > getVoltageSourceCount()) return;
+        if (referenceIndex > getVoltageSourceCount()) {
+            return;
+        }
         voltageSourceReference = reference;
     }
-    
+
     public int getVoltageSourceReference() {
         return voltageSourceReference;
     }
-    
-    public void setCurrent(double current) { 
-        this.current = current; 
+
+    public void setCurrent(double current) {
+        this.current = current;
     }
 
     public void setJointIndex(int postIndex, int jointIndex) {
         joints[postIndex] = jointIndex;
     }
-    
+
     public boolean collidesWith(int x, int y) {
         return boundingBox.contains(x, y);
     }
@@ -236,9 +239,9 @@ public abstract class BaseElement implements Editable {
 
     //<editor-fold defaultstate="collapsed" desc="Getters & Setters">
     public int getVoltageSourceCount() {
-        return 0; 
+        return 0;
     }
-    
+
     Rectangle getBoundingBox() {
         return boundingBox;
     }
@@ -254,8 +257,9 @@ public abstract class BaseElement implements Editable {
 
     //<editor-fold defaultstate="collapsed" desc="Selection related">
     public boolean needsHighlight() {
-        if (containerPanel == null)
+        if (containerPanel == null) {
             return false;
+        }
         return containerPanel.mouseComponent == this || selected;
     }
 
@@ -287,11 +291,11 @@ public abstract class BaseElement implements Editable {
 
         setPoints();
     }
-    
+
     public void movePoint2(int newX2, int newY2) {
         x2 = newX2;
         y2 = newY2;
-        
+
         setPoints();
     }
 
@@ -435,9 +439,10 @@ public abstract class BaseElement implements Editable {
                 && containerPanel.getJoint(n).references.size() == 2) {
             return;
         }
-        /*if (panel.mouseMode == CirSim.MODE_DRAG_ROW ||
-         panel.mouseMode == CirSim.MODE_DRAG_COLUMN)
-         return;*/
+        /*if (containerPanel.currentMouseMode == MouseMode.SELECT_DRAG
+                || containerPanel.currentMouseMode == MouseMode.MOVE_ALL) {
+            return;
+        }*/
         drawPost(g, x0, y0);
     }
 
@@ -490,6 +495,10 @@ public abstract class BaseElement implements Editable {
         y2 += dy;
         boundingBox.move(dx, dy);
         setPoints();
+    }
+    
+    public boolean contains(int x, int y) {
+        return boundingBox.contains(x, y);
     }
 
     public void setPoints() {
@@ -568,19 +577,19 @@ public abstract class BaseElement implements Editable {
     public boolean isCenteredText() {
         return false;
     }
-    
+
     public void drawText(Graphics g, String text) {
         FontMetrics fm = g.getFontMetrics();
         int w = fm.stringWidth(text);
         int textX = x2, oldTextX = x2;
-        
+
         if (x < x2) {
             //textX += w;
         } else {
             textX -= w;
         }
-        
-        g.drawString(text, textX, (int)(y2 + fm.getAscent() / 4.0) );
+
+        g.drawString(text, textX, (int) (y2 + fm.getAscent() / 4.0));
         adjustBbox(textX, y - fm.getAscent() / 2, oldTextX, y + fm.getAscent() / 2);
     }
 
@@ -634,16 +643,17 @@ public abstract class BaseElement implements Editable {
         }
     }
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Simulation">
-    public void stampVoltages () { }
-    
+    public void stampVoltages() {
+    }
+
     public boolean thereIsConnectionBetween(int elementA, int elementB) {
         return true;
     }
-    
-    public boolean hasGroundConnection(int index) { 
-        return false; 
+
+    public boolean hasGroundConnection(int index) {
+        return false;
     }
     //</editor-fold>
 }

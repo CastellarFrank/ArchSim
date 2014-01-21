@@ -4,22 +4,17 @@
  */
 package GUI.Design;
 
-import Exceptions.ArchException;
 import GUI.ContainerPanel;
 import GUI.MainWindow;
 import GUI.MouseMode;
 import GUI.Simulation.DrilldownWindow;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
-import Simulation.Elements.Gates.AndGate;
 import Simulation.Elements.ModuleChip;
-import Simulation.Elements.Wire;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -35,6 +30,7 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
         init();
 
         this.parent = parent;
+        this.runnable = false;
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -60,7 +56,7 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
         if (e.getClickCount() == 2) {
             if (mouseComponent instanceof ModuleChip) {
                 ModuleChip chip = (ModuleChip) mouseComponent;
-                DrilldownWindow window = new DrilldownWindow(chip.getModuleInfo());
+                DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
                 parent.addDrilldownWindow(window);
             }
         }
@@ -146,7 +142,7 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
         draggingPost = -1;
         for (int i = 0; i < elements.size(); i++) {
             BaseElement ce = getElement(i);
-            if (ce.boundingBox.contains(x, y)) {
+            if (ce.contains(x, y)) {
                 int j;
                 int area = ce.boundingBox.width * ce.boundingBox.height;
                 int jn = ce.getPostCount();
@@ -167,8 +163,6 @@ public class PreviewPanel extends ContainerPanel implements MouseListener, Mouse
                 }
             }
         }
-        if (mouseComponent != previousMouse) {
-            repaint();
-        }
+        repaint();
     }
 }

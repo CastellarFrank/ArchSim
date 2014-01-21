@@ -10,6 +10,7 @@ import Simulation.Elements.BaseElement;
 import Simulation.Elements.BasicSwitch;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -61,7 +62,9 @@ public class LogicInput extends BasicSwitch {
         setBbox(point1, lead1, 0);
         drawCenteredText(g, text, x2, y2, true);
         setVoltageColor(g, voltages[0]);
-        drawThickLine(g, point1, lead1);
+        Point extra1 = new Point(point1.x, lead1.y);
+        drawThickLine(g, point1, extra1);
+        drawThickLine(g, extra1, lead1);
         drawPosts(g);
     }
     
@@ -71,8 +74,23 @@ public class LogicInput extends BasicSwitch {
     }
 
     @Override
+    public void stampVoltages() {
+        double newVoltage;
+        if (isOpen)
+            newVoltage = Configuration.LOGIC_0_VOLTAGE;
+        else
+            newVoltage = Configuration.LOGIC_1_VOLTAGE * 2;
+        containerPanel.stampVoltageSource(0, joints[0], voltageSourceReference, newVoltage);
+    }
+
+    @Override
     public void doStep() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        double newVoltage;
+        if (isOpen)
+            newVoltage = Configuration.LOGIC_0_VOLTAGE;
+        else
+            newVoltage = Configuration.LOGIC_1_VOLTAGE * 2;
+        containerPanel.updateVoltageSource(voltageSourceReference, newVoltage);
     }
     
     @Override

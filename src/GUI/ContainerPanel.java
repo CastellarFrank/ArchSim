@@ -9,6 +9,7 @@ import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Elements.Gates.GateElement;
 import Simulation.Elements.Gates.NotGate;
+import Simulation.Elements.Wire;
 import Simulation.Joint;
 import Simulation.JointReference;
 import Simulation.RowInfo;
@@ -41,8 +42,9 @@ public class ContainerPanel extends JCanvas {
     protected double temporalRightSideVoltages[], rightSideVoltages[], leftSideVoltages[];
     protected int draggingPost = -1;
     protected Rectangle selectedArea = null;
-    protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
+    public MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
     protected long lastTimeStamp = 0, lastFrameTimeStamp = 0;
+    public boolean runnable = true;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
@@ -128,12 +130,16 @@ public class ContainerPanel extends JCanvas {
 
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+        Color old = g.getColor();
+        g.setColor(Configuration.BACKGROUND_COLOR);
+        super.paintComponent(g);        
+        g.fillRect(-this.getX(), -this.getY(), getWidth() * 2, getHeight() * 2);
+        g.setColor(old);
         updatePreview(g);
     }
 
     protected void analyze() {
-        if (elements.isEmpty()) {
+        if (elements.isEmpty() || !runnable) {
             return;
         }
 
@@ -174,7 +180,6 @@ public class ContainerPanel extends JCanvas {
                     joint.references.add(jointRef);
 
                     baseElement.setJointIndex(postIndex, jointIndex);
-
                     if (postIndex == 0) {
                         baseElement.setVoltage(postIndex, 0.0);
                     }
@@ -224,7 +229,7 @@ public class ContainerPanel extends JCanvas {
                 BaseElement baseElement = getElement(i);
 
                 for (int j = 0; j < baseElement.getPostCount(); j++) {
-                    System.out.println("for post " + j);
+                    //DEBUG("for post " + j);
                     if (!closure[baseElement.joints[j]]) {
                         //DEBUG("!closure[ce.getNode(j)]" + j);
                         if (baseElement.hasGroundConnection(j)) {
@@ -255,7 +260,7 @@ public class ContainerPanel extends JCanvas {
 
             for (int i = 0; i != joints.size(); i++) {
                 if (!closure[i]) {
-                    System.out.println("node " + i + " unconnected");
+                    //DEBUG("node " + i + " unconnected");
                     stampResistor(0, i, 1e8);
                     closure[i] = true;
                     changed = true;
@@ -317,6 +322,13 @@ public class ContainerPanel extends JCanvas {
             }
         }
 
+        if (Configuration.DEBUG_MODE) {
+            for (int i = 0; i < temporalRightSideVoltages.length; i++) {
+                double b = temporalRightSideVoltages[i];
+                System.out.print(b + ",");
+            }
+            System.out.println();
+        }
 
         //</editor-fold>
 
@@ -386,7 +398,7 @@ public class ContainerPanel extends JCanvas {
     }
 
     public void runStep() {
-        if (elements.isEmpty()) {
+        if (elements.isEmpty() || !runnable) {
             return;
         }
 
@@ -461,7 +473,7 @@ public class ContainerPanel extends JCanvas {
     }
 
     public void updatePreview(Graphics g) {
-        if (needsAnalysis) {
+        if (needsAnalysis || true /*TODO: remove true*/) {
             analyze();
             needsAnalysis = false;
         }
@@ -540,7 +552,7 @@ public class ContainerPanel extends JCanvas {
         BaseElement.defaultColor = Color.BLACK;
         BaseElement.whiteColor = Color.WHITE;
         BaseElement.selectedColor = new Color(255, 128, 0);
-        BaseElement.lowSignalColor = Color.DARK_GRAY;
+        BaseElement.lowSignalColor = new Color(102, 51, 0);
         BaseElement.highSignalColor = Color.GREEN.darker();
         BaseElement.highImpedanceSignalColor = Color.RED;
         BaseElement.unknownSignalColor = Color.BLUE;
@@ -616,9 +628,31 @@ public class ContainerPanel extends JCanvas {
 
         if (allowed) {
             for (i = 0; i != elements.size(); i++) {
-                BaseElement ce = getElement(i);
-                if (ce.isSelected()) {
-                    ce.move(dx, dy);
+                BaseElement baseElement = getElement(i);
+                if (baseElement.isSelected()) {                    
+                    if (Configuration.KEEP_CONNECTED_ON_DRAG
+                            && !(baseElement instanceof Wire)) {
+                        int[] elementJoints = baseElement.joints;
+                        for (int j = 0; j < elementJoints.length; j++) {
+                            int k = elementJoints[j];
+                            if (k >= joints.size()) continue;
+                            Joint joint = joints.get(k);
+                            if (joint.references.size() > 1) {
+                                for (int ref = 0; ref < joint.references.size(); ref++) {
+                                    JointReference jointRef = joint.references.elementAt(ref);
+                                    if (jointRef.element != baseElement) {
+                                        jointRef.element.getPost(jointRef.postNumber).x += dx;
+                                        jointRef.element.getPost(jointRef.postNumber).y += dy;
+                                        
+                                        jointRef.element.movePoint(jointRef.postNumber, dx, dy);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (!Configuration.KEEP_CONNECTED_ON_DRAG
+                            || !(baseElement instanceof Wire))
+                        baseElement.move(dx, dy);
                 }
             }
             prepareForAnalysis();

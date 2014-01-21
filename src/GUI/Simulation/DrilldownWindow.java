@@ -5,6 +5,7 @@
 package GUI.Simulation;
 
 import DataStructures.ModuleInfo;
+import DataStructures.ModuleRepository;
 
 /**
  *
@@ -19,6 +20,16 @@ public class DrilldownWindow extends javax.swing.JInternalFrame {
     public DrilldownWindow(ModuleInfo moduleInfo) {
         super("Module: " + moduleInfo.getModuleName(), true, true, true, true);
         this.moduleInfo = moduleInfo;
+        initComponents();
+        
+        canvas = new DrilldownPanel(moduleInfo);
+        setContentPane(canvas);
+        setVisible(true);
+    }
+    
+    public DrilldownWindow(String moduleName) {
+        super("Module: " + moduleName, true, true, true, true);
+        this.moduleInfo = ModuleRepository.getInstance().getModuleInfo(moduleName);
         initComponents();
         
         canvas = new DrilldownPanel(moduleInfo);

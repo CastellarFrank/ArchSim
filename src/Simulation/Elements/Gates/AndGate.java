@@ -39,7 +39,7 @@ public class AndGate extends GateElement {
         }
         triPoints[11] = new Point(lead2);
         if (isInverting()) {
-            pcircle = interpolatePoint(point1, point2, .5 + (ww + 4) / dn);
+            littleCircle = interpolatePoint(point1, point2, .5 + (ww + 4) / dn);
             lead2 = interpolatePoint(point1, point2, .5 + (ww + 8) / dn);
         }
         gatePolygon = createPolygon(triPoints);

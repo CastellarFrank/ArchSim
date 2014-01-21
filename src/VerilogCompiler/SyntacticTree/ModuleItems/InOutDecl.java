@@ -69,5 +69,10 @@ public class InOutDecl extends ModuleItem {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

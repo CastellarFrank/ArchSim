@@ -9,6 +9,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Operator;
 import VerilogCompiler.Utils.StringUtils;
+import java.util.ArrayList;
 
 /**
  *
@@ -62,9 +63,11 @@ public class BinaryExpression extends Expression {
         ExpressionType leftType = left.validateSemantics();
         ExpressionType rightType = right.validateSemantics();
         
-        if (leftType == ExpressionType.INTEGER && rightType == ExpressionType.INTEGER ||
-                leftType == ExpressionType.VECTOR && rightType == ExpressionType.INTEGER ||
-                leftType == ExpressionType.INTEGER && rightType == ExpressionType.VECTOR)
+        ArrayList<ExpressionType> validTypes = new ArrayList<ExpressionType>();
+        validTypes.add(ExpressionType.INTEGER);
+        validTypes.add(ExpressionType.VECTOR);
+        
+        if (validTypes.contains(leftType) && validTypes.contains(rightType))
             return ExpressionType.INTEGER;
         else {
             if (leftType == ExpressionType.ERROR || rightType == ExpressionType.ERROR)

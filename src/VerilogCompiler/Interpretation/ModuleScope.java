@@ -39,7 +39,7 @@ public class ModuleScope {
     
     public void init() {
         for (InitialBlock initialBlock : initialBlocks) {
-            initialBlock.execute();
+            initialBlock.executeModuleItem();
         }
     }
     

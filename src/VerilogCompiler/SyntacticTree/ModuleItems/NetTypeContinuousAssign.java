@@ -44,5 +44,10 @@ public class NetTypeContinuousAssign extends ContinuousAssign {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

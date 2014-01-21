@@ -59,6 +59,11 @@ public class ModuleInstantiation extends ModuleItem {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
     
 }

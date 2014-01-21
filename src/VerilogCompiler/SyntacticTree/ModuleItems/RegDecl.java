@@ -72,5 +72,10 @@ public class RegDecl extends ModuleItem {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

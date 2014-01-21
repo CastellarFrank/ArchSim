@@ -16,4 +16,7 @@ public abstract class ModuleItem extends VNode {
         super(line, column);
     }
     
+    public void executeModuleItem() {
+        System.out.println("executing module item: " + this.getClass().getSimpleName());
+    }
 }

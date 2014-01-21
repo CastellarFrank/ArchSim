@@ -84,5 +84,10 @@ public class NetDecl extends ModuleItem {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

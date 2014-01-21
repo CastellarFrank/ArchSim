@@ -27,7 +27,7 @@ public abstract class GateElement extends BaseElement {
     Point inPosts[], inGates[];    
     boolean lastOutput;
     Polygon gatePolygon;
-    Point pcircle, linePoints[];
+    Point littleCircle, linePoints[];
     int gsize, gwidth, gwidth2, gheight, hs2;
     //</editor-fold>    
 
@@ -95,15 +95,18 @@ public abstract class GateElement extends BaseElement {
         ContainerPanel.DEBUG("voltage[inputCount] = " + voltages[inputCount]);
         drawThickLine(g, lead2, point2);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
-        drawThickPolygon(g, gatePolygon);
-        g.setColor(old);
+        drawThickPolygon(g, gatePolygon);        
         if (linePoints != null) {
-            for (i = 0; i != linePoints.length - 1; i++) {
+            for (i = 0; i != linePoints.length - 1; i++) {                
                 drawThickLine(g, linePoints[i], linePoints[i + 1]);
             }
         }
+        g.setColor(old);
         if (isInverting()) {
-            drawThickCircle(g, pcircle.x, pcircle.y, 3);
+            old = g.getColor();
+            g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
+            drawThickCircle(g, littleCircle.x, littleCircle.y, 3);
+            g.setColor(old);
         }
         //curcount = updateDotCount(current, curcount);
         //drawDots(g, lead2, point2, 0);
@@ -216,6 +219,18 @@ public abstract class GateElement extends BaseElement {
             setInputCount((int)editInfo.value);
             
         }
+    }
+
+    @Override
+    public void movePoint(int n, int dx, int dy) {
+        if (n < inputCount) {
+            x += dx;
+            y += dy;
+        } else {
+            x2 += dx;
+            y2 += dy;
+        }
+        setPoints();   
     }
     
 }

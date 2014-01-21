@@ -14,13 +14,16 @@ import VerilogCompiler.SyntacticTree.PortDirection;
 public class PortInfo {
     public PortPosition position;
     public String portName;
+    public int index;
+    public boolean isOutput = false;
 
-    public PortInfo(PortPosition position, String portName) {
+    public PortInfo(PortPosition position, String portName, int index) {
         this.position = position;
         this.portName = portName;
+        this.index = index;
     }
     
-    public PortInfo(PortDirection direction, String portName) {
+    public PortInfo(PortDirection direction, String portName, int index) {
         switch (direction) {
             case INPUT:
                 position = PortPosition.WEST;
@@ -30,5 +33,6 @@ public class PortInfo {
                 break;
         }
         this.portName = portName;
+        this.index = index;
     }
 }

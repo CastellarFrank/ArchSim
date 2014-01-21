@@ -6,6 +6,7 @@ package Simulation.Elements;
 
 import Exceptions.ArchException;
 import java.awt.Graphics;
+import java.awt.Point;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -30,7 +31,9 @@ public class Wire extends BaseElement {
     @Override
     public void draw(Graphics g) {
         setVoltageColor(g, voltages[0]);
-        drawThickLine(g, point1, point2);
+        Point extra1 = new Point(point1.x, point2.y);
+        drawThickLine(g, point1, extra1);
+        drawThickLine(g, extra1, point2);
         setBbox(point1, point2, 3);
         drawPosts(g);
     }

@@ -26,6 +26,7 @@ public class Port extends VNode {
     Expression    minExpression;
     Expression    maxExpression;
     boolean       isVector;
+    int           sideIndex;
 
     public Port(PortDirection direction, NetType dataType, String identifier, Expression minExpression, Expression maxExpression, int line, int column) {
         super(line, column);
@@ -71,6 +72,14 @@ public class Port extends VNode {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public int getSideIndex() {
+        return sideIndex;
+    }
+
+    public void setSideIndex(int sideIndex) {
+        this.sideIndex = sideIndex;
     }
 
     public Expression getMinExpression() {

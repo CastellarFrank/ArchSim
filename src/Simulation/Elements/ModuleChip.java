@@ -14,9 +14,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -29,110 +33,142 @@ public class ModuleChip extends BaseElement {
     PortElement ports[];
     int csize, cspc, cspc2;
     int rectPointsX[], rectPointsY[];
-    int sizeX, sizeY;
+    int sizeX, sizeY, textX, textY;
     int southPosition = 0, northPosition = 0, westPosition = 0, eastPosition = 0;
     int maxLengthPortEast = 0, maxLengthPortWest = 0, width = 0;
+    String moduleName;
+    ArrayList<Integer> voltageSources = new ArrayList<Integer>();
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ModuleChip(int x, int y, String[] extraParams) throws ArchException {
         super(x, y);
 
-        initialize(extraParams);
+        sizeX = 4;
+        sizeY = 4;
+        //initialize(extraParams);
     }
 
     public ModuleChip(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
 
-        initialize(extraParams);
+        //initialize(extraParams);
+        sizeX = 4;
+        sizeY = 4;
+        newInit(extraParams[0]);
     }
 
-    public ModuleChip(ModuleInfo info, int x, int y, int x2, int y2, int flags, String[] extraParams) 
+    public ModuleChip(ModuleInfo info, int x, int y, int x2, int y2, int flags, String[] extraParams)
             throws ArchException {
         super(x, y, x2, y2, flags);
 
-        initialize(extraParams);
+        //initialize(extraParams);
+        sizeX = 4;
+        sizeY = 4;
     }
 
-    private void initialize(String[] extraParams) throws ModuleNotFoundException {
-        moduleInfo = ModuleRepository.getInstance().getModuleInfo(extraParams[0]);
-        if (moduleInfo == null) {
-            throw new ModuleNotFoundException(extraParams[0]);
-        }
-        setupPorts(moduleInfo);
+    private void newInit(String moduleName) {
+        Element element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
+        this.moduleName = element.getAttribute("moduleName");
+        textX = Integer.parseInt(element.getAttribute("textX"));
+        textY = Integer.parseInt(element.getAttribute("textY"));
+
+        x = Integer.parseInt(element.getAttribute("x"));
+        y = Integer.parseInt(element.getAttribute("y"));
+        x2 = Integer.parseInt(element.getAttribute("x2"));
+        y2 = Integer.parseInt(element.getAttribute("y2"));
+
+        setBoundingBox(x, y, x2, y2);
+
+        setupPorts(element.getElementsByTagName("port"));
+
         setSize(1);
         allocNodes();
         setPoints();
     }
-    //</editor-fold>    
 
-    public void setupPorts(ModuleInfo info) {
-        sizeX = 4;
-        sizeY = 4;
-        ports = new PortElement[info.getPortsInfo().size()];
+    private void setupPorts(NodeList ports) {
+        this.ports = new PortElement[ports.getLength()];
 
-        for (int i = 0; i < ports.length; i++) {
-            PortInfo portInfo = info.getPortInfo(i);
-            if (portInfo.position == PortPosition.EAST)
-                maxLengthPortEast = max(maxLengthPortEast, portInfo.portName.length());
-            if (portInfo.position == PortPosition.WEST)
-                maxLengthPortWest = max(maxLengthPortWest, portInfo.portName.length());
-            int position = 0;
-            switch (portInfo.position) {
-                case EAST:
-                    position = eastPosition++;
-                    break;
-                case NORTH:
-                    position = northPosition++;
-                    break;
-                case SOUTH:
-                    position = southPosition++;
-                    break;
-                case WEST:
-                    position = westPosition++;
-                    break;
+        for (int i = 0; i < ports.getLength(); i++) {
+            Element port = (Element) ports.item(i);
+            Boolean isVertical = Boolean.parseBoolean(port.getAttribute("isVertical"));
+            Boolean leftOrBottom = Boolean.parseBoolean(port.getAttribute("leftOrBottom"));
+            Integer position = Integer.parseInt(port.getAttribute("position"));
+            String portName = port.getAttribute("portName");
+            Boolean isOutput = Boolean.parseBoolean(port.getAttribute("isOutput"));
+
+            PortPosition side;
+
+            if (isVertical) {
+                if (leftOrBottom) {
+                    southPosition++;
+                    side = PortPosition.SOUTH;
+                } else {
+                    northPosition++;
+                    side = PortPosition.NORTH;
+                }
+            } else {
+                if (leftOrBottom) {
+                    maxLengthPortWest = max(maxLengthPortWest, portName.length());
+                    westPosition++;
+                    side = PortPosition.WEST;
+                } else {
+                    maxLengthPortEast = max(maxLengthPortEast, portName.length());
+                    eastPosition++;
+                    side = PortPosition.EAST;
+                }
             }
-            ports[i] = new PortElement(position, portInfo.position, portInfo.portName);
+            if (isOutput) voltageSources.add(i);
+            
+            PortElement elem = new PortElement(position, side, portName);
+            elem.isVertical = isVertical;
+            elem.leftOrBottom = leftOrBottom;
+            elem.isOutput = isOutput;
+            this.ports[i] = elem;
         }
     }
 
-    public ModuleInfo getModuleInfo() {
-        return moduleInfo;
+    //</editor-fold>    
+
+    @Override
+    public int getVoltageSourceCount() {
+        return voltageSources.size();
+    }
+    
+    @Override
+    public boolean hasGroundConnection(int index) {
+        return voltageSources.contains(index);
     }
 
     public String getModuleName() {
-        if (moduleInfo != null) {
-            return moduleInfo.getModuleName();
-        }
-        return null;
+        return moduleName;
     }
 
     void setSize(int s) {
         csize = s;
         cspc = (8 * s);
         cspc2 = (cspc * 2);
-        width = cspc2 * ((maxLengthPortEast + maxLengthPortWest)/10 + 1);
-        width = max(width, cspc2 * (moduleInfo.getModuleName().length()/10+1));
+        width = cspc2 * ((maxLengthPortEast + maxLengthPortWest) / 10 + 1);
+        width = max(width, cspc2 * (moduleName.length() / 10 + 1));
+    }
+
+    private void setBoundingBox(int x, int y, int x2, int y2) {
+        boundingBox.setBounds(x, y, Math.abs(x2 - x), Math.abs(y2 - y));
     }
 
     @Override
     public void setPoints() {
         super.setPoints();
-        /*if (x2 - x > sizeX * cspc2 && containerPanel != null && this == containerPanel.newElementBeenDrawn) {
-            setSize(2);
-        }*/
-        int hs = cspc;
         int x0 = x + cspc2;
         int y0 = y;
         int xr = x0 - cspc;
         int yr = y0 - cspc;
-        int xs = sizeX * width;
-        double max = max(westPosition, eastPosition);
-        max = ((int) max / 4) + (max % 4 == 0 ? 0 : max % 4 == 1 || max % 4 == 2 ? 0.5 : 1);
-        int ys = (int) (sizeY * cspc2 * (max == 0? 1: max));
-        rectPointsX = new int[]{xr, xr + xs, xr + xs, xr};
-        rectPointsY = new int[]{yr, yr, yr + ys, yr + ys};
-        setBbox(xr, yr, rectPointsX[2], rectPointsY[2]);
+        int xs = x2 - x;
+        int ys = y2 - y;
+        rectPointsX = new int[]{xr, x2 + cspc, x2 + cspc, xr};
+        rectPointsY = new int[]{yr, yr, y2 - cspc, y2 - cspc};
+        setBoundingBox(xr, yr, rectPointsX[2], rectPointsY[2]);
         int i;
         for (i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
@@ -154,6 +190,13 @@ public class ModuleChip extends BaseElement {
     }
 
     @Override
+    public void move(int dx, int dy) {
+        textX += dx;
+        textY += dy;
+        super.move(dx, dy);
+    }
+
+    @Override
     public void draw(Graphics g) {
         if (Configuration.DEBUG_MODE) {
             Color old = g.getColor();
@@ -161,39 +204,25 @@ public class ModuleChip extends BaseElement {
             g.drawRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
             g.setColor(old);
         }
-        drawChip(g);
+        otherDraw(g);
     }
 
-    public void drawChip(Graphics g) {
-        int i;
+    public void otherDraw(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
         Font f = new Font("SansSerif", 0, 10 * csize);
-        g.setFont(f);
-        FontMetrics fm = g.getFontMetrics();
-        for (i = 0; i != getPostCount(); i++) {
+        g2d.setFont(f);
+
+        for (int i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
-            int displacement = 0;            
-            setVoltageColor(g, voltages[i]);
-            Point a = p.post;
-            Point b = p.stub;
-            drawThickLine(g, a, b);
-            g.setColor(BaseElement.textColor);
-            int sw = fm.stringWidth(p.text);
-            if (p.side == PortPosition.EAST)
-                displacement = sw;
-            g.drawString(p.text, p.textloc.x - displacement,
-                    p.textloc.y + fm.getAscent() / 2);
+            p.draw(g, joints[i]);
         }
-        g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
-        drawThickPolygon(g, rectPointsX, rectPointsY, 4);
-        for (i = 0; i != getPostCount(); i++) {
-            drawPost(g, ports[i].post.x, ports[i].post.y, joints[i]);
-        }
-        
+
+        g2d.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
+        drawThickPolygon(g2d, rectPointsX, rectPointsY, 4);
+
         Font newFont = new Font("SansSerif", Font.BOLD, 11 * csize);
-        g.setFont(newFont);
-        g.drawString(moduleInfo.getModuleName(), 
-                (rectPointsX[0] + rectPointsX[1] - fm.stringWidth(moduleInfo.getModuleName()))/2, 
-                rectPointsY[2] - (fm.getAscent())/2);
+        g2d.setFont(newFont);
+        g2d.drawString(moduleName, textX, textY);
     }
 
     @Override
@@ -217,10 +246,10 @@ public class ModuleChip extends BaseElement {
     public Element getXmlElement(Document document) {
         Element element = super.getXmlElement(document);
         element.setAttribute("type", ModuleChip.class.getName());
-        
+
         Element extraParam0 = document.createElement("param");
-        extraParam0.setTextContent(moduleInfo.getModuleName());
-        
+        extraParam0.setTextContent(moduleName);
+
         element.appendChild(extraParam0);
 
         return element;
@@ -230,53 +259,77 @@ public class ModuleChip extends BaseElement {
         //<editor-fold defaultstate="collapsed" desc="Instance Attributes">
 
         Point post, stub;
-        Point textloc;
-        int pos, voltSource, bubbleX, bubbleY;
+        Point textPosition;
+        int position, voltSource, bubbleX, bubbleY;
         PortPosition side;
-        String text;
+        String portName;
         boolean lineOver, bubble, clock, output, value, state;
         double curcount, current;
+        boolean isVertical, leftOrBottom, isOutput;
         //</editor-fold>
 
         PortElement(int p, PortPosition side, String text) {
-            pos = p;
+            position = p;
             this.side = side;
-            this.text = text;
+            this.portName = text;
+        }
+
+        PortElement(int position, String text) {
+            this.portName = text;
+            this.position = position;
         }
 
         void setPoint(int px, int py, int dx, int dy, int dax, int day,
                 int sx, int sy) {
-            /*if ((flags & FLAG_FLIP_X) != 0) {
-             dx = -dx;
-             dax = -dax;
-             px += cspc2*(sizeX-1);
-             sx = -sx;
-             }*/
-            /*if ((flags & FLAG_FLIP_Y) != 0) {
-             dy = -dy;
-             day = -day;
-             py += cspc2*(sizeY-1);
-             sy = -sy;
-             }*/
-            int xa = px + cspc2 * dx * pos + sx;
-            int ya = py + cspc2 * dy * pos + sy;
-            post = new Point(xa + dax * cspc2, ya + day * cspc2);
+            int cspc2 = cspc * 2;
+            int xa = px + (!isVertical ? cspc2 : cspc) * dx * position + sx;
+            int ya = py + (!isVertical ? cspc : cspc2) * dy * position + sy;
+            post = new Point(xa + dax * cspc * 4, ya + day * cspc * 4);
             stub = new Point(xa + dax * cspc, ya + day * cspc);
-            textloc = new Point(xa, ya);
-            /*if (bubble) {
-             bubbleX = xa+dax*10*csize;
-             bubbleY = ya+day*10*csize;
-             }
-             if (clock) {
-             clockPointsX = new int[3];
-             clockPointsY = new int[3];
-             clockPointsX[0] = xa+dax*cspc-dx*cspc/2;
-             clockPointsY[0] = ya+day*cspc-dy*cspc/2;
-             clockPointsX[1] = xa;
-             clockPointsY[1] = ya;
-             clockPointsX[2] = xa+dax*cspc+dx*cspc/2;
-             clockPointsY[2] = ya+day*cspc+dy*cspc/2;
-             }*/
+            textPosition = new Point(xa, ya);
+
+            /*if (!isVertical)
+             setBbox(post.x, post.y - 3, stub.x, post.y + 3);
+             else
+             setBbox(post.x - 3, post.y, post.x + 3, stub.y);*/
+        }
+
+        public void draw(Graphics g, int jointIndex) {
+            drawThickLine(g, post, stub);
+            Font f = new Font("SansSerif", 0, 10);
+            g.setFont(f);
+
+            int dispX = 0;
+            if (isVertical) {
+                AffineTransform fontAT = new AffineTransform();
+                Font theFont = g.getFont();
+                if (leftOrBottom) {
+                    fontAT.rotate(3 * Math.PI / 2);
+                } else {
+                    fontAT.rotate(Math.PI / 2);
+                }
+                Font theDerivedFont = theFont.deriveFont(fontAT);
+                g.setFont(theDerivedFont);
+            }
+
+            FontMetrics fm = g.getFontMetrics();
+
+            if (!leftOrBottom) {
+                if (isVertical) {
+                    dispX = fm.getAscent() / 2;
+                } else {
+                    dispX = fm.stringWidth(portName);
+                }
+            } else {
+                if (isVertical) {
+                    dispX = -g.getFontMetrics(f).getAscent() / 2;
+                } else {
+                }
+            }
+
+            g.drawString(portName, textPosition.x - dispX,
+                    textPosition.y + fm.getAscent() / 2);
+            drawPost(g, post.x, post.y, jointIndex);
         }
     }
 }

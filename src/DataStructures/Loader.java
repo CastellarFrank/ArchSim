@@ -127,9 +127,10 @@ public class Loader {
                     Element port = (Element) ports.item(portIndex);
                     String type = port.getAttribute("type");
                     String portName = port.getAttribute("name");
+                    //int sideIndex = Integer.parseInt(port.getAttribute("index"));
 
                     PortDirection portDirection = PortDirection.valueOf(type);
-                    portInfos.add(new PortInfo(portDirection, portName));
+                    portInfos.add(new PortInfo(portDirection, portName, 0));
                 }
                 info.setPortsInfo(portInfos);
 

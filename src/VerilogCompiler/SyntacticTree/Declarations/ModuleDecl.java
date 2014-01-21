@@ -103,4 +103,10 @@ public class ModuleDecl extends Declaration {
         return null;
     }
     
+    public void executeModule() {
+        for (ModuleItem moduleItem : moduleItemList) {
+            moduleItem.executeModuleItem();
+        }
+    }
+    
 }

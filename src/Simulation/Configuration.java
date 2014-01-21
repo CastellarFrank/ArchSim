@@ -6,6 +6,7 @@ package Simulation;
 
 import DataStructures.Setting;
 import GUI.Design.DesignWindow;
+import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -38,6 +39,9 @@ public class Configuration {
     public static Integer REPAINT_PAUSE = 10;
     public static Boolean DEBUG_MODE = true;
     public static Boolean LOGIC_VALUES_AS_NUMBER = false;
+    public static Boolean KEEP_CONNECTED_ON_DRAG = true;
+    
+    public static Color BACKGROUND_COLOR = Color.WHITE.darker();
     
     public static HashMap<String, Setting> otherSettings = new HashMap<String, Setting>();
     
@@ -105,6 +109,10 @@ public class Configuration {
             root.appendChild(createElement(document, "LOGIC_VALUES_AS_NUMBER", 
                     LOGIC_VALUES_AS_NUMBER.toString(), 
                     LOGIC_VALUES_AS_NUMBER.getClass().getSimpleName()));
+            
+            root.appendChild(createElement(document, "KEEP_CONNECTED_ON_DRAG", 
+                    KEEP_CONNECTED_ON_DRAG.toString(), 
+                    KEEP_CONNECTED_ON_DRAG.getClass().getSimpleName()));
             //</editor-fold>            
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();

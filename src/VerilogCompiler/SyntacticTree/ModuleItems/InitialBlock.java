@@ -45,8 +45,9 @@ public class InitialBlock extends ModuleItem {
         SemanticCheck.getInstance().setInsideProceduralBlock(false);
         return null;
     }
-    
-    public void execute() {
-    
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
     }
 }

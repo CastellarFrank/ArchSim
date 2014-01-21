@@ -4,7 +4,6 @@
  */
 package GUI.Design;
 
-import DataStructures.CircuitGenerator;
 import GUI.ErrorPanel;
 import GUI.MainWindow;
 import Simulation.Configuration;
@@ -17,7 +16,6 @@ import VerilogCompiler.VerilogLexer;
 import VerilogCompiler.parser;
 import java.io.File;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java_cup.runtime.Symbol;
@@ -201,6 +199,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                 Element portElement = document.createElement("port");
                 portElement.setAttribute("type", port.getDirection().name());
                 portElement.setAttribute("name", port.getIdentifier());
+                portElement.setAttribute("index", Integer.toString(port.getSideIndex()));
                 ports.appendChild(portElement);
             }
             root.appendChild(ports);
@@ -223,6 +222,9 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
     
     public void loadFromDocument(Document document) {
+        NodeList behaviour = document.getElementsByTagName("behaviour");
+        source.setProgram(behaviour.item(0).getTextContent());
+        
         NodeList elements = document.getElementsByTagName("element");
         
         for (int i = 0; i < elements.getLength(); i++) {
@@ -241,11 +243,11 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             int x2 = Integer.parseInt(element.getAttribute("x2"));
             int y2 = Integer.parseInt(element.getAttribute("y2"));
             
-            preview.constructAndAddElement(type, x, y, x2, y2, stringExtraParams);
+            BaseElement baseElement = preview.constructElement(type, x, y, x2, y2, stringExtraParams);
+            ModuleDecl module = compileWithoutSemantics();
+            ((ChipRectangule) baseElement).init(module.getPortList(), element);
+            preview.addElement(baseElement);
         }
-        
-        NodeList behaviour = document.getElementsByTagName("behaviour");
-        source.setProgram(behaviour.item(0).getTextContent());
     }
 
     public void showErrorPanel(String errorLog) {
@@ -276,12 +278,9 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
     
     public void generateCircuitFromModule(ModuleDecl module) {
-        ArrayList<BaseElement> elements = CircuitGenerator.getInstance().generateFromModule(module);
-        for (BaseElement baseElement : elements) {
-            preview.addElement(baseElement);
-        }
-        
-        preview.prepareForAnalysis();
+        ChipRectangule chip = new ChipRectangule(50, 50, 100, 50, new String[] { module.getModuleName() });
+        chip.init(module.getPortList());        
+        preview.addElement(chip);
     }
     
     public void closeLogic() {
@@ -401,11 +400,11 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE)
+            .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
+            .addComponent(tabs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
         );
 
         pack();

@@ -32,5 +32,10 @@ public class SimpleContinuousAssign extends ContinuousAssign {
         }
         return null;
     }
+
+    @Override
+    public void executeModuleItem() {
+        /*TODO*/
+    }
     
 }

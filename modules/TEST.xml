@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="TEST" textX="274" textY="92" type="GUI.Design.ChipRectangule" x="128" x2="321" y="40" y2="169"><param>TEST</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="RegWrite" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="Read_Addr1" position="2"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="Read_Addr2" position="4"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="Write_Addr" position="6"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="Write_Data" position="8"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="Read_Data1" position="12"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="Read_Data2" position="8"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="clk" position="10"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="regNumber" position="12"/><port id="0" isOutput="true" isVertical="true" leftOrBottom="true" portName="regValue" position="10"/></element></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    21:15:38 05/15/2012 
+// Design Name: 
+// Module Name:    Register_File 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+module TEST(input RegWrite,
+				input [2:0] Read_Addr1,
+				input [2:0] Read_Addr2,
+				input [2:0] Write_Addr,
+				input [15:0] Write_Data,
+				output reg [15:0] Read_Data1,
+				output reg [15:0] Read_Data2,
+				input clk,
+				
+				input [2:0] regNumber,
+				output reg [15:0] regValue
+    );
+	 
+	 reg [15:0] registers[7:0];
+	 	 
+	 always @ (posedge clk)
+	 begin
+		if(RegWrite == 1)
+			registers[Write_Addr] = Write_Data;
+	 end
+	 
+	 always @ (Read_Addr1 or Read_Addr2 or clk or regNumber)
+	 begin
+		Read_Data1 &lt;= registers[Read_Addr1];
+		Read_Data2 &lt;= registers[Read_Addr2];
+		regValue = registers[regNumber];
+	 end
+
+endmodule
+</behaviour></module>
