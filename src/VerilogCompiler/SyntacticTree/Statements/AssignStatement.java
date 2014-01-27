@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Statements;
 
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -40,6 +41,11 @@ public class AssignStatement extends Statement {
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
         assignment.execute(simulationScope, moduleName);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new AssignStatement((Assignment)assignment.getCopy(), line, column);
     }
     
 }

@@ -54,5 +54,10 @@ public class Range extends VNode {
         }
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        return new Range((Expression)minValue.getCopy(), (Expression)maxValue.getCopy(), line, column);
+    }
     
 }

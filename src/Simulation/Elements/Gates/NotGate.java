@@ -76,6 +76,7 @@ public class NotGate extends BaseElement {
 
     @Override
     public void stampVoltages() {
+        System.out.println("NotGate source ref: " + voltageSourceReference);
         containerPanel.stampVoltageSource(0, joints[1], voltageSourceReference);
     }
     

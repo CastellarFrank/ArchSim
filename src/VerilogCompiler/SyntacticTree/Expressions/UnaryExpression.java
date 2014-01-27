@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.MathHelper;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Operator;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 
 /**
@@ -82,6 +83,12 @@ public class UnaryExpression extends Expression {
                 return null;
         }
         
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new UnaryExpression(expressionOperator, (PrimaryExpression)expression.getCopy(), 
+                line, column);
     }
     
 }

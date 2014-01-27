@@ -34,4 +34,8 @@ public class VariableInfo {
         if (LSB < MSB)
             isBigEndian = true;
     }
+    
+    public VariableInfo getCopy() {
+        return null;
+    }
 }

@@ -56,5 +56,18 @@ public class GateInstance extends VNode {
         }
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        GateInstanceName name = null;
+        if (gateInstanceName != null)
+            name = (GateInstanceName)gateInstanceName.getCopy();
+        ArrayList<Expression> terminals = new ArrayList<Expression>();
+        for (Expression expression : terminalList) {
+            terminals.add((Expression)expression.getCopy());
+        }
+        
+        return new GateInstance(name, terminals, line, column);
+    }
     
 }

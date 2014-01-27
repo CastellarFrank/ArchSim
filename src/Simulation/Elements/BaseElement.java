@@ -217,6 +217,8 @@ public abstract class BaseElement implements Editable {
 
     public void delete() {
     }
+    
+    public boolean isNonLinear() { return false; }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Static Methods">

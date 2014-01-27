@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -53,6 +54,11 @@ public class NegEdgeEventExpression extends EventExpression {
             return new ExpressionValue(1, 1);
         else 
             return new ExpressionValue(0, 1);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new NegEdgeEventExpression((Expression)expression.getCopy(), line, column);
     }
     
 }

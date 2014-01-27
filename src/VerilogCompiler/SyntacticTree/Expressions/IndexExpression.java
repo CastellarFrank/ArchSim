@@ -10,6 +10,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.SyntacticTree.VNode;
 import java.util.ArrayList;
 
 /**
@@ -105,5 +106,10 @@ public class IndexExpression extends PrimaryExpression {
             int max = info.LSB;
             return max - position;
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new IndexExpression(identifier, (Expression)expression.getCopy(), line, column);
     }
 }

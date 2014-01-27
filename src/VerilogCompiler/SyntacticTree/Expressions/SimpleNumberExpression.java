@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -40,6 +41,11 @@ public class SimpleNumberExpression extends NumberExpression {
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
         return new ExpressionValue(unsignedNumber, 32);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new SimpleNumberExpression(unsignedNumber, line, column);
     }
     
 }

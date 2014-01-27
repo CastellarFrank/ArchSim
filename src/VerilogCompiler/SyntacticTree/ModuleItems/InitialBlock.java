@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Others.SensitiveList;
 import VerilogCompiler.SyntacticTree.Statements.Statement;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -49,5 +50,11 @@ public class InitialBlock extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new InitialBlock((SensitiveList)sensitiveList.getCopy(), 
+                (Statement)statement.getCopy(), line, column);
     }
 }

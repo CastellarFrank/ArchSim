@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -87,6 +88,15 @@ public class ForStatement extends Statement {
             cond = condition.evaluate(simulationScope, moduleName);
             intCondition = Integer.parseInt(cond.value.toString());
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        Assignment newInit = initialValue.getCopy();
+        Assignment newIncr = increment.getCopy();
+        Expression newCond = (Expression)condition.getCopy();
+        Statement  newStmt = (Statement)body.getCopy();
+        return new ForStatement(newInit, newCond, newIncr, newStmt, line, column);
     }
     
 }

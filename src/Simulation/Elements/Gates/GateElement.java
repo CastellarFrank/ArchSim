@@ -86,13 +86,13 @@ public abstract class GateElement extends BaseElement {
         for (i = 0; i != inputCount; i++) {
             old = g.getColor();
             setVoltageColor(g, voltages[i]);
-            ContainerPanel.DEBUG("voltage[" + i + "] = " + voltages[i]);
+            //ContainerPanel.DEBUG("voltage[" + i + "] = " + voltages[i]);
             drawThickLine(g, inPosts[i], inGates[i]);
             g.setColor(old);
         }
         old = g.getColor();
         setVoltageColor(g, voltages[inputCount]);
-        ContainerPanel.DEBUG("voltage[inputCount] = " + voltages[inputCount]);
+        //ContainerPanel.DEBUG("voltage[inputCount] = " + voltages[inputCount]);
         drawThickLine(g, lead2, point2);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         drawThickPolygon(g, gatePolygon);        
@@ -200,7 +200,7 @@ public abstract class GateElement extends BaseElement {
         }
         lastOutput = f;
         double output = f ? 5 : 0;
-        ContainerPanel.DEBUG("output " + output);
+        //ContainerPanel.DEBUG("output " + output);
         containerPanel.updateVoltageSource(voltageSourceReference, output);
     }
 

@@ -5,7 +5,9 @@
 package VerilogCompiler.SemanticCheck;
 
 import DataStructures.ModuleRepository;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -125,6 +127,15 @@ public class SemanticCheck {
     }
     
     //</editor-fold>
+    
+    public InstanceModuleScope variablesToScope() {
+        InstanceModuleScope scope = new InstanceModuleScope();
+        for (Map.Entry<String, VariableInfo> entry : declaredVariables.entrySet()) {
+            scope.registerVariable(entry.getKey(), entry.getValue());
+        }
+        
+        return scope;
+    }
     
     public void resetAll() {
         defaultCaseItemFound.clear();

@@ -137,5 +137,14 @@ public class Port extends VNode {
         
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        Expression newMin = minExpression != null ? (Expression)minExpression.getCopy() : null;
+        Expression newMax = minExpression != null ? (Expression)maxExpression.getCopy() : null;
+        return new Port(direction, dataType, identifier,
+                newMin, newMax, 
+                isVector, line, column);
+    }
     
 }

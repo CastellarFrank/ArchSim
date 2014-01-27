@@ -10,6 +10,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Others.SensitiveList;
 import VerilogCompiler.SyntacticTree.Statements.Statement;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -60,6 +61,12 @@ public class AlwaysBlock extends ModuleItem {
     public void executeModuleItem() {
         super.executeModuleItem();
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new AlwaysBlock((SensitiveList)sensitiveList.getCopy(), 
+                (Statement)statement.getCopy(), line, column);
     }
     
 }

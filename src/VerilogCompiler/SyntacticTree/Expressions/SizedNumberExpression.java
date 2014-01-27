@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Base;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 
 /**
@@ -64,6 +65,11 @@ public class SizedNumberExpression extends NumberExpression {
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
     String moduleName) {
         return new ExpressionValue(value, size);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new SizedNumberExpression(size, base, value, line, column);
     }
     
 }

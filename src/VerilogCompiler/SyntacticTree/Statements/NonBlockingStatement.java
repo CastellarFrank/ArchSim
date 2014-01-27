@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Expressions.LValue;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -57,6 +58,12 @@ public class NonBlockingStatement extends Statement {
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         /*TODO: Registrar la asignacion para futura ejecucion, 
          * solo se evalua la expression para tener el valor listo*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new NonBlockingStatement((LValue)lvalue.getCopy(), 
+                (Expression)expression.getCopy(), line, column);
     }
     
 }

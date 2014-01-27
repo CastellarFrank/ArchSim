@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Statements;
 
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -53,6 +54,15 @@ public class SeqBlock extends  Statement {
         for (Statement statement : statementList) {
             statement.execute(simulationScope, moduleName);
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Statement> stmts = new ArrayList<Statement>();
+        for (Statement statement : statementList) {
+            stmts.add((Statement)statement.getCopy());
+        }
+        return new SeqBlock(stmts, line, column);
     }
     
 }

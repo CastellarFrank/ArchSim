@@ -60,5 +60,14 @@ public class ModuleInstance extends VNode {
         }
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Expression> exps = new ArrayList<Expression>();
+        for (Expression expression : moduleConnectionList) {
+            exps.add((Expression)expression.getCopy());
+        }
+        return new ModuleInstance(identifier, exps, line, column);
+    }
     
 }

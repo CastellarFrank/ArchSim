@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.ModuleItems.GateDecl;
 import VerilogCompiler.SyntacticTree.ModuleItems.ModuleItem;
 import VerilogCompiler.SyntacticTree.Others.Port;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -103,10 +104,25 @@ public class ModuleDecl extends Declaration {
         return null;
     }
     
-    public void executeModule() {
+    public void executeModule(String moduleInstanceId) {
         for (ModuleItem moduleItem : moduleItemList) {
-            moduleItem.executeModuleItem();
+            moduleItem.executeModuleItem(/*moduleInstanceId*/);
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Port> portCopies = new ArrayList<Port>();
+        for (Port port : portList) {
+            portCopies.add((Port)port.getCopy());
+        }
+        ArrayList<ModuleItem> itemsCopies = new ArrayList<ModuleItem>();
+        for (ModuleItem moduleItem : moduleItemList) {
+            itemsCopies.add((ModuleItem)moduleItem.getCopy());
+        }
+        ModuleDecl copy = new ModuleDecl(moduleName, portCopies, itemsCopies, line, column);
+        copy.getGates();
+        return copy;
     }
     
 }

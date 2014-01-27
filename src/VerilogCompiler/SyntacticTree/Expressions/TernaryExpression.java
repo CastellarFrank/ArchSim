@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -78,6 +79,13 @@ public class TernaryExpression extends Expression {
         }
         
         return new ExpressionValue(value, bits);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new TernaryExpression((Expression)condition.getCopy(), 
+                (Expression)trueExpression.getCopy(), (Expression)falseExpression.getCopy(), 
+                line, column);
     }
     
 }

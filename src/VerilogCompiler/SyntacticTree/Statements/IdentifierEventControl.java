@@ -10,6 +10,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -51,6 +52,11 @@ public class IdentifierEventControl extends EventControlStatement {
         Integer intValue = Integer.parseInt(value.value.toString());
         /*TODO*/
         throw new UnsuportedFeature("identifier event control statement not supported");
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new IdentifierEventControl(identifier, line, column);
     }
     
 }

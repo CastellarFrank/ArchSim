@@ -54,5 +54,10 @@ public class ParameterAssign extends VNode {
         value.validateSemantics();
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        return new ParameterAssign(identifier, (Expression)value.getCopy(), line, column);
+    }
     
 }

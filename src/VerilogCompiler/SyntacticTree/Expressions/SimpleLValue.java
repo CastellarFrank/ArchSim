@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -61,5 +62,10 @@ public class SimpleLValue extends LValue {
     @Override
     public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new SimpleLValue(identifier, line, column);
     }
 }

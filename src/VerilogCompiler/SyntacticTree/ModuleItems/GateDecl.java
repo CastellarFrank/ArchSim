@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.ModuleItems;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.GateType;
 import VerilogCompiler.SyntacticTree.Others.GateInstance;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -58,6 +59,15 @@ public class GateDecl extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<GateInstance> newInstances = new ArrayList<GateInstance>();
+        for (GateInstance gateInstance : gateInstanceList) {
+            newInstances.add((GateInstance)gateInstance.getCopy());
+        }
+        return new GateDecl(gateType, newInstances, line, column);
     }
     
 }

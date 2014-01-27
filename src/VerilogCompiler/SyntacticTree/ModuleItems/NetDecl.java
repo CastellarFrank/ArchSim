@@ -11,6 +11,7 @@ import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.NetType;
 import VerilogCompiler.SyntacticTree.Range;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -88,6 +89,16 @@ public class NetDecl extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        Range newRange = (Range)range.getCopy();
+        ArrayList<Variable> vars = new ArrayList<Variable>();
+        for (Variable variable : variableList) {
+            vars.add((Variable)variable.getCopy());
+        }
+        return new NetDecl(type, newRange, vars, line, column);
     }
     
 }

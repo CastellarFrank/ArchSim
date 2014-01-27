@@ -41,7 +41,7 @@ public class Configuration {
     public static Boolean LOGIC_VALUES_AS_NUMBER = false;
     public static Boolean KEEP_CONNECTED_ON_DRAG = true;
     
-    public static Color BACKGROUND_COLOR = Color.WHITE.darker();
+    public static Color BACKGROUND_COLOR = Color.WHITE;
     
     public static HashMap<String, Setting> otherSettings = new HashMap<String, Setting>();
     

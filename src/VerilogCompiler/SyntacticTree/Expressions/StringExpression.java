@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -41,6 +42,11 @@ public class StringExpression extends Expression {
     @Override
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
         return new ExpressionValue(value, 0);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new StringExpression(value, line, column);
     }
     
 }

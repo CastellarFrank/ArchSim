@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Base;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 
 /**
@@ -74,6 +75,13 @@ public class SizedHexNumberExpression extends NumberExpression {
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
     String moduleName) {
         return new ExpressionValue(evaluatedValue, size);
+    }
+
+    @Override
+    public VNode getCopy() {
+        SizedHexNumberExpression newOne = new SizedHexNumberExpression(size, base, hexNumber, line, column);
+        newOne.evaluatedValue = this.evaluatedValue;
+        return newOne;
     }
     
 }

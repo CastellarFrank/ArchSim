@@ -6,9 +6,7 @@ package Simulation.Elements;
 
 import DataStructures.ModuleInfo;
 import DataStructures.ModuleRepository;
-import DataStructures.PortInfo;
 import Exceptions.ArchException;
-import Exceptions.ModuleNotFoundException;
 import Simulation.Configuration;
 import java.awt.Color;
 import java.awt.Font;
@@ -132,14 +130,38 @@ public class ModuleChip extends BaseElement {
     //</editor-fold>    
 
     @Override
+    public void stampVoltages() {
+        for (int i = 0; i < getPostCount(); i++) {
+            if (ports[i].isOutput && voltageSources.contains(i))
+                containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex);
+        }
+    }
+    
+    @Override
     public int getVoltageSourceCount() {
         return voltageSources.size();
+    }
+
+    @Override
+    public void setVoltageSourceReference(int referenceIndex, int reference) {
+        for (int i = 0; i < getPostCount(); i++) {
+            PortElement port = ports[i];
+            if (voltageSources.contains(i) && port.isOutput && referenceIndex-- == 0) {
+                port.voltageSourceIndex = reference;
+                return;
+            }
+        }
     }
     
     @Override
     public boolean hasGroundConnection(int index) {
-        return voltageSources.contains(index);
+        return voltageSources.contains(index) && ports[index].isOutput;
     }
+
+    @Override
+    public boolean thereIsConnectionBetween(int elementA, int elementB) {
+        return false;
+    }    
 
     public String getModuleName() {
         return moduleName;
@@ -214,19 +236,23 @@ public class ModuleChip extends BaseElement {
 
         for (int i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
-            p.draw(g, joints[i]);
+            p.voltage = voltages[i];
+            p.draw(g2d, joints[i]);
         }
 
+        Color old = g2d.getBackground();
         g2d.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
-        drawThickPolygon(g2d, rectPointsX, rectPointsY, 4);
+        drawThickPolygon(g2d, rectPointsX, rectPointsY, 4);        
 
         Font newFont = new Font("SansSerif", Font.BOLD, 11 * csize);
         g2d.setFont(newFont);
         g2d.drawString(moduleName, textX, textY);
+        g2d.setColor(old);
     }
 
     @Override
     public void doStep() {
+        
     }
 
     @Override
@@ -260,12 +286,13 @@ public class ModuleChip extends BaseElement {
 
         Point post, stub;
         Point textPosition;
-        int position, voltSource, bubbleX, bubbleY;
+        int position, voltageSourceIndex, bubbleX, bubbleY;
         PortPosition side;
         String portName;
-        boolean lineOver, bubble, clock, output, value, state;
+        boolean lineOver, bubble, clock, value, state;
         double curcount, current;
         boolean isVertical, leftOrBottom, isOutput;
+        double voltage;
         //</editor-fold>
 
         PortElement(int p, PortPosition side, String text) {
@@ -295,7 +322,11 @@ public class ModuleChip extends BaseElement {
         }
 
         public void draw(Graphics g, int jointIndex) {
+            Color old = g.getColor();
+            setVoltageColor(g, voltage);
             drawThickLine(g, post, stub);
+            g.setColor(old);
+            
             Font f = new Font("SansSerif", 0, 10);
             g.setFont(f);
 

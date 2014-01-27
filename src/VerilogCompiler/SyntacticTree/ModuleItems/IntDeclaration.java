@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -48,6 +49,15 @@ public class IntDeclaration extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Variable> newVariables = new ArrayList<Variable>();
+        for (Variable variable : variables) {
+            newVariables.add((Variable)variable.getCopy());
+        }
+        return new IntDeclaration(newVariables, line, column);
     }
     
 }

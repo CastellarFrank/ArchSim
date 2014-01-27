@@ -11,6 +11,7 @@ import VerilogCompiler.Interpretation.MathHelper;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -72,6 +73,15 @@ public class Concatenation extends LValue {
             
             currentPos -= min - 1;
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Expression> copies = new ArrayList<Expression>();
+        for (Expression expression : expressionList) {
+            copies.add((Expression)expression.getCopy());
+        }
+        return new Concatenation(expressionList, line, column);
     }
     
 }

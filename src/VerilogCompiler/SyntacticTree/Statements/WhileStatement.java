@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -62,6 +63,12 @@ public class WhileStatement extends Statement {
             value = condition.evaluate(simulationScope, moduleName);
             intValue = Integer.parseInt(value.value.toString());
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new WhileStatement((Expression)condition.getCopy(), 
+                (Statement)body.getCopy(), line, column);
     }
     
 }

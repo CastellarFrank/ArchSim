@@ -5,6 +5,7 @@
 package DataStructures;
 
 import Simulation.Configuration;
+import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Set;
@@ -21,11 +22,18 @@ import org.w3c.dom.NodeList;
 public class ModuleRepository {
 
     private HashMap<String, ModuleInfo> modulesRepository;
+    private HashMap<String, ModuleDecl> modulesLogic;
     private HashMap<String, Element> designPrototypes;
 
     private ModuleRepository() {
         modulesRepository = new HashMap<String, ModuleInfo>();
         designPrototypes = new HashMap<String, Element>();
+        modulesLogic = new HashMap<String, ModuleDecl>();
+    }
+    
+    public void registerModuleLogic(String moduleName, ModuleDecl moduleDecl) {
+        if (!modulesLogic.containsKey(moduleName))
+            modulesLogic.put(moduleName, moduleDecl);
     }
 
     public void registerModule(String moduleName, ModuleInfo info) {
@@ -38,6 +46,12 @@ public class ModuleRepository {
 
     public ModuleInfo getModuleInfo(String moduleName) {
         return modulesRepository.get(moduleName);
+    }
+    
+    public ModuleDecl getModuleLogic(String moduleName) {
+        if (modulesLogic.containsKey(moduleName))
+            return (ModuleDecl)modulesLogic.get(moduleName).getCopy();
+        return null;
     }
     
     public Element getDesignPrototype(String moduleName) {

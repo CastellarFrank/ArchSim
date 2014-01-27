@@ -22,4 +22,6 @@ public abstract class VNode {
     public abstract String toString();
     
     public abstract ExpressionType validateSemantics();
+    
+    public abstract VNode getCopy();
 }

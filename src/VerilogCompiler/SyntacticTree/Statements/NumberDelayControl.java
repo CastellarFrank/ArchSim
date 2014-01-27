@@ -8,6 +8,7 @@ import Exceptions.UnsuportedFeature;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.NumberExpression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -43,6 +44,11 @@ public class NumberDelayControl extends DelayControlStatement {
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
         throw new UnsuportedFeature("number delay control event on expression is not supported");
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new NumberDelayControl((NumberExpression)delay.getCopy(), line, column);
     }
     
 }

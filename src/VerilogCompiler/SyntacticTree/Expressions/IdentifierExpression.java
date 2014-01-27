@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -62,6 +63,11 @@ public class IdentifierExpression extends PrimaryExpression {
                 return simulationScope.getVariableValue(moduleName, identifier);
             default: return null;
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new IdentifierExpression(identifier, line, column);
     }
     
 }

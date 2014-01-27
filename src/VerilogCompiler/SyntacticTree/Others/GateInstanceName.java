@@ -59,5 +59,11 @@ public class GateInstanceName extends VNode {
         
         return null;
     }
+
+    @Override
+    public VNode getCopy() {
+        return new GateInstanceName(identifier, range != null?(Range)range.getCopy():null,
+                line, column);
+    }
     
 }

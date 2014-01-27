@@ -9,6 +9,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Statements.Statement;
+import VerilogCompiler.SyntacticTree.VNode;
 import java.util.ArrayList;
 
 /**
@@ -56,6 +57,11 @@ public class DefaultCaseItem extends CaseItem {
     @Override
     public ArrayList<Integer> getValue(SimulationScope simulationScope, String moduleName) {
         return null;
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new DefaultCaseItem((Statement)statement.getCopy(), line, column);
     }
     
 }

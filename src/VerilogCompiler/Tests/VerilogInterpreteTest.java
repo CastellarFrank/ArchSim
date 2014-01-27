@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.Tests;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
@@ -46,8 +47,11 @@ public class VerilogInterpreteTest {
                 System.out.println(module.toString());
                 module.validateSemantics();
                 
-                if (!ErrorHandler.getInstance().hasErrors())
-                    module.executeModule();
+                SimulationScope scope = new SimulationScope();
+                if (!ErrorHandler.getInstance().hasErrors()) {    
+                    
+                    module.executeModule("");
+                }
                 else
                     System.err.println(ErrorHandler.getInstance().getErrors());
             } catch (Exception ex) {

@@ -58,5 +58,11 @@ public class RegVariable extends VNode {
             return ExpressionType.INTEGER;
         return ExpressionType.ERROR;
     }
+
+    @Override
+    public VNode getCopy() {
+        return new RegVariable(identifier, range != null ? (Range)range.getCopy(): null,
+                line, column);
+    }
     
 }

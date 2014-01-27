@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Statements.Statement;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -69,6 +70,16 @@ public class NumCaseItem extends CaseItem {
             values.add(Integer.parseInt(expression.evaluate(scope, moduleName).value.toString()));
         }
         return values;
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Expression> copies = new ArrayList<Expression>();
+        for (Expression expression : expressionList) {
+            copies.add((Expression)expression.getCopy());
+        }
+        
+        return new NumCaseItem(copies, (Statement)statement.getCopy(), line, column);
     }
     
 }

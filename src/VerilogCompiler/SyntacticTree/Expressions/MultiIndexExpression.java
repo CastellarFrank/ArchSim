@@ -11,6 +11,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.Range;
+import VerilogCompiler.SyntacticTree.VNode;
 import java.util.ArrayList;
 
 /**
@@ -121,6 +122,16 @@ public class MultiIndexExpression extends PrimaryExpression {
             int max = info.LSB;
             return max - position;
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        Range newRange = (Range)range.getCopy();
+        ArrayList<Expression> newIndexes = new ArrayList<Expression>();
+        for (Expression expression : indexes) {
+            newIndexes.add((Expression)expression.getCopy());
+        }
+        return new MultiIndexExpression(identifier, newIndexes, newRange, line, column);
     }
     
 }

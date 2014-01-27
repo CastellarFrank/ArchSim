@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -69,6 +70,12 @@ public class ComposedEventExpression extends EventExpression{
         Integer rightValue = Integer.parseInt(r.toString());
         
         return new ExpressionValue(leftValue == 1 || rightValue == 1, 1);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new ComposedEventExpression((EventExpression)left.getCopy(), 
+                (EventExpression)right.getCopy(), line, column);
     }
     
 }

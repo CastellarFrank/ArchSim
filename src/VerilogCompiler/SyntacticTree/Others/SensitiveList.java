@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.EventExpression;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -88,6 +89,15 @@ public class SensitiveList extends Expression {
             }
         }
         return new ExpressionValue(result, 1);
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<EventExpression> events = new ArrayList<EventExpression>();
+        for (EventExpression eventExpression : items) {
+            events.add((EventExpression)eventExpression.getCopy());
+        }
+        return new SensitiveList(acceptAll, events, line, column);
     }
     
 }

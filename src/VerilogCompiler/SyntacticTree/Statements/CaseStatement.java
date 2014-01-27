@@ -10,6 +10,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.CaseItems.CaseItem;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -72,6 +73,15 @@ public class CaseStatement extends Statement {
                 break;
             }
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<CaseItem> cases = new ArrayList<CaseItem>();
+        for (CaseItem caseItem : caseItemList) {
+            cases.add((CaseItem)caseItem.getCopy());
+        }
+        return new CaseStatement((Expression)expression.getCopy(), cases, line, column);
     }
     
 }

@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Others.ModuleInstance;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -63,6 +64,15 @@ public class ModuleInstantiation extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<ModuleInstance> instances = new ArrayList<ModuleInstance>();
+        for (ModuleInstance moduleInstance : moduleInstanceList) {
+            instances.add((ModuleInstance)moduleInstance.getCopy());
+        }
+        return new ModuleInstantiation(identifier, instances, line, column);
     }
     
     

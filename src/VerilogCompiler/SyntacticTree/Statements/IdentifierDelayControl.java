@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -49,6 +50,11 @@ public class IdentifierDelayControl extends DelayControlStatement {
         ExpressionValue value = simulationScope.getVariableValue(moduleName, identifier);
         Integer intValue = Integer.parseInt(value.value.toString());
         /*Esperar intValue unidades de tiempo*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new IdentifierDelayControl(identifier, line, column);
     }
     
 }

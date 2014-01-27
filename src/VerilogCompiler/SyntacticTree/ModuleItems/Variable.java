@@ -53,5 +53,11 @@ public class Variable extends VNode {
             return ExpressionType.INTEGER;
         return ExpressionType.ERROR;
     }
+
+    @Override
+    public VNode getCopy() {
+        return new Variable(identifier, range != null? (Range)range.getCopy(): null, 
+                line, column);
+    }
     
 }

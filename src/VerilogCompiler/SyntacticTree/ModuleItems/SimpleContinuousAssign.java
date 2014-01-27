@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.ModuleItems;
 
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Statements.Assignment;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -36,6 +37,15 @@ public class SimpleContinuousAssign extends ContinuousAssign {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<Assignment> newAssigns = new ArrayList<Assignment>();
+        for (Assignment assignment : assignmentList) {
+            newAssigns.add((Assignment)assignment.getCopy());
+        }
+        return new SimpleContinuousAssign(newAssigns, line, column);
     }
     
 }

@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -73,6 +74,12 @@ public class IfStatement extends Statement {
             trueBlock.execute(simulationScope, moduleName);
         else if (falseBlock != null)
             falseBlock.execute(simulationScope, moduleName);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new IfStatement((Expression)condition.getCopy(), (Statement)trueBlock.getCopy(), 
+                falseBlock != null ? (Statement)falseBlock.getCopy(): null, line, column);
     }
     
 }

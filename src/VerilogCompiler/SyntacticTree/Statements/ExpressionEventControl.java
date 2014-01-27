@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Statements;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.EventExpression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -42,6 +43,11 @@ public class ExpressionEventControl extends EventControlStatement {
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
         eventExpression.evaluate(simulationScope, moduleName);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new ExpressionEventControl((EventExpression)eventExpression.getCopy(), line, column);
     }
     
 }

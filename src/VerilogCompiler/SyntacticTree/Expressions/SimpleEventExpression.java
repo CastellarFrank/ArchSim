@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -44,6 +45,11 @@ public class SimpleEventExpression extends EventExpression {
         Integer intValue = Integer.parseInt(exp.value.toString());
         
         return new ExpressionValue(intValue == 0 ? 0 : 1, 1);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new SimpleEventExpression((Expression)expression.getCopy(), line, column);
     }
     
 }

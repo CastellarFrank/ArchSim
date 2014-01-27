@@ -20,6 +20,7 @@ import Simulation.Elements.Gates.XorGate;
 import Simulation.Elements.Inputs.LogicInput;
 import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Multiplexor;
+import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -41,6 +42,7 @@ public class SimulationCanvas extends ContainerPanel implements
     public String draggingClass;
     public String[] draggingExtraParams;
     public boolean deleting = false;
+    public SimulationScope simulationScope;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public SimulationCanvas(MainWindow parent) {

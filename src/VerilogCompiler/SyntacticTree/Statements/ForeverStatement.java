@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Statements;
 
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -43,6 +44,11 @@ public class ForeverStatement extends Statement {
         while (true) {
             statement.execute(simulationScope, moduleName);
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new ForeverStatement((Statement)statement.getCopy(), line, column);
     }
     
 }

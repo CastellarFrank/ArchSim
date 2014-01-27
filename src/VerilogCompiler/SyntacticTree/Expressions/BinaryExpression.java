@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Operator;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -155,6 +156,11 @@ public class BinaryExpression extends Expression {
         }
         
         return null;
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new BinaryExpression((Expression)left.getCopy(), expressionOperator, (Expression)right.getCopy(), line, column);
     }
     
 }

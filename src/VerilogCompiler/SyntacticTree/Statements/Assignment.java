@@ -56,6 +56,10 @@ public class Assignment {
         return null;
     }
     
+    public Assignment getCopy() {
+        return new Assignment(lvalue, expression, line, column);
+    }
+    
     public void execute(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         lvalue.setValue(simulationScope, moduleName, value.value);

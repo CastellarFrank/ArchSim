@@ -8,6 +8,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -55,6 +56,15 @@ public class ParameterDecl extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        ArrayList<ParameterAssign> assigns = new ArrayList<ParameterAssign>();
+        for (ParameterAssign parameterAssign : paramAssignList) {
+            assigns.add((ParameterAssign)parameterAssign.getCopy());
+        }
+        return new ParameterDecl(assigns, line, column);
     }
     
 }

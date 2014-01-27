@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -61,6 +62,12 @@ public class WaitStatement extends Statement {
         
         /*Wait intValue unidades*/
         statement.execute(simulationScope, moduleName);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new WaitStatement((Expression)condition.getCopy(), 
+                (Statement)statement.getCopy(), line, column);
     }
     
 }

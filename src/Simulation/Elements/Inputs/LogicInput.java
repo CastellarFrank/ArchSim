@@ -85,12 +85,6 @@ public class LogicInput extends BasicSwitch {
 
     @Override
     public void doStep() {
-        double newVoltage;
-        if (isOpen)
-            newVoltage = Configuration.LOGIC_0_VOLTAGE;
-        else
-            newVoltage = Configuration.LOGIC_1_VOLTAGE * 2;
-        containerPanel.updateVoltageSource(voltageSourceReference, newVoltage);
     }
     
     @Override

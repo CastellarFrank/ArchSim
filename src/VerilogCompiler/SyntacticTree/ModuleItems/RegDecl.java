@@ -11,6 +11,7 @@ import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.Others.RegVariable;
 import VerilogCompiler.SyntacticTree.Range;
+import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
 
@@ -76,6 +77,16 @@ public class RegDecl extends ModuleItem {
     @Override
     public void executeModuleItem() {
         /*TODO*/
+    }
+
+    @Override
+    public VNode getCopy() {
+        Range newRange = (Range)range.getCopy();
+        ArrayList<RegVariable> newRgs = new ArrayList<RegVariable>();
+        for (RegVariable regVariable : regVariableList) {
+            newRgs.add((RegVariable)regVariable.getCopy());
+        }
+        return new RegDecl(newRange, newRgs, line, column);
     }
     
 }

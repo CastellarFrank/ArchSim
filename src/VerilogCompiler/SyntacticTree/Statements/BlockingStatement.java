@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Expressions.LValue;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -56,6 +57,12 @@ public class BlockingStatement extends Statement {
     public void execute(SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         lvalue.setValue(simulationScope, moduleName, value.value);
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new BlockingStatement((LValue)lvalue.getCopy(), 
+                (Expression)expression.getCopy(), line, column);
     }
     
 }

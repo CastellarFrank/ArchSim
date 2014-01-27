@@ -38,13 +38,15 @@ public class ContainerPanel extends JCanvas {
     protected boolean dragging = false, mapForStamp = false;
     protected int dragX, dragY, initDragX, initDragY, matrixSize, matrixFullSize;
     protected int gridSize, gridMask, gridRound;
-    protected double voltageMatrix[][], temporalVoltageMatrix[][];
+    protected double voltageMatrix[][], temporalVoltageMatrix[][], speed = 172.0;
+    protected double stepTime, totalTime = 0;
+    protected int circuitPermute[];
     protected double temporalRightSideVoltages[], rightSideVoltages[], leftSideVoltages[];
-    protected int draggingPost = -1;
+    protected int draggingPost = -1, steps = 0, frames = 0;
     protected Rectangle selectedArea = null;
     public MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
-    protected long lastTimeStamp = 0, lastFrameTimeStamp = 0;
-    public boolean runnable = true;
+    protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
+    public boolean runnable = true, circuitNonLinear, converged;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
@@ -127,14 +129,32 @@ public class ContainerPanel extends JCanvas {
         addElement(constructElement(type, x, y, x2, y2, extraParams));
     }
     //</editor-fold>
+    
+    public void printThings() {
+        if (Configuration.DEBUG_MODE) {
+            if (temporalRightSideVoltages != null) {
+                System.out.println("RIGHT SIDE VOLTAGES!!! COUNT: " + temporalRightSideVoltages.length);
+                for (int i = 0; i < temporalRightSideVoltages.length; i++) {
+                    double b = temporalRightSideVoltages[i];
+                    System.out.print(b + ",");
+                }
+                System.out.println("\nEND OF RIGHT SIDE VOLTAGES");
+            }
+        }
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
         Color old = g.getColor();
         g.setColor(Configuration.BACKGROUND_COLOR);
-        super.paintComponent(g);        
+        //super.paintComponent(g);        
         g.fillRect(-this.getX(), -this.getY(), getWidth() * 2, getHeight() * 2);
         g.setColor(old);
+        updatePreview(g);
+    }
+
+    @Override
+    public void update(Graphics g) {
         updatePreview(g);
     }
 
@@ -153,7 +173,7 @@ public class ContainerPanel extends JCanvas {
         for (elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
             BaseElement baseElement = getElement(elementIndex);
             int postCount = baseElement.getPostCount();
-            int voltageSourceCount = baseElement.getVoltageSourceCount();
+            int elementVoltageSourceCount = baseElement.getVoltageSourceCount();
 
             //<editor-fold defaultstate="collapsed" desc="Update joints">
             for (postIndex = 0; postIndex < postCount; postIndex++) {
@@ -180,30 +200,34 @@ public class ContainerPanel extends JCanvas {
                     joint.references.add(jointRef);
 
                     baseElement.setJointIndex(postIndex, jointIndex);
-                    if (postIndex == 0) {
+                    if (jointIndex == 0) {
                         baseElement.setVoltage(postIndex, 0.0);
                     }
                 }
             }
             //</editor-fold>
 
-            totalVoltageSourceCount += voltageSourceCount;
+            totalVoltageSourceCount += elementVoltageSourceCount;
         }
 
         voltageSourceElements = new BaseElement[totalVoltageSourceCount];
-
-        int rowCount = joints.size() + totalVoltageSourceCount - 1;
+        circuitNonLinear = false;
+        
+        totalVoltageSourceCount = 0;
+        
         //<editor-fold defaultstate="collapsed" desc="Set voltage source references">
-        int voltageSourceCount, control = 0;
+        int ivs;
         for (BaseElement baseElement : elements) {
-            voltageSourceCount = baseElement.getVoltageSourceCount();
-            for (int i = 0; i < voltageSourceCount; i++) {
-                baseElement.setVoltageSourceReference(i, control);
-                voltageSourceElements[control] = baseElement;
-                control += 1;
+            ivs = baseElement.getVoltageSourceCount();
+            for (int i = 0; i < ivs; i++) {
+                voltageSourceElements[totalVoltageSourceCount] = baseElement;
+                baseElement.setVoltageSourceReference(i, totalVoltageSourceCount++);
             }
         }
 
+        //voltageSourceCount = totalVoltageSourceCount;
+        
+        int rowCount = joints.size() + totalVoltageSourceCount - 1;
         initializeRows(rowCount);
 
         temporalRightSideVoltages = new double[rowCount];
@@ -211,6 +235,7 @@ public class ContainerPanel extends JCanvas {
         matrixSize = matrixFullSize = rowCount;
         temporalVoltageMatrix = new double[rowCount][rowCount];
         voltageMatrix = new double[rowCount][rowCount];
+        circuitPermute = new int[matrixSize];
         mapForStamp = false;
 
         for (BaseElement baseElement : elements) {
@@ -270,24 +295,21 @@ public class ContainerPanel extends JCanvas {
         }
         //</editor-fold>
 
-        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
-                temporalRightSideVoltages.length);
-
         //<editor-fold defaultstate="collapsed" desc="Matrix reduction">
         int index, innerIndex = 0;
-        for (index = 0; index < matrixSize; index++) {
+        for (index = 0; index < rowCount; index++) {
             int quantityM = -1, quantityP = -1;
-            double value = 0, constantsSum = 0;
+            double value = 0, rightSideSum = 0;
 
             RowInfo rowInfo = rowsInfo.elementAt(index);
             if (rowInfo.leftSideChanges || rowInfo.notUsedInMatrix || rowInfo.rightSideChanges) {
                 continue;
             }
 
-            for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
+            for (innerIndex = 0; innerIndex < rowCount; innerIndex++) {
                 double q = temporalVoltageMatrix[index][innerIndex];
                 if (rowsInfo.elementAt(innerIndex).type == RowType.CONSTANT) {
-                    constantsSum -= rowsInfo.elementAt(innerIndex).voltage * q;
+                    rightSideSum -= rowsInfo.elementAt(innerIndex).voltage * q;
                     continue;
                 }
                 if (q == 0) {
@@ -304,49 +326,88 @@ public class ContainerPanel extends JCanvas {
                 }
                 break;
             }
-            if (innerIndex == matrixSize) {
+            if (innerIndex == rowCount) {
                 if (quantityP == -1) {
                     System.err.println("Error!");
                     return;
                 }
                 RowInfo secondRowInfo = rowsInfo.elementAt(quantityP);
                 if (quantityM == -1) {
+                    int k;
+                    for (k = 0; secondRowInfo.type == RowType.EQUALS_TO_ANOTHER && k < 100; k++) {
+                        quantityP = secondRowInfo.rowEqualsToReference;
+                        secondRowInfo = rowsInfo.elementAt(quantityP);
+                    }
+                    if (secondRowInfo.type == RowType.EQUALS_TO_ANOTHER) {
+                        secondRowInfo.type = RowType.NORMAL;
+                        continue;
+                    }
+                    if (secondRowInfo.type != RowType.NORMAL) {
+                        continue;
+                    }
                     secondRowInfo.type = RowType.CONSTANT;
                     rowInfo.notUsedInMatrix = true;
-                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + constantsSum) / value;
+                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / value;
                     index = -1;
-                } else if (constantsSum + temporalRightSideVoltages[index] == 0) {
+                } else if (rightSideSum + temporalRightSideVoltages[index] == 0) {
+                    if (secondRowInfo.type != RowType.NORMAL) {
+                        int qq = quantityM;
+                        quantityM = quantityP;
+                        quantityP = qq;
+                        secondRowInfo = rowsInfo.elementAt(quantityP);
+                        if (secondRowInfo.type != RowType.NORMAL) {
+                            System.out.println("swap failed");
+                            continue;
+                        }
+                    }
                     secondRowInfo.type = RowType.EQUALS_TO_ANOTHER;
+                    secondRowInfo.rowEqualsToReference = quantityM;
                     rowInfo.notUsedInMatrix = true;
                 }
             }
         }
 
-        if (Configuration.DEBUG_MODE) {
-            for (int i = 0; i < temporalRightSideVoltages.length; i++) {
-                double b = temporalRightSideVoltages[i];
-                System.out.print(b + ",");
-            }
-            System.out.println();
-        }
 
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="Delete useless rows">
         int newCol = 0;
-        for (int i = 0; i < matrixSize; i++) {
-            RowInfo rowInfo = rowsInfo.elementAt(i);
+        for (index = 0; index < matrixSize; index++) {
+            RowInfo rowInfo = rowsInfo.elementAt(index);
             switch (rowInfo.type) {
                 case NORMAL:
-                    rowInfo.mappedColumn = newCol;
-                    newCol++;
+                    rowInfo.mappedColumn = newCol++;
                     continue;
                 case CONSTANT:
                     rowInfo.mappedColumn = -1;
                     break;
                 case EQUALS_TO_ANOTHER:
-                    RowInfo piv = null;
+                    RowInfo pivot;
+                    for (innerIndex = 0; innerIndex != 100; innerIndex++) {
+                        pivot = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
+                        if (pivot.type != RowType.EQUALS_TO_ANOTHER) {
+                            break;
+                        }
+                        if (index == pivot.rowEqualsToReference) {
+                            break;
+                        }
+                        rowInfo.rowEqualsToReference = pivot.rowEqualsToReference;
+                    }
                     break;
+            }
+        }
+        
+        for (index = 0; index != rowCount; index++) {
+            RowInfo rowInfo = rowsInfo.elementAt(index);
+            if (rowInfo.type == RowType.EQUALS_TO_ANOTHER) {
+                RowInfo secondRowInfo = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
+                if (secondRowInfo.type == RowType.CONSTANT) {
+                    rowInfo.type = secondRowInfo.type;
+                    rowInfo.voltage = secondRowInfo.voltage;
+                    rowInfo.mappedColumn = -1;
+                } else {
+                    rowInfo.mappedColumn = secondRowInfo.mappedColumn;
+                }
             }
         }
 
@@ -354,21 +415,21 @@ public class ContainerPanel extends JCanvas {
         double newRightSides[] = new double[newCol];
 
         int newIndex = 0;
-        for (int i = 0; i < matrixSize; i++) {
-            RowInfo rowInfo = rowsInfo.elementAt(i);
+        for (index = 0; index < matrixSize; index++) {
+            RowInfo rowInfo = rowsInfo.elementAt(index);
             if (rowInfo.notUsedInMatrix) {
                 rowInfo.mappedRow = -1;
                 continue;
             }
-            newRightSides[newIndex] = temporalRightSideVoltages[i];
+            newRightSides[newIndex] = temporalRightSideVoltages[index];
             rowInfo.mappedRow = newIndex;
 
-            for (int j = 0; j < matrixSize; j++) {
-                RowInfo rowInfoJ = rowsInfo.elementAt(j);
+            for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
+                RowInfo rowInfoJ = rowsInfo.elementAt(innerIndex);
                 if (rowInfoJ.type == RowType.CONSTANT) {
-                    newRightSides[newIndex] -= rowInfoJ.voltage * temporalVoltageMatrix[i][j];
+                    newRightSides[newIndex] -= rowInfoJ.voltage * temporalVoltageMatrix[index][innerIndex];
                 } else {
-                    newMatrix[newIndex][rowInfoJ.mappedColumn] += temporalVoltageMatrix[i][j];
+                    newMatrix[newIndex][rowInfoJ.mappedColumn] += temporalVoltageMatrix[index][innerIndex];
                 }
             }
             newIndex++;
@@ -376,19 +437,149 @@ public class ContainerPanel extends JCanvas {
 
         temporalRightSideVoltages = newRightSides;
         temporalVoltageMatrix = newMatrix;
-        matrixSize = newCol;
+        rowCount = matrixSize = newCol;
 
         System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
-                temporalRightSideVoltages.length);
+                rowCount);
 
-        for (int i = 0; i < matrixSize; i++) {
-            System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
+        for (int i = 0; i < rowCount; i++) {
+            System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, rowCount);
         }
+        
+        System.out.println("new size: " + newCol);
 
         //</editor-fold>
         //</editor-fold>       
         mapForStamp = true;
+        
+        
+        if (!circuitNonLinear && !lu_factor(temporalVoltageMatrix, matrixSize, circuitPermute)) {
+            System.out.println("Singular matrix!");
+        }
     }
+    
+    //<editor-fold defaultstate="collapsed" desc="LU">
+    boolean lu_factor(double a[][], int size, int pivot[]) {
+        double scaleFactors[];
+        int i, j, k;
+
+        scaleFactors = new double[size];
+
+        // divide each row by its largest element, keeping track of the
+        // scaling factors
+        for (i = 0; i != size; i++) {
+            double largest = 0;
+            for (j = 0; j != size; j++) {
+                double x = Math.abs(a[i][j]);
+                if (x > largest) {
+                    largest = x;
+                }
+            }
+            // if all zeros, it's a singular matrix
+            if (largest == 0) {
+                return false;
+            }
+            scaleFactors[i] = 1.0 / largest;
+        }
+
+        // use Crout's method; loop through the columns
+        for (j = 0; j != size; j++) {
+
+            // calculate upper triangular elements for this column
+            for (i = 0; i != j; i++) {
+                double q = a[i][j];
+                for (k = 0; k != i; k++) {
+                    q -= a[i][k] * a[k][j];
+                }
+                a[i][j] = q;
+            }
+
+            // calculate lower triangular elements for this column
+            double largest = 0;
+            int largestRow = -1;
+            for (i = j; i != size; i++) {
+                double q = a[i][j];
+                for (k = 0; k != j; k++) {
+                    q -= a[i][k] * a[k][j];
+                }
+                a[i][j] = q;
+                double x = Math.abs(q);
+                if (x >= largest) {
+                    largest = x;
+                    largestRow = i;
+                }
+            }
+
+            // pivoting
+            if (j != largestRow) {
+                double x;
+                for (k = 0; k != size; k++) {
+                    x = a[largestRow][k];
+                    a[largestRow][k] = a[j][k];
+                    a[j][k] = x;
+                }
+                scaleFactors[largestRow] = scaleFactors[j];
+            }
+
+            // keep track of row interchanges
+            pivot[j] = largestRow;
+
+            // avoid zeros
+            if (a[j][j] == 0.0) {
+                System.out.println("avoided zero");
+                a[j][j] = 1e-18;
+            }
+
+            if (j != size - 1) {
+                double mult = 1.0 / a[j][j];
+                for (i = j + 1; i != size; i++) {
+                    a[i][j] *= mult;
+                }
+            }
+        }
+        return true;
+    }
+    
+    void lu_solve(double a[][], int n, int ipvt[], double b[]) {
+        int i;
+
+        // find first nonzero b element
+        for (i = 0; i != n; i++) {
+            int row = ipvt[i];
+
+            double swap = b[row];
+            b[row] = b[i];
+            b[i] = swap;
+            if (swap != 0) {
+                break;
+            }
+        }
+
+        int bi = i++;
+        for (; i < n; i++) {
+            int row = ipvt[i];
+            int j;
+            double tot = b[row];
+
+            b[row] = b[i];
+            // forward substitution using the lower triangular matrix
+            for (j = bi; j < i; j++) {
+                tot -= a[i][j] * b[j];
+            }
+            b[i] = tot;
+        }
+        for (i = n - 1; i >= 0; i--) {
+            double tot = b[i];
+
+            // back-substitution using the upper triangular matrix
+            int j;
+            for (j = i + 1; j != n; j++) {
+                tot -= a[i][j] * b[j];
+            }
+            b[i] = tot / a[i][i];
+        }
+    }
+    //</editor-fold>
 
     public void initializeRows(int rowCount) {
         rowsInfo = new Vector<RowInfo>(rowCount);
@@ -396,36 +587,66 @@ public class ContainerPanel extends JCanvas {
             rowsInfo.add(new RowInfo());
         }
     }
+    
+    double getIterationRate() {
+        if (speed == 0)
+            return 0;
+        return .1 * Math.exp((speed - 61) / 24.);
+    }
+    
+    long lastIterationTime;
 
     public void runStep() {
-        if (elements.isEmpty() || !runnable) {
+        if (elements == null || elements.isEmpty() || !runnable) {
             return;
         }
 
-        /*long steprate = (long) (160 * 100.23124542356);
-        long tm = System.currentTimeMillis();
-        long temporalLastTimeStamp = lastTimeStamp;
+        double iterationRate = getIterationRate();
+        long stepRate = (long) (160 * iterationRate);
+        long temporalLastTimeStamp = System.currentTimeMillis();
+        long temporalLastIterationTime = lastIterationTime;
         int iter;
-        if (1000 >= steprate * (tm - lastTimeStamp)) {
+        if (1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)) {
             return;
-        }*/
+        }
+        
+        int iteration;
 
-        //for (iter = 1;; iter++) {
-        //    for (int iteration = 0; iteration < 5000; iteration++) {
-                for (int i = 0; i < matrixSize; i++) {
-                    System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
-                }
-
-                for (BaseElement baseElement : elements) {
-                    if (baseElement instanceof NotGate || baseElement instanceof GateElement) {
-                        baseElement.doStep();
-                    }
-                }
+        for (iter = 1; iter < 10; iter++) {
+            int maxSubIteration = 5000;
+            steps++;
+            for (iteration = 0; iteration < maxSubIteration; iteration++) {
+                subIterations = iteration;
+                converged = true;
+                
                 System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                         temporalRightSideVoltages.length);
+                
+                if (circuitNonLinear) {
+                    for (int i = 0; i < matrixSize; i++) {
+                        System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
+                    }
+                }                
+                //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
+                
+                for (BaseElement baseElement : elements) {
+                    if (baseElement instanceof NotGate || baseElement instanceof GateElement) 
+                        baseElement.doStep();                    
+                }                
                 if (isPaused) {
                     return;
                 }
+                if (circuitNonLinear) {
+                    if (converged && iteration > 0)
+                        break;
+                    if (!lu_factor(temporalVoltageMatrix, matrixSize,
+                        circuitPermute)) {
+                        System.out.println("Singular matrix!");
+                        return;
+                    }
+                }
+                lu_solve(temporalVoltageMatrix, matrixSize, circuitPermute,
+                        temporalRightSideVoltages);
                 for (int rowIndex = 0; rowIndex < matrixFullSize; rowIndex++) {
                     RowInfo rowInfo = rowsInfo.get(rowIndex);
                     double newVoltage = 0;
@@ -436,6 +657,8 @@ public class ContainerPanel extends JCanvas {
                     }
 
                     if (Double.isNaN(newVoltage)) {
+                        converged = false;
+                        break;
                     }
                     if (rowIndex < joints.size() - 1) {
                         Joint joint = joints.elementAt(rowIndex + 1);
@@ -447,15 +670,25 @@ public class ContainerPanel extends JCanvas {
                         //voltageSourceElements[newIndex].setCurrent(newVoltage);
                     }
                 }
-                //break;
-            //}
-            /*temporalLastTimeStamp = System.currentTimeMillis();
-            if (iter * 1000 >= steprate * (temporalLastTimeStamp - lastTimeStamp)
+                //</editor-fold>   
+                
+                if (!circuitNonLinear) {
+                    break;
+                }
+            }
+            if (iteration == maxSubIteration) {
+                System.out.println("STOP!");
+                break;
+            }
+            totalTime += stepTime;
+            temporalLastTimeStamp = System.currentTimeMillis();
+            temporalLastIterationTime = temporalLastTimeStamp;
+            if (iter * 1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)
                     || (temporalLastTimeStamp - lastFrameTimeStamp > 500)) {
                 break;
             }
         }
-        lastTimeStamp = temporalLastTimeStamp;*/
+        lastIterationTime = temporalLastIterationTime;
     }
 
     public void resume() {
@@ -465,24 +698,47 @@ public class ContainerPanel extends JCanvas {
     public void pause() {
         isPaused = true;
     }
+    
+    public void reset() {
+        totalTime = 0;
+        isPaused = false;
+        repaint();
+    }
 
     public static void DEBUG(String message) {
         if (Configuration.DEBUG_MODE) {
             System.out.println(message);
         }
     }
+    
+    long secTime = 0;
 
     public void updatePreview(Graphics g) {
         if (needsAnalysis || true /*TODO: remove true*/) {
             analyze();
             needsAnalysis = false;
         }
+        
+        printThings();
 
         if (!isPaused) {
             runStep();
         }
-
-        lastFrameTimeStamp = System.currentTimeMillis();
+        
+        if (!isPaused) {
+            long sysTime = System.currentTimeMillis();
+            if (sysTime - secTime >= 1000) {
+                frames = 0;
+                steps = 0;
+                secTime = sysTime;
+            }
+            lastTimeStamp = sysTime;
+        } else {
+            lastTimeStamp = 0;
+        }
+        
+        //System.out.println("After step");
+        //printThings();
 
         for (BaseElement baseElement : elements) {
             baseElement.draw(g);
@@ -522,6 +778,21 @@ public class ContainerPanel extends JCanvas {
 
             g.setColor(old);
         }
+        
+        frames++;
+        
+        if (!isPaused && temporalVoltageMatrix != null) {
+            long delay = 1000 / 50 - (System.currentTimeMillis() - lastFrameTimeStamp);
+            if (delay > 0) {
+                try {
+                    System.out.println("delay: " + delay);
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                }
+            }
+            repaint(0);
+        }
+        lastFrameTimeStamp = lastTimeStamp;
     }
 
     public void addElement(BaseElement element) {
@@ -587,11 +858,19 @@ public class ContainerPanel extends JCanvas {
         prepareForAnalysis();
         repaint();
     }
+    
+    public int getElementPosition(BaseElement element) {
+        for (int i = 0; i < elements.size(); i++) {
+            if (elements.elementAt(i) == element)
+                return i;
+        }
+        return -1;
+    }
 
     public boolean dragSelected(int x, int y) {
-        boolean me = false;
+        boolean mouseElementSelected = false;
         if (mouseComponent != null && !mouseComponent.isSelected()) {
-            mouseComponent.setSelected(me = true);
+            mouseComponent.setSelected(mouseElementSelected = true);
         }
 
         // snap grid, unless we're only dragging text elements
@@ -611,7 +890,7 @@ public class ContainerPanel extends JCanvas {
         int dy = y - dragY;
         if (dx == 0 && dy == 0) {
             // don't leave mouseComponent selected if we selected it above
-            if (me) {
+            if (mouseElementSelected) {
                 mouseComponent.setSelected(false);
             }
             return false;
@@ -659,7 +938,7 @@ public class ContainerPanel extends JCanvas {
         }
 
         // don't leave mouseComponent selected if we selected it above
-        if (me) {
+        if (mouseElementSelected) {
             mouseComponent.setSelected(false);
         }
 

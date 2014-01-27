@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
@@ -59,6 +60,12 @@ public class RepeatStatement extends Statement {
         for (int i = 0; i < intValue; i++) {
             body.execute(simulationScope, moduleName);
         }
+    }
+
+    @Override
+    public VNode getCopy() {
+        return new RepeatStatement((Expression)condition.getCopy(), 
+                (Statement)body.getCopy(), line, column);
     }
     
 }

@@ -14,14 +14,18 @@ import java.util.Vector;
  *
  * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
  */
-public class ModuleScope {
+public class InstanceModuleScope {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
     private HashMap<String, VariableInfo> declaredVariables;
     Vector<InitialBlock> initialBlocks = new Vector<InitialBlock>();
     Vector<AlwaysBlock> alwaysBlocks = new Vector<AlwaysBlock>();
     //</editor-fold>
+    
+    public HashMap<String, VariableInfo> getVariables() {
+        return declaredVariables;
+    }
 
-    public ModuleScope() {
+    public InstanceModuleScope() {
         declaredVariables = new HashMap<String, VariableInfo>();
     }
     
