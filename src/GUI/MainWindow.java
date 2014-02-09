@@ -9,6 +9,7 @@ import DataStructures.ModuleRepository;
 import GUI.Design.DesignWindow;
 import GUI.Simulation.DrilldownWindow;
 import GUI.Simulation.SimulationWindow;
+import GUI.Watcher.Watches;
 import Simulation.Configuration;
 import java.awt.Dimension;
 import java.beans.PropertyVetoException;
@@ -27,7 +28,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class MainWindow extends javax.swing.JFrame {
 
@@ -53,6 +54,12 @@ public class MainWindow extends javax.swing.JFrame {
         Loader.getInstance().loadModules();
         moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
         Collections.sort(moduleNames);
+    }
+    
+    public void addWatcherWindow(Watches watcher) {
+        if (watcher.getDesktopPane() == this.desktopPane)
+            return;
+        this.desktopPane.add(watcher);
     }
     
     public void addDrilldownWindow(DrilldownWindow one) {        
@@ -217,9 +224,9 @@ public class MainWindow extends javax.swing.JFrame {
             
             NodeList program = doc.getElementsByTagName("behaviour");
             if (program.getLength() == 0) {
-                openSimulationFile(doc);
+                openSimulationFile(doc, target.getName());
             } else {
-                openDesignFile(doc);
+                openDesignFile(doc, target.getName());
             }
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
@@ -235,17 +242,19 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_changeSettingsMenuActionPerformed
 
     
-    private void openSimulationFile(Document document) {
+    private void openSimulationFile(Document document, String fileName) {
         SimulationWindow simulationWindow = new SimulationWindow(this);
         simulationWindow.loadFromDocument(document);
+        simulationWindow.addFilenameToTitle(fileName);
         
         this.desktopPane.add(simulationWindow);
         simulationWindow.setVisible(true);
     }
     
-    private void openDesignFile(Document document) {
+    private void openDesignFile(Document document, String fileName) {
         DesignWindow designWindow = new DesignWindow(this);
         designWindow.loadFromDocument(document);
+        designWindow.addFilenameToTitle(fileName);
         
         this.desktopPane.add(designWindow);
         designWindow.setVisible(true);

@@ -8,11 +8,29 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleInfo {
     private String moduleName;
     private ArrayList<PortInfo> portsInfo;
+    private boolean leaf = false;
+    private String source;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public boolean isLeaf() {
+        return leaf;
+    }
+
+    public void setIsLeaf(boolean isLeaf) {
+        this.leaf = isLeaf;
+    }
 
     public ArrayList<PortInfo> getPortsInfo() {
         return portsInfo;

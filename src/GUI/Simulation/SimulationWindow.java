@@ -14,9 +14,11 @@ import Simulation.Elements.Gates.OrGate;
 import Simulation.Elements.Gates.XnorGate;
 import Simulation.Elements.Gates.XorGate;
 import Simulation.Elements.Inputs.LogicInput;
-import Simulation.Elements.LogicOutput;
+import Simulation.Elements.Inputs.MultiBitsInput;
 import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Multiplexor;
+import Simulation.Elements.Outputs.LogicOutput;
+import Simulation.Elements.Outputs.MultiBitsOutput;
 import Simulation.Elements.Wire;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,11 +43,11 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimulationWindow extends javax.swing.JInternalFrame implements ActionListener {
     SimulationCanvas canvas;
-    String[] extraParams2 = new String[] { "2" };
+    String[] extraParams2 = new String[] { "2" };    
     
     /**
      * Creates new form SimulationWindow
@@ -83,6 +85,13 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         
         canvas = new SimulationCanvas(parent);
         this.setContentPane(canvas);
+        
+        this.setLocation((parent.getWidth() - getWidth()) / 2, 
+                (parent.getHeight() - getHeight()) / 2);
+    }
+    
+    public void addFilenameToTitle(String fileName) {
+        setTitle(getTitle() + " - " + fileName);
     }
     
     public final JMenuItem makeMenuItem(String moduleName) {
@@ -154,19 +163,25 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         }
     }
     
-    public void closeLogic() {
+    public boolean closeLogic() {        
         if (canvas.containsElements()) {
             int result = JOptionPane.showConfirmDialog(this, "Would you like to save before exit?",
                     "Exiting", JOptionPane.YES_OPTION);
+            if (result == -1)
+                return false;
             if (result == JOptionPane.YES_OPTION) {
                 saveComponent();
+                canvas.destroyAll();
                 dispose();
             } else if (result == JOptionPane.NO_OPTION) {
+                canvas.destroyAll();
                 dispose();
             }
         } else {
+            canvas.destroyAll();
             dispose();
         }
+        return true;
     }
 
     /**
@@ -194,8 +209,11 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         inverterMenu = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
         lInputMenu = new javax.swing.JMenuItem();
+        multiBitsMenu = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
+        jMenu6 = new javax.swing.JMenu();
         lOuputMenu = new javax.swing.JMenuItem();
+        multiBitsOutputMenu = new javax.swing.JMenuItem();
         addMultMenu = new javax.swing.JMenuItem();
         modulesMenu = new javax.swing.JMenu();
         addWireMenu = new javax.swing.JMenuItem();
@@ -318,18 +336,38 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         });
         jMenu5.add(lInputMenu);
 
+        multiBitsMenu.setText("MultiBits Input");
+        multiBitsMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                multiBitsMenuActionPerformed(evt);
+            }
+        });
+        jMenu5.add(multiBitsMenu);
+
         jMenuItem6.setText("Clock");
         jMenu5.add(jMenuItem6);
 
         jMenu3.add(jMenu5);
 
-        lOuputMenu.setText("Add Logic Output");
+        jMenu6.setText("Add Output");
+
+        lOuputMenu.setText("Logic Output");
         lOuputMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 lOuputMenuActionPerformed(evt);
             }
         });
-        jMenu3.add(lOuputMenu);
+        jMenu6.add(lOuputMenu);
+
+        multiBitsOutputMenu.setText("MultiBits Output");
+        multiBitsOutputMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                multiBitsOutputMenuActionPerformed(evt);
+            }
+        });
+        jMenu6.add(multiBitsOutputMenu);
+
+        jMenu3.add(jMenu6);
 
         addMultMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.ALT_MASK));
         addMultMenu.setText("Add Multiplexor");
@@ -384,7 +422,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 436, Short.MAX_VALUE)
+            .addGap(0, 444, Short.MAX_VALUE)
         );
 
         pack();
@@ -453,8 +491,17 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     }//GEN-LAST:event_inverterMenuActionPerformed
 
     private void formInternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosing
-        closeLogic();
+        if (closeLogic())
+            System.out.println("close it");
     }//GEN-LAST:event_formInternalFrameClosing
+
+    private void multiBitsMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multiBitsMenuActionPerformed
+        setAddingElementInfo(MultiBitsInput.class.getName(), new String[] { "z" });
+    }//GEN-LAST:event_multiBitsMenuActionPerformed
+
+    private void multiBitsOutputMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multiBitsOutputMenuActionPerformed
+        setAddingElementInfo(MultiBitsOutput.class.getName(), new String[] { "z" });
+    }//GEN-LAST:event_multiBitsOutputMenuActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAndMenu;
@@ -472,6 +519,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
+    private javax.swing.JMenu jMenu6;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
@@ -480,6 +528,8 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenuItem lInputMenu;
     private javax.swing.JMenuItem lOuputMenu;
     private javax.swing.JMenu modulesMenu;
+    private javax.swing.JMenuItem multiBitsMenu;
+    private javax.swing.JMenuItem multiBitsOutputMenu;
     private javax.swing.JMenuItem pauseContinueMenu;
     private javax.swing.JMenuItem saveMenu;
     // End of variables declaration//GEN-END:variables

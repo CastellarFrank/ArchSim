@@ -44,6 +44,19 @@ module TEST(input RegWrite,
 		Read_Data2 &lt;= registers[Read_Addr2];
 		regValue = registers[regNumber];
 	 end
+	 
+	 initial
+	 begin
+		 RegWrite = 1;
+		 Write_Data = 3'b111;
+		 Write_Addr = 3'o010;
+		 registers[0] = 5;
+		 registers[1] = 3'h00A;
+		 registers[2] = 3'b111;
+		 Read_Addr2 = 1;
+		 //regNumber = 1;
+		 //clk = 1;
+	 end
 
 endmodule
 </behaviour></module>

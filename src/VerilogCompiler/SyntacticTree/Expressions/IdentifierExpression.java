@@ -13,7 +13,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class IdentifierExpression extends PrimaryExpression {
     String identifier;
@@ -60,6 +60,7 @@ public class IdentifierExpression extends PrimaryExpression {
             case ERROR: return null;
             case INTEGER: 
             case ARRAY:
+            case VECTOR:
                 return simulationScope.getVariableValue(moduleName, identifier);
             default: return null;
         }
@@ -67,7 +68,9 @@ public class IdentifierExpression extends PrimaryExpression {
 
     @Override
     public VNode getCopy() {
-        return new IdentifierExpression(identifier, line, column);
+        IdentifierExpression copy = new IdentifierExpression(identifier, line, column);
+        copy.type = type;
+        return copy;
     }
     
 }

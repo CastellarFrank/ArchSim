@@ -11,7 +11,7 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class EditionDialog extends javax.swing.JDialog {
 
@@ -63,7 +63,7 @@ public class EditionDialog extends javax.swing.JDialog {
             EditInfo info = editInfos.elementAt(i);
             for (JComponent component : info.components) {
                 if (component instanceof JTextField) {
-                    info.value = Integer.parseInt(((JTextField)component).getText());
+                    info.value = ((JTextField)component).getText();
                     break;
                 }
             }

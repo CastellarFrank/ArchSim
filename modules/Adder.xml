@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="Adder" textX="327" textY="124" type="GUI.Design.ChipRectangule" x="304" x2="369" y="112" y2="145"><param>Adder</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="a" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="b" position="2"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="c" position="2"/></element></elements><behaviour>module Adder(input reg a, input reg b, output reg c);
+	assign c = a + b;
+endmodule</behaviour></module>

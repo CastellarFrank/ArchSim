@@ -13,7 +13,7 @@ import VerilogCompiler.Utils.StringUtils;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class UnaryExpression extends Expression {
     Operator expressionOperator;

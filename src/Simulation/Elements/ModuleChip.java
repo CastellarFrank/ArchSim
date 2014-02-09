@@ -7,7 +7,13 @@ package Simulation.Elements;
 import DataStructures.ModuleInfo;
 import DataStructures.ModuleRepository;
 import Exceptions.ArchException;
+import Exceptions.ModuleDesignNotFoundException;
+import GUI.ContainerPanel;
 import Simulation.Configuration;
+import VerilogCompiler.Interpretation.Convert;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
+import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
+import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -22,7 +28,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleChip extends BaseElement {
 
@@ -34,8 +40,11 @@ public class ModuleChip extends BaseElement {
     int sizeX, sizeY, textX, textY;
     int southPosition = 0, northPosition = 0, westPosition = 0, eastPosition = 0;
     int maxLengthPortEast = 0, maxLengthPortWest = 0, width = 0;
-    String moduleName;
+    String moduleName, moduleInstanceId;
+    ModuleDecl moduleInstance;
     ArrayList<Integer> voltageSources = new ArrayList<Integer>();
+    
+    public boolean isInitialized = false;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -65,8 +74,19 @@ public class ModuleChip extends BaseElement {
         sizeY = 4;
     }
 
+    @Override
+    public void setContainerPanel(ContainerPanel containerPanel) {
+        super.setContainerPanel(containerPanel);
+        moduleInstance = ModuleRepository.getInstance().getModuleLogic(moduleName);
+        moduleInstanceId = ModuleInstanceIdGenerator.generate();
+        InstanceModuleScope scope = moduleInstance.getScope();
+        this.containerPanel.simulationScope.register(moduleInstanceId, scope);
+    }   
+
     private void newInit(String moduleName) {
         Element element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
+        if (element == null)
+            throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
         this.moduleName = element.getAttribute("moduleName");
         textX = Integer.parseInt(element.getAttribute("textX"));
         textY = Integer.parseInt(element.getAttribute("textY"));
@@ -129,6 +149,11 @@ public class ModuleChip extends BaseElement {
 
     //</editor-fold>    
 
+
+    public String getModuleInstanceId() {
+        return moduleInstanceId;
+    }
+    
     @Override
     public void stampVoltages() {
         for (int i = 0; i < getPostCount(); i++) {
@@ -252,7 +277,22 @@ public class ModuleChip extends BaseElement {
 
     @Override
     public void doStep() {
-        
+        if (!isInitialized) {
+            moduleInstance.initModule(containerPanel.simulationScope, moduleInstanceId);
+            isInitialized = true;
+        }
+        int postCount = getPostCount();
+        for (int i = 0; i < postCount; i++) {
+            if (ports[i].isOutput)
+                continue;
+            String portName = ports[i].portName;
+            Integer value = Convert.voltageToLogicValue(ports[i].voltage);
+            containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).setValue(value);
+        }
+        moduleInstance.executeModule(containerPanel.simulationScope, moduleInstanceId);
+        containerPanel.simulationScope.executeScheduledNonBlockingAssigns();
+        if (Configuration.DEBUG_MODE)
+            System.out.println(containerPanel.simulationScope.dumpToString(moduleInstanceId));
     }
 
     @Override
@@ -357,9 +397,10 @@ public class ModuleChip extends BaseElement {
                 } else {
                 }
             }
-
+            g.setColor(BaseElement.textColor);
             g.drawString(portName, textPosition.x - dispX,
                     textPosition.y + fm.getAscent() / 2);
+            g.setColor(old);
             drawPost(g, post.x, post.y, jointIndex);
         }
     }

@@ -6,7 +6,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class EventExpression extends Expression{
 

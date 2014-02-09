@@ -12,7 +12,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class RegVariable extends VNode {
     String identifier;
@@ -45,7 +45,11 @@ public class RegVariable extends VNode {
         return String.format("%s %s", identifier, 
                 range==null?"":range.toString());
     }
-
+    
+    public boolean isArray(){
+        return range != null;
+    }
+    
     @Override
     public ExpressionType validateSemantics() {
         if (range != null) {

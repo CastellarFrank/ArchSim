@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 import Exceptions.UnsuportedFeature;
 import Simulation.Configuration;
 import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.MathHelper;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Concatenation extends LValue {
     ArrayList<Expression> expressionList;
@@ -54,10 +55,9 @@ public class Concatenation extends LValue {
 
     @Override
     public void setValue(SimulationScope simulationScope, 
-            String moduleName,Object value) {
-        String binaryRep = Integer.toBinaryString((Integer)value);
+            String moduleName, Object value) {
         if (Configuration.DEBUG_MODE)
-            System.out.println("binary number " + binaryRep);
+            System.out.println("binary number " + value);
         int intValue = (Integer) value;
         int currentPos = 31;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
@@ -82,6 +82,28 @@ public class Concatenation extends LValue {
             copies.add((Expression)expression.getCopy());
         }
         return new Concatenation(expressionList, line, column);
+    }
+
+    @Override
+    public void setValue(InstanceModuleScope scope, ExpressionValue value) {
+        String binaryRep = Integer.toBinaryString((Integer)value.value);
+        if (Configuration.DEBUG_MODE)
+            System.out.println("binary number " + binaryRep);
+        int intValue = (Integer) value.value;
+        int currentPos = 31;
+        for (int i = expressionList.size() - 1; i >= 0; i--) {
+            if (currentPos < 0) break;
+            IdentifierExpression expression = (IdentifierExpression) expressionList.get(i);
+            if (expression == null)
+                throw new UnsuportedFeature("concatenation members can only be identifiers");
+            ExpressionValue loc = scope.getVariableValue(expression.getIdentifier());
+            long min = currentPos - loc.bits + 1;
+            if (min < 0) min = 0;
+            long portion = MathHelper.getBitSelection(intValue, min, currentPos);
+            loc.value = new Long(portion);
+            
+            currentPos -= min - 1;
+        }
     }
     
 }

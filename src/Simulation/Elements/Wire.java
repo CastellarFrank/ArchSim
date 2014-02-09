@@ -5,17 +5,22 @@
 package Simulation.Elements;
 
 import Exceptions.ArchException;
+import GUI.Edit.EditInfo;
 import java.awt.Graphics;
 import java.awt.Point;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Wire extends BaseElement {
 
+    int from, to;
+    
     public Wire(int x, int y) {
         super(x, y);
     }
@@ -51,6 +56,29 @@ public class Wire extends BaseElement {
     @Override
     public void doStep() {
         
+    }
+    
+    @Override
+    public EditInfo getEditInfo(int n) {
+        if (n == 0)
+            return new EditInfo("from" , 0.0, 0, 0).
+                    addComponent(new JLabel("From: ")).
+                    addComponent(new JTextField(from + "", 10));
+        if (n == 1)
+            return new EditInfo("to" , 0.0, 0, 0).
+                    addComponent(new JLabel("     To: ")).
+                    addComponent(new JTextField(to + "", 10));
+        return null;
+    }
+    
+    @Override
+    public void setEditValue(int n, EditInfo editInfo) {
+        if (n == 0) {
+            from = Integer.parseInt(editInfo.value);
+        }
+        if (n == 1) {
+            to = Integer.parseInt(editInfo.value);
+        }
     }
 
     @Override

@@ -9,7 +9,7 @@ import VerilogCompiler.SyntacticTree.PortDirection;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class PortInfo {
     public PortPosition position;

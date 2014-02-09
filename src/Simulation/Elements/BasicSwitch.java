@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class BasicSwitch extends BaseElement {
 

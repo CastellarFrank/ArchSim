@@ -4,18 +4,26 @@
  */
 package GUI.Design;
 
+import Simulation.Configuration;
 import java.awt.GridLayout;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import rsyntaxtextarea.TextEditorDemo;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class VerilogPanel extends JPanel {
     RSyntaxTextArea textArea;
@@ -45,6 +53,16 @@ public class VerilogPanel extends JPanel {
         //add(errorArea);
         
         layout = (GridLayout) getLayout();
+    }
+    
+    public void refreshTheme() {
+        try {
+            Theme theme = Theme.load(new FileInputStream(new File(Configuration.THEME)));
+            theme.apply(textArea);
+        } catch (IOException ex) {
+            if (Configuration.DEBUG_MODE)
+                Logger.getLogger(TextEditorDemo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void showBottomPanel() {        
@@ -88,4 +106,8 @@ public class VerilogPanel extends JPanel {
             textArea.setText(program);
     }
     
+    public void setReadOnly(boolean readOnly) {
+        if (textArea != null)
+            textArea.setEditable(!readOnly);
+    }
 }

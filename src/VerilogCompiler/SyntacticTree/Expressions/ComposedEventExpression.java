@@ -11,7 +11,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ComposedEventExpression extends EventExpression{
     EventExpression left;
@@ -66,10 +66,13 @@ public class ComposedEventExpression extends EventExpression{
         ExpressionValue l = left.evaluate(simulationScope, moduleName);
         ExpressionValue r = right.evaluate(simulationScope, moduleName);
         
-        Integer leftValue = Integer.parseInt(l.toString());
-        Integer rightValue = Integer.parseInt(r.toString());
+        if (l.xValue || r.xValue || l.zValue || r.zValue)
+            return new ExpressionValue();
         
-        return new ExpressionValue(leftValue == 1 || rightValue == 1, 1);
+        Integer leftValue = Integer.parseInt(l.value.toString());
+        Integer rightValue = Integer.parseInt(r.value.toString());
+        
+        return new ExpressionValue(leftValue == 1 || rightValue == 1 ? 1: 0, 1);
     }
 
     @Override

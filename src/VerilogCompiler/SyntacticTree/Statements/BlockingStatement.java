@@ -13,7 +13,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class BlockingStatement extends Statement {
     LValue lvalue;
@@ -55,6 +55,7 @@ public class BlockingStatement extends Statement {
     
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
+        System.out.println(expression);
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         lvalue.setValue(simulationScope, moduleName, value.value);
     }

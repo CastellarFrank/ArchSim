@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.CaseItems;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class NumCaseItem extends CaseItem {
     ArrayList<Expression> expressionList;
@@ -64,10 +65,10 @@ public class NumCaseItem extends CaseItem {
     }
 
     @Override
-    public ArrayList<Integer> getValue(SimulationScope scope, String moduleName) {
-        ArrayList<Integer> values = new ArrayList<Integer>();
+    public ArrayList<ExpressionValue> getValue(SimulationScope scope, String moduleName) {
+        ArrayList<ExpressionValue> values = new ArrayList<ExpressionValue>();
         for (Expression expression : expressionList) {
-            values.add(Integer.parseInt(expression.evaluate(scope, moduleName).value.toString()));
+            values.add(expression.evaluate(scope, moduleName));
         }
         return values;
     }

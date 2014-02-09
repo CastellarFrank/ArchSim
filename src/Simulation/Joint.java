@@ -8,7 +8,7 @@ import java.util.Vector;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Joint {
     public int coordX, coordY;

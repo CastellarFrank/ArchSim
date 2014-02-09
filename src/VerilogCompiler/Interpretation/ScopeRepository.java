@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ScopeRepository {
     
@@ -28,15 +28,10 @@ public class ScopeRepository {
     }
     
     public InstanceModuleScope getCopyOfScope(String moduleName) {
-        InstanceModuleScope newScope = new InstanceModuleScope();
-        InstanceModuleScope reference = getInstanceScope(moduleName);
-        HashMap<String, VariableInfo> variables = reference.getVariables();
+        if (!scopesByModule.containsKey(moduleName))
+            return null;
         
-        for (Map.Entry<String, VariableInfo> entry : variables.entrySet()) {
-            newScope.registerVariable(entry.getKey(), entry.getValue().getCopy());
-        }
-        
-        return newScope;
+        return scopesByModule.get(moduleName).getCopy();
     }
     
     private ScopeRepository() {

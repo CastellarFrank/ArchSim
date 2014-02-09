@@ -4,13 +4,14 @@
  */
 package VerilogCompiler.SyntacticTree.CaseItems;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SyntacticTree.VNode;
 import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class CaseItem extends VNode {
 
@@ -21,7 +22,10 @@ public abstract class CaseItem extends VNode {
     @Override
     public abstract String toString();
     
-    public abstract ArrayList<Integer> getValue(SimulationScope simulationScope, String moduleName);
+    public abstract ArrayList<ExpressionValue> getValue(SimulationScope simulationScope, String moduleName);
     
     public abstract void execute(SimulationScope simulationScope, String moduleName);
+    
+    @Override
+    public abstract VNode getCopy();
 }

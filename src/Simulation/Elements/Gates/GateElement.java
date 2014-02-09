@@ -18,7 +18,7 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class GateElement extends BaseElement {
 
@@ -216,8 +216,7 @@ public abstract class GateElement extends BaseElement {
     @Override
     public void setEditValue(int n, EditInfo editInfo) {
         if (n == 0) {
-            setInputCount((int)editInfo.value);
-            
+            setInputCount(Integer.parseInt(editInfo.value));            
         }
     }
 

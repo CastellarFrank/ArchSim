@@ -10,7 +10,7 @@ import VerilogCompiler.SyntacticTree.Expressions.Expression;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Range extends VNode {
     Expression minValue;

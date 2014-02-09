@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class IndexExpression extends PrimaryExpression {
     String identifier;
@@ -68,8 +68,8 @@ public class IndexExpression extends PrimaryExpression {
         }
         if (SemanticCheck.getInstance().variableIsArray(identifier) &&
                 SemanticCheck.getInstance().variableIsVector(identifier))
-            return ExpressionType.VECTOR;
-        return ExpressionType.INTEGER;
+            return type = ExpressionType.VECTOR;
+        return type = ExpressionType.INTEGER;
     }
     
     @Override
@@ -84,11 +84,12 @@ public class IndexExpression extends PrimaryExpression {
                 
                 int realMin = adjustPositionToSize(minLimit, simulationScope, moduleName);
                 
-                ArrayList<Integer> values = (ArrayList<Integer>) complete.value;
+                Object[] values = (Object[]) complete.value;
                 
-                if (realMin < 0 || realMin > values.size())
+                if (realMin < 0 || realMin > values.length)
                     /*ERROR!!!*/
-                return new ExpressionValue(values.get(realMin), 0);
+                    return null;
+                return new ExpressionValue(values[realMin], 0);
             default: return null;
         }
     }
@@ -110,6 +111,8 @@ public class IndexExpression extends PrimaryExpression {
 
     @Override
     public VNode getCopy() {
-        return new IndexExpression(identifier, (Expression)expression.getCopy(), line, column);
+        IndexExpression copy = new IndexExpression(identifier, (Expression)expression.getCopy(), line, column);
+        copy.type = type;
+        return copy;
     }
 }

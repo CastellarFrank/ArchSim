@@ -8,7 +8,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class VNode {
     public int line, column;

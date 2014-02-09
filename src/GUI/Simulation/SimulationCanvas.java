@@ -9,31 +9,32 @@ import GUI.ContainerPanel;
 import GUI.Edit.EditionDialog;
 import GUI.MainWindow;
 import GUI.MouseMode;
+import GUI.Watcher.Selector.WatchesSelector;
+import GUI.Watcher.Watches;
+import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Elements.BasicSwitch;
-import Simulation.Elements.Gates.AndGate;
-import Simulation.Elements.Gates.NandGate;
-import Simulation.Elements.Gates.OrGate;
-import Simulation.Elements.Gates.XnorGate;
-import Simulation.Elements.Gates.XorGate;
-import Simulation.Elements.Inputs.LogicInput;
 import Simulation.Elements.ModuleChip;
-import Simulation.Elements.Multiplexor;
-import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Cursor;
+import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimulationCanvas extends ContainerPanel implements
         MouseListener, MouseMotionListener, KeyListener {
@@ -42,41 +43,43 @@ public class SimulationCanvas extends ContainerPanel implements
     public String draggingClass;
     public String[] draggingExtraParams;
     public boolean deleting = false;
-    public SimulationScope simulationScope;
+    public JPopupMenu pop;
+    
+    Watches watcherWindow;   
+    
+    ArrayList<DrilldownWindow> drilldowns;
+    
+    public WatchesTableModel getWatchingVariables() {
+        return watchesTableModel;
+    }
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public SimulationCanvas(MainWindow parent) {
+    public SimulationCanvas(MainWindow parentP) {
         super();
         try {
             init();
 
-            this.parent = parent;
+            this.parent = parentP;
+            
+            pop = new JPopupMenu("Add Watch");
+            JMenuItem menu = new JMenuItem(new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String modId = ((ModuleChip) mouseComponent).getModuleInstanceId();
+                    WatchesSelector selector = new WatchesSelector(parent, watcherWindow, watchesTableModel, simulationScope, modId, parent, true);
+                    selector.setVisible(true);
+                }
+            });
+            menu.setText("Add Watch");
+            pop.add(menu);
+            this.add(pop);
 
             addMouseListener(this);
             addMouseMotionListener(this);
             addKeyListener(this);
-
-            AndGate andGate = new AndGate(80, 100, 150, 100, null);
-            //addElement(andGate);
-
-            OrGate orGate = new XorGate(170, 190, 250, 190, null);
-            //addElement(orGate);
-
-            orGate = new XnorGate(170, 120, 250, 120, null);
-            //addElement(orGate);
-
-            orGate = new OrGate(170, 250, 250, 250, null);
-            //addElement(orGate);
-
-            andGate = new NandGate(80, 150, 150, 150, null);
-            //addElement(andGate);
-
-            LogicInput input = new LogicInput(170, 250, 250, 250, new String[]{"true"});
-            //addElement(input);
-
-            Multiplexor mult = new Multiplexor(170, 100, 300, 100, new String[]{"6"});
-            //mult.setInputCount(10);
-            //addElement(mult);   
+            
+            drilldowns = new ArrayList<DrilldownWindow>();
         } catch (ArchException ex) {
             Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -109,6 +112,7 @@ public class SimulationCanvas extends ContainerPanel implements
             if (mouseComponent instanceof ModuleChip) {
                 ModuleChip chip = (ModuleChip) mouseComponent;
                 DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
+                drilldowns.add(window);
                 parent.addDrilldownWindow(window);
             } else {
                 if (mouseComponent.getEditInfo(0) != null) {
@@ -151,6 +155,16 @@ public class SimulationCanvas extends ContainerPanel implements
                 currentMouseMode = MouseMode.POST_DRAG;
             } else if ((exModifiers & MouseEvent.ALT_DOWN_MASK) != 0) {
                 currentMouseMode = MouseMode.MOVE_ALL;
+            }
+        }
+        if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+            if (mouseComponent != null && mouseComponent instanceof ModuleChip) {                
+                pop.show(e.getComponent(), e.getX(), e.getY());  
+                if (watchesTableModel == null)
+                    watchesTableModel = new WatchesTableModel(simulationScope);
+                if (watcherWindow == null)
+                    watcherWindow = new Watches(this);
+                return;
             }
         }
 
@@ -203,7 +217,7 @@ public class SimulationCanvas extends ContainerPanel implements
             case SELECT:
                 if (mouseComponent == null) {
                     selectionOnArea(e.getX(), e.getY());
-                } else {
+                } else if (newElementBeenDrawn == null){
                     currentMouseMode = MouseMode.SELECT_DRAG;
                     success = dragSelected(e.getX(), e.getY());
                 }
@@ -221,9 +235,10 @@ public class SimulationCanvas extends ContainerPanel implements
                 break;
         }
 
-        if (newElementBeenDrawn != null) {
+        if (newElementBeenDrawn != null ) {
             deleting = false;
-            newElementBeenDrawn.movePoint2(snapGrid(e.getX()), snapGrid(e.getY()));
+            if (!(newElementBeenDrawn instanceof ModuleChip))
+                newElementBeenDrawn.movePoint2(snapGrid(e.getX()), snapGrid(e.getY()));
         }
 
         dragging = true;
@@ -298,6 +313,10 @@ public class SimulationCanvas extends ContainerPanel implements
             boolean anyRemoved = false;
             for (int i = 0; i < elements.size(); i++) {
                 if (elements.get(i).isSelected()) {
+                    BaseElement element = elements.get(i);
+                    if (element instanceof ModuleChip) {
+                        simulationScope.unregister(((ModuleChip)element).getModuleInstanceId());
+                    }
                     elements.remove(i);
                     anyRemoved = true;
                     i = i -1;
@@ -315,5 +334,20 @@ public class SimulationCanvas extends ContainerPanel implements
     @Override
     public void keyReleased(KeyEvent e) {
     }
+
+    @Override
+    public void updatePreview(Graphics g) {
+        super.updatePreview(g);
+        if (watcherWindow != null && !watcherWindow.isSelected()) 
+            watcherWindow.refreshModel();
+        
+    }
     
+    public void destroyAll() {
+        if (watcherWindow != null)
+            watcherWindow.dispose();
+        for (DrilldownWindow window : drilldowns) {
+            window.dispose();
+        }
+    }
 }

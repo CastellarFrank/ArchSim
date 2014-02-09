@@ -24,13 +24,14 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Configuration {
     public static String MODULES_DIRECTORY_PATH = "modules/";
     public static String MODULE_METADATA_DIRECTORY_PATH = "modulesMetadata/";
     public static final String CONFIGURATION_FILE_DIRECTORY_PATH = "configs/";
     public static final String CONFIG_FILE_NAME = "globalSettings.xml";
+    public static String THEME = "themes/default-alt.xml";
     public static Boolean COMPILE_ON_SAVE = true;
     
     public static Double LOGIC_1_VOLTAGE = 2.5;

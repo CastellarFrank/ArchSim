@@ -9,18 +9,27 @@ import javax.swing.JComponent;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 
 public class EditInfo {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
     public String name, text;
-    public double value, minval, maxval;
+    public String value;
+    public double minval, maxval;
     
     ArrayList<JComponent> components;
     //</editor-fold>
     
     public EditInfo(String name, double currentValue, double minValue, double maxValue) {
+	this.name = name;
+	this.value = currentValue + "";
+	this.minval = minValue;
+        this.maxval = maxValue;
+        components = new ArrayList<JComponent>();
+    }
+    
+    public EditInfo(String name, String currentValue, double minValue, double maxValue) {
 	this.name = name;
 	this.value = currentValue;
 	this.minval = minValue;

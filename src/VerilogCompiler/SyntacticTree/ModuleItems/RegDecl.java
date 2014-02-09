@@ -4,11 +4,14 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.DataType;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import VerilogCompiler.SyntacticTree.Expressions.SimpleNumberExpression;
 import VerilogCompiler.SyntacticTree.Others.RegVariable;
 import VerilogCompiler.SyntacticTree.Range;
 import VerilogCompiler.SyntacticTree.VNode;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class RegDecl extends ModuleItem {
     Range range;
@@ -53,10 +56,14 @@ public class RegDecl extends ModuleItem {
 
     @Override
     public ExpressionType validateSemantics() {
-        boolean isArray = false;
+        boolean isVector = false;
+        int size = 0;
         if (range != null) {
             range.validateSemantics();
-            isArray = true;
+            size = (int)((SimpleNumberExpression)range.getMinValue()).getUnsignedNumber();
+            size -= (int)((SimpleNumberExpression)range.getMaxValue()).getUnsignedNumber();
+            size = Math.abs(size) + 1;
+            isVector = true;
         }
         
         for (RegVariable regVariable : regVariableList) {
@@ -66,7 +73,13 @@ public class RegDecl extends ModuleItem {
             } else {
                 VariableInfo varInfo = new VariableInfo();
                 varInfo.type = DataType.VARIABLE;
-                varInfo.isArray = isArray;
+                varInfo.isVector = isVector;
+                varInfo.isArray = regVariable.isArray();
+                if (isVector) {
+                    Object[] values = new Object[size];
+                    ExpressionValue value = new ExpressionValue(values, 0);
+                    varInfo.value = value;
+                }
                 SemanticCheck.getInstance().registerVariable(regVariable.getIdentifier(), varInfo);
             }
             regVariable.validateSemantics();
@@ -75,7 +88,7 @@ public class RegDecl extends ModuleItem {
     }
 
     @Override
-    public void executeModuleItem() {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         /*TODO*/
     }
 

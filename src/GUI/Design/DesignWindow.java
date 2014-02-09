@@ -4,6 +4,7 @@
  */
 package GUI.Design;
 
+import Exceptions.ModuleDesignNotFoundException;
 import GUI.ErrorPanel;
 import GUI.MainWindow;
 import Simulation.Configuration;
@@ -14,6 +15,7 @@ import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import VerilogCompiler.SyntacticTree.Others.Port;
 import VerilogCompiler.VerilogLexer;
 import VerilogCompiler.parser;
+import java.awt.Graphics;
 import java.io.File;
 import java.io.StringReader;
 import java.util.logging.Level;
@@ -39,7 +41,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class DesignWindow extends javax.swing.JInternalFrame {
 
@@ -48,6 +50,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     PreviewPanel preview;
     ErrorPanel errors;
     String fileName = "";
+    boolean modified = false;
 
     /**
      * Creates new form DesignWindow
@@ -95,6 +98,29 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
         setCustomTitle();  
+        
+        this.setLocation((parent.getWidth() - getWidth()) / 2, 
+                (parent.getHeight() - getHeight()) / 2);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {        
+        if (!modified && source != null && source.hasBeenModified) {
+            addFilenameToTitle(fileName + "*");
+            modified = true;
+            update(g);
+        }
+        super.paintComponent(g);
+    }
+    
+    public void refreshTheme() {
+        this.source.refreshTheme();
+    }
+    
+    public void addFilenameToTitle(String fileName) {
+        this.fileName = fileName;
+        String sTitle = "Component Design Window";
+        setTitle(sTitle + " - " + fileName);
     }
 
     private void setCustomTitle() {
@@ -143,6 +169,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         if (choose != JFileChooser.APPROVE_OPTION)
             return;
         File target = fileChooser.getSelectedFile();
+        String tempFilename = target.getName().replaceFirst(".xml", "");
+        removeModuleInfo(tempFilename);
         
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -170,8 +198,16 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             tfe.printStackTrace();
         }
         source.hasBeenModified = false;
+        addFilenameToTitle(tempFilename);
+        modified = false;
         if (Configuration.COMPILE_ON_SAVE) 
             saveModuleMetadata(target.getName());
+    }
+    
+    public void removeModuleInfo(String fileName) {
+        File file = new File(fileName);
+        if (file.exists())
+            file.delete();
     }
     
     public void saveModuleMetadata(String fileName) {
@@ -224,6 +260,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     public void loadFromDocument(Document document) {
         NodeList behaviour = document.getElementsByTagName("behaviour");
         source.setProgram(behaviour.item(0).getTextContent());
+        source.hasBeenModified = false;
         
         NodeList elements = document.getElementsByTagName("element");
         
@@ -243,10 +280,18 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             int x2 = Integer.parseInt(element.getAttribute("x2"));
             int y2 = Integer.parseInt(element.getAttribute("y2"));
             
-            BaseElement baseElement = preview.constructElement(type, x, y, x2, y2, stringExtraParams);
-            ModuleDecl module = compileWithoutSemantics();
-            ((ChipRectangule) baseElement).init(module.getPortList(), element);
-            preview.addElement(baseElement);
+            try {
+                BaseElement baseElement = preview.constructElement(type, x, y, x2, y2, stringExtraParams);
+                ModuleDecl module = compileWithoutSemantics();
+                if (!(baseElement instanceof ChipRectangule)) {
+                    System.out.println("Error! It shouldn't be anything but a ChipRectangule");
+                    continue;
+                }
+                ((ChipRectangule) baseElement).init(module.getPortList(), element);
+                preview.addElement(baseElement);
+            } catch (ModuleDesignNotFoundException ex) {
+                Logger.getLogger(DesignWindow.class.getName()).log(Level.WARNING, null, ex);
+            }
         }
     }
 

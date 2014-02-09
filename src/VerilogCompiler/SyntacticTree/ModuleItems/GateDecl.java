@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.GateType;
 import VerilogCompiler.SyntacticTree.Others.GateInstance;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class GateDecl extends ModuleItem {
     GateType gateType;
@@ -57,7 +58,7 @@ public class GateDecl extends ModuleItem {
     }
 
     @Override
-    public void executeModuleItem() {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         /*TODO*/
     }
 

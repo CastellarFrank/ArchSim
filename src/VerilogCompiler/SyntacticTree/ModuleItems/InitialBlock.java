@@ -4,6 +4,9 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.Convert;
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Others.SensitiveList;
@@ -12,7 +15,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class InitialBlock extends ModuleItem {
     SensitiveList sensitiveList;
@@ -48,13 +51,21 @@ public class InitialBlock extends ModuleItem {
     }
 
     @Override
-    public void executeModuleItem() {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         /*TODO*/
+        if (sensitiveList == null || Convert.getBoolean(sensitiveList.evaluate(simulationScope, moduleInstanceId))) {
+            statement.execute(simulationScope, moduleInstanceId);
+        } else {
+            System.out.println("DEBUG: " + "initial block avoided.");
+        }
     }
 
     @Override
     public VNode getCopy() {
-        return new InitialBlock((SensitiveList)sensitiveList.getCopy(), 
+        SensitiveList listCopy = null;
+        if (sensitiveList != null)
+            listCopy = (SensitiveList)sensitiveList.getCopy();
+        return new InitialBlock(listCopy, 
                 (Statement)statement.getCopy(), line, column);
     }
 }

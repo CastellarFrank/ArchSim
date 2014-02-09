@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -13,7 +15,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class RangeLValue extends LValue {
     String identifier;
@@ -71,6 +73,11 @@ public class RangeLValue extends LValue {
     @Override
     public VNode getCopy() {
         return new RangeLValue(identifier, (Range)range.getCopy(), line, column);
+    }
+
+    @Override
+    public void setValue(InstanceModuleScope scope, ExpressionValue value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

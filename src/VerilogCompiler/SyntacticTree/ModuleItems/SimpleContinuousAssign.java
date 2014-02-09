@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Statements.Assignment;
 import VerilogCompiler.SyntacticTree.VNode;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimpleContinuousAssign extends ContinuousAssign {
 
@@ -35,8 +36,10 @@ public class SimpleContinuousAssign extends ContinuousAssign {
     }
 
     @Override
-    public void executeModuleItem() {
-        /*TODO*/
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        for (Assignment assignment : assignmentList) {
+            assignment.scheduleAssign(simulationScope, moduleInstanceId);
+        }
     }
 
     @Override

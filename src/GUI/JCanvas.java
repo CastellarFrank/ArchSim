@@ -9,7 +9,7 @@ import javax.swing.JComponent;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class JCanvas extends JComponent {
 

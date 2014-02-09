@@ -14,7 +14,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class AlwaysBlock extends ModuleItem {
     SensitiveList sensitiveList;
@@ -58,9 +58,10 @@ public class AlwaysBlock extends ModuleItem {
     }
 
     @Override
-    public void executeModuleItem() {
-        super.executeModuleItem();
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        super.executeModuleItem(simulationScope, moduleInstanceId);
         /*TODO*/
+        execute(simulationScope, moduleInstanceId);
     }
 
     @Override

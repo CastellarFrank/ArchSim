@@ -6,7 +6,7 @@ package Exceptions;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class UnsuportedFeature extends ArchException{
 

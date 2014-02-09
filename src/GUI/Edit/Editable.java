@@ -6,7 +6,7 @@ package GUI.Edit;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public interface Editable {
     EditInfo getEditInfo(int n);

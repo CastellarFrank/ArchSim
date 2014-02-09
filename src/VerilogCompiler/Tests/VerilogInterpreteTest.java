@@ -4,6 +4,9 @@
  */
 package VerilogCompiler.Tests;
 
+import DataStructures.Loader;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
+import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -18,7 +21,7 @@ import java_cup.runtime.Symbol;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class VerilogInterpreteTest {
 
@@ -26,8 +29,11 @@ public class VerilogInterpreteTest {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        Loader.getInstance().loadModules();
+        
         try {
-            File text = new File("tmp/ALU.xml");
+            File text = new File("tmp/Register_File.v");
             FileInputStream stream  = new FileInputStream(text);
             byte[] data = new byte[(int)text.length()];
             
@@ -47,10 +53,16 @@ public class VerilogInterpreteTest {
                 System.out.println(module.toString());
                 module.validateSemantics();
                 
-                SimulationScope scope = new SimulationScope();
-                if (!ErrorHandler.getInstance().hasErrors()) {    
-                    
-                    module.executeModule("");
+                InstanceModuleScope scope = SemanticCheck.getInstance().variablesToScope();                
+                SimulationScope simScope = new SimulationScope();
+                String moduleInstanceId = ModuleInstanceIdGenerator.generate();
+                simScope.register(moduleInstanceId, scope);
+                
+                if (!ErrorHandler.getInstance().hasErrors()) {     
+                    module.initModule(simScope, moduleInstanceId);
+                    module.executeModule(simScope, moduleInstanceId);
+                    simScope.executeScheduledNonBlockingAssigns();
+                    System.out.println(simScope.dumpToString(moduleInstanceId));
                 }
                 else
                     System.err.println(ErrorHandler.getInstance().getErrors());

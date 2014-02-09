@@ -17,16 +17,16 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleRepository {
 
-    private HashMap<String, ModuleInfo> modulesRepository;
+    private HashMap<String, ModuleInfo> moduleInfos;
     private HashMap<String, ModuleDecl> modulesLogic;
     private HashMap<String, Element> designPrototypes;
 
     private ModuleRepository() {
-        modulesRepository = new HashMap<String, ModuleInfo>();
+        moduleInfos = new HashMap<String, ModuleInfo>();
         designPrototypes = new HashMap<String, Element>();
         modulesLogic = new HashMap<String, ModuleDecl>();
     }
@@ -37,15 +37,15 @@ public class ModuleRepository {
     }
 
     public void registerModule(String moduleName, ModuleInfo info) {
-        modulesRepository.put(moduleName, info);
+        moduleInfos.put(moduleName, info);
     }
 
     public boolean moduleIsRegistered(String moduleName) {
-        return modulesRepository.containsKey(moduleName);
+        return moduleInfos.containsKey(moduleName);
     }
 
     public ModuleInfo getModuleInfo(String moduleName) {
-        return modulesRepository.get(moduleName);
+        return moduleInfos.get(moduleName);
     }
     
     public ModuleDecl getModuleLogic(String moduleName) {
@@ -76,7 +76,7 @@ public class ModuleRepository {
     }
     
     public Set<String> getModuleNames() {
-        return modulesRepository.keySet();
+        return moduleInfos.keySet();
     }
     
     public static ModuleRepository getInstance() {

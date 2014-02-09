@@ -11,7 +11,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class PosEdgeEventExpression extends EventExpression {
     Expression expression;
@@ -42,8 +42,12 @@ public class PosEdgeEventExpression extends EventExpression {
     }
 
     @Override
-    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
-        ExpressionValue newValue = expression.evaluate(simulationScope, moduleName);
+    public ExpressionValue evaluate(SimulationScope simulationScope, String moduleInstanceId) {
+        ExpressionValue newValue = expression.evaluate(simulationScope, moduleInstanceId);
+        
+        if (newValue.xValue || newValue.zValue)
+            return new ExpressionValue();
+        
         Integer nValue = Integer.parseInt(newValue.value.toString());
         Integer oldValue = Integer.parseInt(previousValue.value.toString());
         
@@ -57,7 +61,9 @@ public class PosEdgeEventExpression extends EventExpression {
 
     @Override
     public VNode getCopy() {
-        return new PosEdgeEventExpression((Expression)expression.getCopy(), line, column);
+        PosEdgeEventExpression copy = new PosEdgeEventExpression((Expression)expression.getCopy(), line, column);
+        copy.type = type;
+        return copy;
     }
     
 }

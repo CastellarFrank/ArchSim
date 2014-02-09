@@ -17,7 +17,7 @@ import VerilogCompiler.Utils.StringUtils;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Port extends VNode {
     PortDirection direction;

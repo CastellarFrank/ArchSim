@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleInstantiation extends ModuleItem {
     String identifier;
@@ -56,14 +57,19 @@ public class ModuleInstantiation extends ModuleItem {
             return ExpressionType.ERROR;
         }
         for (ModuleInstance moduleInstance : moduleInstanceList) {
+            moduleInstance.setModuleName(identifier);
             moduleInstance.validateSemantics();
         }
         return null;
     }
 
     @Override
-    public void executeModuleItem() {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         /*TODO*/
+        super.executeModuleItem(simulationScope, moduleInstanceId);
+        for (ModuleInstance moduleInstance : moduleInstanceList) {
+            moduleInstance.executeModuleInstance(simulationScope, moduleInstanceId);
+        }
     }
 
     @Override

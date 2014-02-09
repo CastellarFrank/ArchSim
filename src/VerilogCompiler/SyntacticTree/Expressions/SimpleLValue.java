@@ -4,6 +4,8 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -12,7 +14,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimpleLValue extends LValue {
 
@@ -60,12 +62,18 @@ public class SimpleLValue extends LValue {
     }
 
     @Override
-    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setValue(SimulationScope simulationScope, String instanceModuleId, Object value) {
+        ExpressionValue address = simulationScope.getVariableValue(instanceModuleId, identifier);
+        address.setValue(value);
     }
 
     @Override
     public VNode getCopy() {
         return new SimpleLValue(identifier, line, column);
+    }
+
+    @Override
+    public void setValue(InstanceModuleScope scope, ExpressionValue value) {
+        scope.setVariableValue(identifier, value);
     }
 }

@@ -21,7 +21,7 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class BaseElement implements Editable {
 
@@ -30,11 +30,9 @@ public abstract class BaseElement implements Editable {
     public static Color highSignalColor, lowSignalColor,
             unknownSignalColor, highImpedanceSignalColor;
     public static Color textColor;
-    public static Font font;
-    public ContainerPanel containerPanel;
-    //public SimulationCanvas simulationCanvas;
+    public static Font font;    
     public static final double pi = 3.14159265358979323846;
-    public double voltages[];
+    
     //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="Instance Members">
@@ -46,9 +44,12 @@ public abstract class BaseElement implements Editable {
     public double dn, dpx1, dpy1;
     public Point point1, point2, lead1, lead2;
     public boolean noDiagonal;
+    public ContainerPanel containerPanel;
     public double current, curcount;
     private boolean isMovable = true;
     private String id;
+    public double voltages[];
+    public String binaryValues[];
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -106,6 +107,7 @@ public abstract class BaseElement implements Editable {
     public void allocNodes() {
         joints = new int[getPostCount() + getInternalNodeCount()];
         voltages = new double[getPostCount() + getInternalNodeCount()];
+        binaryValues = new String[getPostCount() + getInternalNodeCount()];
     }
 
     public int getPostCount() {
@@ -166,6 +168,14 @@ public abstract class BaseElement implements Editable {
 
     @Override
     public void setEditValue(int n, EditInfo ei) {
+    }
+    
+    public void setBinaryValue(int index, String value) {
+        binaryValues[index] = value;
+    }
+    
+    public void setContainerPanel(ContainerPanel containerPanel) {
+        this.containerPanel = containerPanel;
     }
 
     public void setVoltageColor(Graphics g, double voltage) {
@@ -591,8 +601,9 @@ public abstract class BaseElement implements Editable {
             textX -= w;
         }
 
-        g.drawString(text, textX, (int) (y2 + fm.getAscent() / 4.0));
-        adjustBbox(textX, y - fm.getAscent() / 2, oldTextX, y + fm.getAscent() / 2);
+        g.drawString(text, textX, (int) (y2 + fm.getAscent() / 2.0));
+        adjustBbox(textX, y - fm.getAscent() / 2, 
+                oldTextX, y + fm.getAscent() / 2 + fm.getDescent());
     }
 
     public void drawCenteredText(Graphics g, String s, int x, int y, boolean cx) {

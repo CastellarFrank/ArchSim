@@ -11,7 +11,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimpleEventExpression extends EventExpression {
     Expression expression;
@@ -42,6 +42,10 @@ public class SimpleEventExpression extends EventExpression {
     @Override
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
         ExpressionValue exp = expression.evaluate(simulationScope, moduleName);
+        
+        if (exp.xValue || exp.zValue)
+            return new ExpressionValue();
+        
         Integer intValue = Integer.parseInt(exp.value.toString());
         
         return new ExpressionValue(intValue == 0 ? 0 : 1, 1);

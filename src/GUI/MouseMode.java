@@ -6,7 +6,7 @@ package GUI;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public enum MouseMode {
     POST_DRAG,

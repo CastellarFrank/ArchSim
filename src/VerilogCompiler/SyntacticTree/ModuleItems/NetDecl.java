@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.DataType;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class NetDecl extends ModuleItem {
     NetType type;
@@ -87,7 +88,7 @@ public class NetDecl extends ModuleItem {
     }
 
     @Override
-    public void executeModuleItem() {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         /*TODO*/
     }
 

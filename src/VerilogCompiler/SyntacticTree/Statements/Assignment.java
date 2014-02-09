@@ -5,13 +5,14 @@
 package VerilogCompiler.SyntacticTree.Statements;
 
 import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
 import VerilogCompiler.SyntacticTree.Expressions.LValue;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Assignment {
     int line, column;
@@ -60,8 +61,13 @@ public class Assignment {
         return new Assignment(lvalue, expression, line, column);
     }
     
-    public void execute(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
-        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
-        lvalue.setValue(simulationScope, moduleName, value.value);
+    public void execute(SimulationScope simulationScope, String moduleInstanceId) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleInstanceId);
+        lvalue.setValue(simulationScope, moduleInstanceId, value.value);
+    }
+    
+    public void scheduleAssign(SimulationScope simulationScope, String moduleInstanceId) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleInstanceId);
+        simulationScope.getScope(moduleInstanceId).scheduleVariableAssign(lvalue, value);
     }
 }

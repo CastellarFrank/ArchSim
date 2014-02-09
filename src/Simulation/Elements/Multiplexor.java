@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Multiplexor extends BaseElement {
 
@@ -282,7 +282,7 @@ public class Multiplexor extends BaseElement {
     @Override
     public void setEditValue(int n, EditInfo editInfo) {
         if (n == 0) {
-            setInputCount((int)editInfo.value);
+            setInputCount(Integer.parseInt(editInfo.value));
         }
     }
     

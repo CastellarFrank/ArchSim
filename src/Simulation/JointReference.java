@@ -8,7 +8,7 @@ import Simulation.Elements.BaseElement;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class JointReference {
     public BaseElement element;

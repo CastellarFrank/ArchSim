@@ -5,6 +5,7 @@ import java_cup.runtime.*;
 %%
 
 %class VerilogLexer
+%public
 
 %line
 %column
@@ -49,6 +50,8 @@ decimal_number	= {sign}{unsigned_number}|{size}{decimal_base}{unsigned_number}
 octal_number	= {size}{octal_base}{octal_digit}(_|{octal_digit})*
 binary_number	= {size}{binary_base}{binary_digit}(_|{binary_digit})*
 hex_number	= {size}{hex_base}{hex_digit}(_|{hex_digit})*
+
+hex_simple      = {hex_digit}(_|{hex_digit})*
 
 number          = {decimal_number}|{octal_number}|{binary_number}|{hex_number}
 
@@ -161,7 +164,7 @@ edge_symbol	= [pn]
 
     {unsigned_number}    { return symbol(sym.UNSIGNED_NUMBER, new Long(yytext())); }
 
-
+    {hex_simple}         { return symbol(sym.HEX_NUMBER, new String(yytext())); }
 }
 
 

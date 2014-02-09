@@ -6,14 +6,16 @@ package GUI.Simulation;
 
 import DataStructures.ModuleInfo;
 import DataStructures.ModuleRepository;
+import GUI.Design.VerilogPanel;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class DrilldownWindow extends javax.swing.JInternalFrame {
     ModuleInfo moduleInfo;
     DrilldownPanel canvas;
+    VerilogPanel program;
     /**
      * Creates new form DrilldownPanel
      */
@@ -22,8 +24,17 @@ public class DrilldownWindow extends javax.swing.JInternalFrame {
         this.moduleInfo = moduleInfo;
         initComponents();
         
-        canvas = new DrilldownPanel(moduleInfo);
-        setContentPane(canvas);
+        if (moduleInfo.isLeaf()) {
+            program = new VerilogPanel();
+            this.add(program);
+            
+            program.setProgram(moduleInfo.getSource());
+            program.setVisible(true);            
+        } else {
+            canvas = new DrilldownPanel(moduleInfo);
+            setContentPane(canvas);
+        }
+        pack();
         setVisible(true);
     }
     
@@ -32,8 +43,18 @@ public class DrilldownWindow extends javax.swing.JInternalFrame {
         this.moduleInfo = ModuleRepository.getInstance().getModuleInfo(moduleName);
         initComponents();
         
-        canvas = new DrilldownPanel(moduleInfo);
-        setContentPane(canvas);
+        if (moduleInfo.isLeaf()) {
+            program = new VerilogPanel();
+            program.setProgram(moduleInfo.getSource());
+            program.setVisible(true);
+            program.setReadOnly(true);
+            setContentPane(program);
+        } else {
+            canvas = new DrilldownPanel(moduleInfo);
+            setContentPane(canvas);
+        }
+        pack();
+        
         setVisible(true);
     }
 

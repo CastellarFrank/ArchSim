@@ -4,13 +4,14 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SimpleNumberExpression extends NumberExpression {
     long unsignedNumber;
@@ -40,7 +41,7 @@ public class SimpleNumberExpression extends NumberExpression {
 
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
-        return new ExpressionValue(unsignedNumber, 32);
+        return new ExpressionValue(Convert.decimalToBinary((int)unsignedNumber), 32);
     }
 
     @Override

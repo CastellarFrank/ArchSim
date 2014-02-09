@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Statements;
 
+import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class CaseStatement extends Statement {
     Expression expression;
@@ -65,12 +66,29 @@ public class CaseStatement extends Statement {
     public void execute(SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         for (CaseItem caseItem : caseItemList) {
-            ArrayList<Integer> result = caseItem.getValue(simulationScope, moduleName);
+            ArrayList<ExpressionValue> result = caseItem.getValue(simulationScope, moduleName);
             if (result == null) { //default
                 caseItem.execute(simulationScope, moduleName);
-            } else if (result.contains(Integer.parseInt(value.value.toString()))) {
-                caseItem.execute(simulationScope, moduleName);
-                break;
+            } else {
+                for (ExpressionValue expressionValue : result) {
+                    if (value == null) {
+                        if (expressionValue != null &&
+                                (expressionValue.xValue == value.xValue || 
+                                expressionValue.zValue == value.zValue)) {
+                            caseItem.execute(simulationScope, moduleName);
+                            break;
+                        }
+                    } else {
+                        if (expressionValue != null && 
+                                (expressionValue.xValue && value.xValue ||
+                                expressionValue.zValue && value.zValue ||
+                                value.value != null && 
+                                Convert.getInteger(expressionValue) == Convert.getInteger(value))) {
+                            caseItem.execute(simulationScope, moduleName);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

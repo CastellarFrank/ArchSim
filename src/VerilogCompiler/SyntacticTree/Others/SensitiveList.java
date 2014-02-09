@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SensitiveList extends Expression {
 
@@ -82,10 +82,14 @@ public class SensitiveList extends Expression {
         int result = 1;
         for (EventExpression eventExpression : items) {
             ExpressionValue val = eventExpression.evaluate(simulationScope, moduleName);
-            Integer intValue = Integer.parseInt(val.value.toString());
-            if (intValue != 1) {
+            if (val.xValue || val.zValue) {
                 result = 0;
-                break;
+            } else {
+                Integer intValue = Integer.parseInt(val.value.toString());
+                if (intValue != 1) {
+                    result = 0;
+                    break;
+                }
             }
         }
         return new ExpressionValue(result, 1);

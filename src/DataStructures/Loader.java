@@ -5,6 +5,8 @@
 package DataStructures;
 
 import Simulation.Configuration;
+import VerilogCompiler.CompilationHelper;
+import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import VerilogCompiler.SyntacticTree.PortDirection;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -19,7 +21,7 @@ import org.w3c.dom.NodeList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Loader {
 
@@ -85,23 +87,71 @@ public class Loader {
         for (File file : modules) {
             if (Configuration.DEBUG_MODE) {
                 System.out.println("Loading module... " + file.getAbsolutePath());
-            }
-            ModuleInfo moduleInfo = getModuleInfo(file.getName());
-            if (moduleInfo != null) {
-                ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
+            }            
+            String source = getSourceCode(file.getName());
+            ModuleDecl parsed = getModuleLogic(source);
+            if (parsed != null || true) {
+                ModuleInfo moduleInfo = getModuleInfo(file.getName());
+                moduleInfo.setSource(source);
+                
+                if (!parsed.hasModuleInstances()) 
+                    moduleInfo.setIsLeaf(true);
+                
+                if (moduleInfo != null) {
+                    ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
+                    ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
+                } else {
+                    System.out.println("Module Info is null");
+                }
+            } else {
+                System.out.println("ModuleDecl is null. Possibly parse error");
             }
         }
     }
+    
+    public String getSourceCode(String xmlFileName) {
+        File moduleFile = new File(Configuration.MODULES_DIRECTORY_PATH + 
+                "/" + xmlFileName);
+        if (!moduleFile.exists())
+            return null;
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(moduleFile);
 
-    public ModuleInfo getModuleInfo(String fileNameXml) {
+            doc.normalize();
+            
+            NodeList program = doc.getElementsByTagName("behaviour");
+            if (program.getLength() != 1) {
+                /*ERROR*/
+                return null;
+            }
+            String source = ((Element)program.item(0)).getTextContent();
+            return source;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+    
+    public ModuleDecl getModuleLogic(String source) {
+        try {
+            return CompilationHelper.parseWithSemantics(source);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
+    }
+
+    public ModuleInfo getModuleInfo(String xmlFileName) {
         File moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
-                + "/" + fileNameXml);
+                + "/" + xmlFileName);
 
         if (!moduleInfoFile.exists()) {
             return null;
         }
 
-        String fileName = fileNameXml.replaceFirst(".xml", "");
+        String fileName = xmlFileName.replaceFirst(".xml", "");
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();

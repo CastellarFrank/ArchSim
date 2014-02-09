@@ -13,7 +13,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class NonBlockingStatement extends Statement {
     LValue lvalue;
@@ -54,8 +54,9 @@ public class NonBlockingStatement extends Statement {
     }
 
     @Override
-    public void execute(SimulationScope simulationScope, String moduleName) {
-        ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+    public void execute(SimulationScope simulationScope, String moduleInstanceId) {
+        ExpressionValue value = expression.evaluate(simulationScope, moduleInstanceId);
+        simulationScope.getScope(moduleInstanceId).scheduleVariableAssign(lvalue, value);
         /*TODO: Registrar la asignacion para futura ejecucion, 
          * solo se evalua la expression para tener el valor listo*/
     }

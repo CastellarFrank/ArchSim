@@ -4,17 +4,19 @@
  */
 package GUI;
 
+import GUI.Design.DesignWindow;
 import Simulation.Configuration;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.JFileChooser;
+import javax.swing.JInternalFrame;
 import javax.swing.Timer;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SettingsEditor extends javax.swing.JInternalFrame {
 
@@ -39,6 +41,20 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         
         this.modulesDirectoryTF.setText(mods.getAbsolutePath());
         this.modulesMetaDirectoryTF.setText(metas.getAbsolutePath());
+    }
+    
+    public String indexToTheme(int index) {
+        if (index == 0)
+            return "themes/default.xml";
+        else if (index == 1)
+            return "themes/dark.xml";
+        else if (index == 2)
+            return "themes/vs.xml";
+        else if (index == 3)
+            return "themes/eclipse.xml";
+        else if (index == 4)
+            return "themes/idea.xml";
+        return "";
     }
 
     /**
@@ -73,6 +89,8 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         pauseTF = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         strongConCB = new javax.swing.JCheckBox();
+        jLabel7 = new javax.swing.JLabel();
+        themeCB = new javax.swing.JComboBox();
         saveButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         status = new javax.swing.JLabel();
@@ -156,30 +174,16 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
 
         strongConCB.setText("Keep elements connected on drag");
 
+        jLabel7.setText("Theme");
+
+        themeCB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Default", "Dark", "Visual Studio", "Eclipse", "Idea" }));
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(46, 46, 46)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lvalue1TF, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel4)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -214,6 +218,30 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                                                 .addComponent(debugModeCB)
                                                 .addGap(18, 18, 18)
                                                 .addComponent(asNumbersCB)))))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addGap(46, 46, 46)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lvalue1TF, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jLabel5)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel6)))
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addGap(18, 18, 18))
         );
@@ -254,7 +282,11 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel6)))
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(25, 25, 25))
         );
 
         tabs.addTab("General Settings", jPanel1);
@@ -295,7 +327,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
@@ -331,6 +363,15 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         Configuration.KEEP_CONNECTED_ON_DRAG = strongConCB.isSelected();
         
         Configuration.saveToFile(Configuration.CONFIG_FILE_NAME);
+        Configuration.THEME = indexToTheme(themeCB.getSelectedIndex());
+        
+        JInternalFrame[] frames = this.getDesktopPane().getAllFrames();
+        for (JInternalFrame jInternalFrame : frames) {
+            if (jInternalFrame instanceof DesignWindow) {
+                ((DesignWindow)jInternalFrame).refreshTheme();
+            }
+        }
+        
         status.setText("Settings successfully saved.");
         status.setForeground(Color.GREEN.darker());
         
@@ -366,6 +407,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
@@ -381,5 +423,6 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private javax.swing.JLabel status;
     private javax.swing.JCheckBox strongConCB;
     private javax.swing.JTabbedPane tabs;
+    private javax.swing.JComboBox themeCB;
     // End of variables declaration//GEN-END:variables
 }

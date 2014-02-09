@@ -44,7 +44,7 @@ parser code {:
    
 /* ------------Declaration of Terminals and Non Terminals Section----------- */
    
-terminal String     IDENTIFIER;
+terminal String     IDENTIFIER, HEX_NUMBER;
 terminal            BIT_AND, BIT_XOR, BIT_XNOR, BIT_OR, BIT_NOR, BIT_NAND, LOG_AND, LOG_OR;
 terminal            REL_EQ, REL_NOTEQ;
 terminal            REL_GRT, REL_LST, REL_GRTEQ, REL_LSTEQ;
@@ -660,7 +660,7 @@ NUMBER ::=  UNSIGNED_NUMBER:num
             {: RESULT = new SimpleNumberExpression(num, numleft, numright); :}
 	    |UNSIGNED_NUMBER:size BASE:base UNSIGNED_NUMBER:num
             {: RESULT = new SizedNumberExpression(size, base, num, sizeleft, sizeright); :}
-            |UNSIGNED_NUMBER:size BASE:base IDENTIFIER:hexNum
+            |UNSIGNED_NUMBER:size BASE:base HEX_NUMBER:hexNum
             {: RESULT = new SizedHexNumberExpression(size, base, hexNum, sizeleft, sizeright); :}
 	    |BASE:base UNSIGNED_NUMBER:num
             {: RESULT = new SizedNumberExpression(32, base, num, baseleft, baseright); :}

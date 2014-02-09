@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Base;
@@ -12,7 +13,7 @@ import VerilogCompiler.Utils.StringUtils;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SizedNumberExpression extends NumberExpression {
     long size;
@@ -64,7 +65,9 @@ public class SizedNumberExpression extends NumberExpression {
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
     String moduleName) {
-        return new ExpressionValue(value, size);
+        Long longValue = Long.parseLong(value + "", Convert.baseToRadix(base));
+        ExpressionValue val = new ExpressionValue(Long.toBinaryString(longValue), size);
+        return val;
     }
 
     @Override

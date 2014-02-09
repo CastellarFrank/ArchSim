@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class VariableInfo {
     public boolean isArray = false;
@@ -20,6 +20,10 @@ public class VariableInfo {
     public DataType type;
     public ArrayList<DataType> acceptedTypes = new ArrayList<DataType>();
     public ExpressionValue value;
+
+    public VariableInfo() {
+        value = new ExpressionValue();
+    }    
     
     public int MSB = 0, LSB = 0;
     
@@ -36,6 +40,15 @@ public class VariableInfo {
     }
     
     public VariableInfo getCopy() {
-        return null;
+        VariableInfo copy = new VariableInfo();
+        copy.isArray = isArray;
+        copy.isVector = isVector;
+        copy.isNumeric = isNumeric;
+        copy.isModuleInstance = isModuleInstance;
+        copy.isBigEndian = isBigEndian;
+        copy.acceptedTypes = acceptedTypes;
+        copy.value = value.getCopy();
+        
+        return copy;
     }
 }

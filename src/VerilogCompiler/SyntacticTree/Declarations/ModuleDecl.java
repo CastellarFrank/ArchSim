@@ -4,8 +4,13 @@
  */
 package VerilogCompiler.SyntacticTree.Declarations;
 
+import VerilogCompiler.Interpretation.InstanceModuleScope;
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.ModuleItems.GateDecl;
+import VerilogCompiler.SyntacticTree.ModuleItems.InitialBlock;
+import VerilogCompiler.SyntacticTree.ModuleItems.ModuleInstantiation;
 import VerilogCompiler.SyntacticTree.ModuleItems.ModuleItem;
 import VerilogCompiler.SyntacticTree.Others.Port;
 import VerilogCompiler.SyntacticTree.VNode;
@@ -14,7 +19,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleDecl extends Declaration {
     String moduleName;
@@ -26,7 +31,11 @@ public class ModuleDecl extends Declaration {
     int outputPortCount = 0;
     int inoutPortCount = 0;
     
+    boolean hasModuleInstances = false;
+    
     ArrayList<GateDecl> gates;
+    
+    InstanceModuleScope scope;
     
     //</editor-fold>
 
@@ -35,6 +44,22 @@ public class ModuleDecl extends Declaration {
         this.moduleName = moduleName;
         this.portList = portList;
         this.moduleItemList = moduleItemList;
+    }
+
+    public boolean hasModuleInstances() {
+        return hasModuleInstances;
+    }
+
+    public void setHasModuleInstances(boolean hasModuleInstances) {
+        this.hasModuleInstances = hasModuleInstances;
+    }
+
+    public InstanceModuleScope getScope() {
+        return scope;
+    }
+
+    public void setScope(InstanceModuleScope scope) {
+        this.scope = scope;
     }
 
 
@@ -98,15 +123,28 @@ public class ModuleDecl extends Declaration {
         }
         
         for (ModuleItem moduleItem : moduleItemList) {
+            if (moduleItem instanceof ModuleInstantiation)
+                hasModuleInstances = true;
             moduleItem.validateSemantics();
         }
+        
+        scope = SemanticCheck.getInstance().variablesToScope();
         
         return null;
     }
     
-    public void executeModule(String moduleInstanceId) {
+    public void initModule(SimulationScope simulationScope, String moduleInstanceId) {
         for (ModuleItem moduleItem : moduleItemList) {
-            moduleItem.executeModuleItem(/*moduleInstanceId*/);
+            if (moduleItem instanceof InitialBlock)
+                moduleItem.executeModuleItem(simulationScope, moduleInstanceId);
+        }
+    }
+    
+    public void executeModule(SimulationScope simulationScope, String moduleInstanceId) {
+        for (ModuleItem moduleItem : moduleItemList) {
+            if (moduleItem instanceof InitialBlock)
+                continue;
+            moduleItem.executeModuleItem(simulationScope, moduleInstanceId);
         }
     }
 
@@ -122,6 +160,16 @@ public class ModuleDecl extends Declaration {
         }
         ModuleDecl copy = new ModuleDecl(moduleName, portCopies, itemsCopies, line, column);
         copy.getGates();
+        
+        //<editor-fold defaultstate="collapsed" desc="Copy decorations">
+        copy.hasModuleInstances = this.hasModuleInstances;
+        copy.inoutPortCount = this.inoutPortCount;
+        copy.outputPortCount = this.outputPortCount;
+        copy.inputPortCount = this.inputPortCount;
+        
+        copy.scope = scope.getCopy();
+        //</editor-fold>
+        
         return copy;
     }
     

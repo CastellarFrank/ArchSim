@@ -10,7 +10,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class TernaryExpression extends Expression {
     Expression condition;
@@ -70,6 +70,8 @@ public class TernaryExpression extends Expression {
         
         Object value;
         long bits;
+        if (cond.xValue || cond.zValue) return new ExpressionValue();
+        
         if (Integer.parseInt(cond.value.toString()) == 1) {
             value = trueValue.value;
             bits = trueValue.bits;

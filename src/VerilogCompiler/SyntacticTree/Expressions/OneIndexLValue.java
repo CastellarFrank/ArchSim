@@ -4,6 +4,9 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.Convert;
+import VerilogCompiler.Interpretation.ExpressionValue;
+import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -12,7 +15,7 @@ import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class OneIndexLValue extends LValue {
     String identifier;
@@ -71,13 +74,21 @@ public class OneIndexLValue extends LValue {
     }
 
     @Override
-    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setValue(SimulationScope simulationScope, String moduleInstanceId, Object value) {
+        ExpressionValue index = expression.evaluate(simulationScope, moduleInstanceId);
+        int intIndex = Convert.getInteger(index);
+        ExpressionValue address = simulationScope.getScope(moduleInstanceId).getVariableValue(identifier);
+        ((Object[])address.value)[intIndex] = value;
     }
 
     @Override
     public VNode getCopy() {
         return new OneIndexLValue(identifier, (Expression)expression.getCopy(), line, column);
+    }
+
+    @Override
+    public void setValue(InstanceModuleScope scope, ExpressionValue value) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

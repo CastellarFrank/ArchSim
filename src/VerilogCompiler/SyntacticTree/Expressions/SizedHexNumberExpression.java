@@ -4,6 +4,7 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
+import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -13,7 +14,7 @@ import VerilogCompiler.Utils.StringUtils;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class SizedHexNumberExpression extends NumberExpression {
     long size;
@@ -74,7 +75,8 @@ public class SizedHexNumberExpression extends NumberExpression {
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
     String moduleName) {
-        return new ExpressionValue(evaluatedValue, size);
+        ExpressionValue val = new ExpressionValue(Long.toBinaryString(evaluatedValue), size);
+        return val;
     }
 
     @Override

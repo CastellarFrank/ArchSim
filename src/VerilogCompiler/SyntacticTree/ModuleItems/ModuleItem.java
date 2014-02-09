@@ -4,11 +4,12 @@
  */
 package VerilogCompiler.SyntacticTree.ModuleItems;
 
+import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SyntacticTree.VNode;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public abstract class ModuleItem extends VNode {
 
@@ -16,7 +17,7 @@ public abstract class ModuleItem extends VNode {
         super(line, column);
     }
     
-    public void executeModuleItem(/*String moduleInstanceId*/) {
+    public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         System.out.println("executing module item: " + this.getClass().getSimpleName());
     }
 }

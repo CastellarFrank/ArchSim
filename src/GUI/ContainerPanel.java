@@ -5,15 +5,16 @@
 package GUI;
 
 import DataStructures.CircuitGenerator;
+import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
-import Simulation.Elements.Gates.GateElement;
-import Simulation.Elements.Gates.NotGate;
 import Simulation.Elements.Wire;
 import Simulation.Joint;
 import Simulation.JointReference;
 import Simulation.RowInfo;
 import Simulation.RowType;
+import Simulation.SimulationFactory;
+import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -24,7 +25,7 @@ import org.w3c.dom.Element;
 
 /**
  *
- * @author Néstor A. Bermúdez <nestor.bermudez@unitec.edu>
+ * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ContainerPanel extends JCanvas {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
@@ -47,6 +48,9 @@ public class ContainerPanel extends JCanvas {
     public MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
     protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
     public boolean runnable = true, circuitNonLinear, converged;
+    public SimulationScope simulationScope;
+    
+    public WatchesTableModel watchesTableModel = null;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
@@ -118,7 +122,7 @@ public class ContainerPanel extends JCanvas {
                 x, y, x2, y2, extraParams);
 
         if (element != null) {
-            element.containerPanel = this;
+            element.setContainerPanel(this);
         }
 
         return element;
@@ -450,6 +454,7 @@ public class ContainerPanel extends JCanvas {
 
         //</editor-fold>
         //</editor-fold>       
+        
         mapForStamp = true;
         
         
@@ -630,8 +635,7 @@ public class ContainerPanel extends JCanvas {
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
                 
                 for (BaseElement baseElement : elements) {
-                    if (baseElement instanceof NotGate || baseElement instanceof GateElement) 
-                        baseElement.doStep();                    
+                    baseElement.doStep();                    
                 }                
                 if (isPaused) {
                     return;
@@ -723,6 +727,9 @@ public class ContainerPanel extends JCanvas {
 
         if (!isPaused) {
             runStep();
+            if (watchesTableModel != null) {
+                watchesTableModel.updateValues();
+            }
         }
         
         if (!isPaused) {
@@ -800,7 +807,7 @@ public class ContainerPanel extends JCanvas {
             return;
         }
         if (element.containerPanel == null) {
-            element.containerPanel = this;
+            element.setContainerPanel(this);
         }
         element.x = snapGrid(element.x);
         element.y = snapGrid(element.y);
@@ -819,6 +826,7 @@ public class ContainerPanel extends JCanvas {
     public ContainerPanel() {
         elements = new Vector<BaseElement>(50);
         joints = new Vector<Joint>(100);
+        simulationScope = SimulationFactory.createSimulationScope();
 
         BaseElement.defaultColor = Color.BLACK;
         BaseElement.whiteColor = Color.WHITE;
