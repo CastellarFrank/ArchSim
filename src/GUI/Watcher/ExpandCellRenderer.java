@@ -6,19 +6,16 @@ package GUI.Watcher;
 
 import java.awt.Component;
 import java.awt.Font;
-import javax.swing.JButton;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.JToggleButton;
 import javax.swing.table.TableCellRenderer;
-import sun.swing.table.DefaultTableCellHeaderRenderer;
 
 /**
  *
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
-public class ExpandCellRenderer extends JButton implements TableCellRenderer {
+public class ExpandCellRenderer extends JToggleButton implements TableCellRenderer {
 
-    DefaultTableCellRenderer renderer = new DefaultTableCellHeaderRenderer();
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -30,7 +27,7 @@ public class ExpandCellRenderer extends JButton implements TableCellRenderer {
                 return this;
             }
         }
-        return renderer;
+        return this;
         
     }
     

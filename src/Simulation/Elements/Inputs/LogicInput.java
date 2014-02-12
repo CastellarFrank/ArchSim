@@ -76,11 +76,15 @@ public class LogicInput extends BasicSwitch {
     @Override
     public void stampVoltages() {
         double newVoltage;
-        if (isOpen)
+        String multibit;
+        if (isOpen) { 
             newVoltage = Configuration.LOGIC_0_VOLTAGE;
-        else
+            multibit = "0";
+        } else {
             newVoltage = Configuration.LOGIC_1_VOLTAGE * 2;
-        containerPanel.stampVoltageSource(0, joints[0], voltageSourceReference, newVoltage);
+            multibit = "1";
+        }
+        containerPanel.stampVoltageSource(0, joints[0], voltageSourceReference, newVoltage, multibit);
     }
 
     @Override

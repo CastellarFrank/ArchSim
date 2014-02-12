@@ -45,7 +45,8 @@ public class Wire extends BaseElement {
 
     @Override
     public void stampVoltages() {
-        containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0);
+        containerPanel.stampVoltageSource(joints[0], joints[1], 
+                voltageSourceReference, 0, "z");
     }
     
     @Override
@@ -61,11 +62,11 @@ public class Wire extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("from" , 0.0, 0, 0).
+            return new EditInfo("from" , 0.0, 0, binaryValues[0].length() - 1).
                     addComponent(new JLabel("From: ")).
                     addComponent(new JTextField(from + "", 10));
         if (n == 1)
-            return new EditInfo("to" , 0.0, 0, 0).
+            return new EditInfo("to" , 0.0, 0, binaryValues[0].length() - 1).
                     addComponent(new JLabel("     To: ")).
                     addComponent(new JTextField(to + "", 10));
         return null;

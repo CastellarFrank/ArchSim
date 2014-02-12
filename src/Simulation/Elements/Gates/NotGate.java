@@ -97,7 +97,8 @@ public class NotGate extends BaseElement {
             output = Configuration.LOGIC_0_VOLTAGE;
         else
             output = Configuration.LOGIC_1_VOLTAGE * 2;
-        containerPanel.updateVoltageSource(voltageSourceReference, output);
+        String bit = voltages[0] >= Configuration.LOGIC_1_VOLTAGE ? "0" : "1";
+        containerPanel.updateVoltageSource(voltageSourceReference, output, bit);
     }
 
     @Override

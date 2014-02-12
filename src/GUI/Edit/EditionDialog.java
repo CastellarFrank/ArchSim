@@ -58,17 +58,29 @@ public class EditionDialog extends javax.swing.JDialog {
         }
     }
     
-    private void saveLogic() {
+    private boolean saveLogic() {
+        boolean accept = true;
         for (int i = 0; i < editInfos.size(); i++) {
             EditInfo info = editInfos.elementAt(i);
+            boolean valid = true;
             for (JComponent component : info.components) {
                 if (component instanceof JTextField) {
                     info.value = ((JTextField)component).getText();
+                    if (!info.accepts(info.value))
+                        valid = false;
                     break;
                 }
             }
-            editableElement.setEditValue(i, info);
+            if (valid) {
+                editableElement.setEditValue(i, info);                 
+            } else {
+                errormsg.setText("not valid values");
+                errormsg.setSize(100, errormsg.getHeight());
+                accept = false;
+                break;
+            }
         }
+        return accept;
     }
 
     /**
@@ -84,6 +96,7 @@ public class EditionDialog extends javax.swing.JDialog {
         jButton1 = new javax.swing.JButton();
         cancelMenu = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        errormsg = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(274, 212));
@@ -119,40 +132,50 @@ public class EditionDialog extends javax.swing.JDialog {
             }
         });
 
+        errormsg.setForeground(new java.awt.Color(102, 0, 0));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cancelMenu)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(errormsg)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cancelMenu)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(errormsg, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton1)
                         .addComponent(cancelMenu))
                     .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 8, Short.MAX_VALUE))
+                .addGap(0, 2, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        saveLogic();
-        getParent().repaint();
-        dispose();
+        if (saveLogic()) {
+            getParent().repaint();
+            dispose();
+        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void cancelMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelMenuActionPerformed
@@ -203,6 +226,7 @@ public class EditionDialog extends javax.swing.JDialog {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancelMenu;
+    private javax.swing.JLabel errormsg;
     private javax.swing.JButton jButton1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel mainPanel;

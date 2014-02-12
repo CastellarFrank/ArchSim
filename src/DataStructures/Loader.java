@@ -20,7 +20,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- *
+ * Singleton Class used to load settings and modules on application starting process.
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Loader {
@@ -28,11 +28,19 @@ public class Loader {
     private Loader() {
     }
 
+    /**
+     * <code>Loader</code>'s main method. It's used to load settings and modules
+     * in a single method call.
+     */
     public void setup() {
         loadSettings();
         loadModules();
     }
 
+    /**
+     * Loads the settings configuration file into <code>Configuration</code> class.
+     * So after this call, every configuration is available through <code>Configuration</code> class.
+     */
     public void loadSettings() {
         //Cargará los settings de un xml y las pondrá en Configuration
         File generalSettings = new File(Configuration.CONFIGURATION_FILE_DIRECTORY_PATH
@@ -80,6 +88,10 @@ public class Loader {
         }
     }
 
+    /**
+     * Loads every module definition file found on <code>Configuration.MODULES_DIRECTORY_PATH</code>
+     * into the <code>ModuleRepository</code> singleton class.
+     */
     public void loadModules() {
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
@@ -109,6 +121,11 @@ public class Loader {
         }
     }
     
+    /**
+     * Given a file name of a module definition file it returns its source code.
+     * @param xmlFileName name (extension included) of the XML file of a module definition.
+     * @return Verilog source used at definition time. 
+     */
     public String getSourceCode(String xmlFileName) {
         File moduleFile = new File(Configuration.MODULES_DIRECTORY_PATH + 
                 "/" + xmlFileName);
@@ -134,6 +151,11 @@ public class Loader {
         return null;
     }
     
+    /**
+     * It parses and returns a memory representation of a Verilog source code.
+     * @param source Verilog source code
+     * @return a <code>ModuleDecl</code> instance result of parsing the source code.
+     */
     public ModuleDecl getModuleLogic(String source) {
         try {
             return CompilationHelper.parseWithSemantics(source);
@@ -143,6 +165,11 @@ public class Loader {
         return null;
     }
 
+    /**
+     * It parses a XML file named <code>xmlFileName</code> its metadata.
+     * @param xmlFileName name (extension included) of the XML file of a module definition.
+     * @return <code>ModuleInfo</code> instance
+     */
     public ModuleInfo getModuleInfo(String xmlFileName) {
         File moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
                 + "/" + xmlFileName);
@@ -194,6 +221,10 @@ public class Loader {
         return null;
     }
 
+    /**
+     * Static method to get the instance of a <code>Loader</code> singleton
+     * @return the <code>Loader</code> singleton instance.
+     */
     public static Loader getInstance() {
         return LoaderHolder.INSTANCE;
     }

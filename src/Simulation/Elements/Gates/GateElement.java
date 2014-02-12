@@ -199,9 +199,11 @@ public abstract class GateElement extends BaseElement {
             f = !f;
         }
         lastOutput = f;
-        double output = f ? 5 : 0;
+        double output = f ? Configuration.LOGIC_1_VOLTAGE : Configuration.LOGIC_0_VOLTAGE;
+        String bit;
+        bit = f ? "1" : "0";
         //ContainerPanel.DEBUG("output " + output);
-        containerPanel.updateVoltageSource(voltageSourceReference, output);
+        containerPanel.updateVoltageSource(voltageSourceReference, output, bit);
     }
 
     @Override
@@ -222,7 +224,7 @@ public abstract class GateElement extends BaseElement {
 
     @Override
     public void movePoint(int n, int dx, int dy) {
-        if (n < inputCount) {
+        if (n == 0) {
             x += dx;
             y += dy;
         } else {

@@ -13,6 +13,7 @@ public class RowInfo {
     public boolean notUsedInMatrix;
     public double voltage;
     public RowType type;
+    public String multiBitsValue;
     
     public int rowEqualsToReference;
     public int mappedColumn, mappedRow;

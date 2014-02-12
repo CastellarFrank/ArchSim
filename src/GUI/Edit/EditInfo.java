@@ -41,4 +41,25 @@ public class EditInfo {
         components.add(component);
         return this;
     }
+    
+    public EditInfo setMinValue(int minValue) {
+        this.minval = minValue;
+        return this;
+    }
+    
+    public EditInfo setMaxValue(int maxValue) {
+        this.maxval = maxValue;
+        return this;
+    }
+    
+    public boolean accepts(String newValue) {
+        try {
+            Integer result = Integer.parseInt(newValue);
+            if (result <= maxval && result >= minval)
+                return true;
+            return false;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }

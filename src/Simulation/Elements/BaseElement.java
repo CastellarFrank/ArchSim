@@ -16,6 +16,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.lang.reflect.Array;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -108,6 +109,9 @@ public abstract class BaseElement implements Editable {
         joints = new int[getPostCount() + getInternalNodeCount()];
         voltages = new double[getPostCount() + getInternalNodeCount()];
         binaryValues = new String[getPostCount() + getInternalNodeCount()];
+        for (int i = 0; i < binaryValues.length; i++) {
+            binaryValues[i] = "z";
+        }
     }
 
     public int getPostCount() {
@@ -188,6 +192,14 @@ public abstract class BaseElement implements Editable {
                 g.setColor(BaseElement.lowSignalColor);
             }
         }
+    }
+    
+    public void setMultiBitsValue(int index, String value) {
+        if (index >= binaryValues.length || index < 0) {
+            System.out.println("out of range...");
+            return;
+        }
+        binaryValues[index] = value;
     }
 
     public void setVoltage(int voltageIndex, double newVoltage) {

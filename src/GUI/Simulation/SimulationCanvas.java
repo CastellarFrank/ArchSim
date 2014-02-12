@@ -4,6 +4,7 @@
  */
 package GUI.Simulation;
 
+import DataStructures.CircuitGenerator;
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
 import GUI.Edit.EditionDialog;
@@ -216,7 +217,7 @@ public class SimulationCanvas extends ContainerPanel implements
         switch (currentMouseMode) {
             case SELECT:
                 if (mouseComponent == null) {
-                    selectionOnArea(e.getX(), e.getY());
+                    selectElementsOnArea(e.getX(), e.getY());
                 } else if (newElementBeenDrawn == null){
                     currentMouseMode = MouseMode.SELECT_DRAG;
                     success = dragSelected(e.getX(), e.getY());

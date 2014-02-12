@@ -30,7 +30,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class was supposed to be used to generate a layout
+ * for an array of connected <code>BaseElement</code>.
+ * Now just use it to construct an element from it's class name.
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class CircuitGenerator {
@@ -48,6 +50,12 @@ public class CircuitGenerator {
         moduleItemToIdMapping = new HashMap<ModuleItem, String>();
     }
 
+    /**
+     * Get a list of graphic elements in a proper layout from a <code>ModuleDecl</code>
+     * @param module instance generated from a Verilog source code parsing.
+     * @return a list of <code>BaseElement</code>s that contain the
+     * graphic representation of the <code>module</code>
+     */
     public ArrayList<BaseElement> generateFromModule(ModuleDecl module) {
         ArrayList<BaseElement> elements = new ArrayList<BaseElement>();
 
@@ -121,6 +129,13 @@ public class CircuitGenerator {
     }
     
     //<editor-fold defaultstate="collapsed" desc="Construction Methods">
+    /**
+     * Constructs a <code>BaseElement</code> from given parameters.
+     * @param type the full class name of the element to be constructed.
+     * @param x starting x coordinate.
+     * @param y starting y coordinate.
+     * @return a <code>BaseElement</code> instantiated through reflection.
+     */
     public BaseElement constructElement(String type, int x, int y) {
         Class[] proto = new Class[2];
         proto[0] = proto[1] = int.class;
@@ -147,6 +162,16 @@ public class CircuitGenerator {
         return null;
     }
     
+    /**
+     * Constructs a <code>BaseElement</code> from given parameters.
+     * @param type the full class name of the element to be constructed.
+     * @param x starting x coordinate.
+     * @param y starting y coordinate.
+     * @param x2 ending x coordinate.
+     * @param y2 ending y coordinate.
+     * @param extraParams optional extra parameters like number of inputs on an AndGate.
+     * @return a <code>BaseElement</code> instantiated through reflection.
+     */
     public BaseElement constructElement(String type,
             int x, int y, int x2, int y2, String[] extraParams) {
         Class[] proto = new Class[5];
@@ -179,10 +204,18 @@ public class CircuitGenerator {
 
     //</editor-fold>
     
+    /**
+     * Get a unique identifier for elements;
+     * @return a new id usually used to identify a <code>BaseElement</code>
+     */
     public String getNewElementId() {
         return "baseElement" + (elementId++);
     }
 
+    /**
+     * Static method to get the instance of a <code>CircuitGenerator</code> singleton
+     * @return the <code>CircuitGenerator</code> singleton instance.
+     */
     public static CircuitGenerator getInstance() {
         return CircuitGeneratorHolder.INSTANCE;
     }

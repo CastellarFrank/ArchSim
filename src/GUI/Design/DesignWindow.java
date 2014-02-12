@@ -4,6 +4,7 @@
  */
 package GUI.Design;
 
+import DataStructures.CircuitGenerator;
 import Exceptions.ModuleDesignNotFoundException;
 import GUI.ErrorPanel;
 import GUI.MainWindow;
@@ -281,7 +282,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             int y2 = Integer.parseInt(element.getAttribute("y2"));
             
             try {
-                BaseElement baseElement = preview.constructElement(type, x, y, x2, y2, stringExtraParams);
+                BaseElement baseElement = CircuitGenerator.getInstance().constructElement(type, x, y, x2, y2, stringExtraParams);
                 ModuleDecl module = compileWithoutSemantics();
                 if (!(baseElement instanceof ChipRectangule)) {
                     System.out.println("Error! It shouldn't be anything but a ChipRectangule");

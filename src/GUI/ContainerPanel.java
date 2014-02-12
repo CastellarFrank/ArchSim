@@ -24,40 +24,77 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
+ * Main class related to rendering this simulator canvas.
  *
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ContainerPanel extends JCanvas {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
 
+    /**
+     * <
+     * code>BaseElement</code> that is being added *
+     */
+    public BaseElement newElementBeenDrawn;
+    /**
+     * <
+     * code>BaseElement</code> that is under the mouse cursor *
+     */
+    public BaseElement mouseComponent;
+    /**
+     * Tells if the simulation is paused*
+     */
+    public boolean isPaused = false;
+    /**
+     * <code>SimulationScope</code> used to run this only if its a
+     * <code>SimulationCanvas</code>*
+     */
+    public SimulationScope simulationScope;
+    /**
+     * <
+     * code>WatchesTableModel</code> used to feed a
+     * <code>Watches</code> window *
+     */
+    public WatchesTableModel watchesTableModel = null;
     protected Vector<BaseElement> elements;
     protected BaseElement[] voltageSourceElements;
     protected Vector<Joint> joints;
     protected Vector<RowInfo> rowsInfo;
-    public BaseElement newElementBeenDrawn, menuElm, mouseComponent, stopElm;
-    public boolean needsAnalysis = false, isPaused = false;
     protected boolean dragging = false, mapForStamp = false;
     protected int dragX, dragY, initDragX, initDragY, matrixSize, matrixFullSize;
     protected int gridSize, gridMask, gridRound;
     protected double voltageMatrix[][], temporalVoltageMatrix[][], speed = 172.0;
     protected double stepTime, totalTime = 0;
     protected int circuitPermute[];
-    protected double temporalRightSideVoltages[], rightSideVoltages[], leftSideVoltages[];
+    protected double temporalRightSideVoltages[], rightSideVoltages[];
+    protected String temporalMultibits[], multibitsValues[];
     protected int draggingPost = -1, steps = 0, frames = 0;
     protected Rectangle selectedArea = null;
-    public MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
+    protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
     protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
-    public boolean runnable = true, circuitNonLinear, converged;
-    public SimulationScope simulationScope;
-    
-    public WatchesTableModel watchesTableModel = null;
+    protected boolean needsAnalysis = false;
+    protected boolean runnable = true, circuitNonLinear, converged;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
-    public BaseElement getElement(int i) {
-        return this.elements.get(i);
+    /**
+     * Returns a
+     * <code>BaseElement</code> given an index
+     *
+     * @param index position to be returned.
+     * @return <code>BaseElement</code> if in range, <code>null</code> otherwise
+     */
+    public BaseElement getElement(int index) {
+        return this.elements.get(index);
     }
 
+    /**
+     * Returns a
+     * <code>Joint</code> given an index
+     *
+     * @param index position to be returned.
+     * @return <code>Joint</code> if in range, <code>null</code> otherwise
+     */
     public Joint getJoint(int index) {
         if (index >= joints.size()) {
             return null;
@@ -65,17 +102,39 @@ public class ContainerPanel extends JCanvas {
         return joints.elementAt(index);
     }
 
+    /**
+     * Calculates a distance (before taking square root) between two pair of
+     * (x,y) coordinates
+     *
+     * @param x1 point A's x coordinate
+     * @param y1 point A's y coordinate
+     * @param x2 point B's x coordinate
+     * @param y2 point B's y coordinate
+     * @return distance before square root
+     */
     public int distance(int x1, int y1, int x2, int y2) {
         x2 -= x1;
         y2 -= y1;
         return x2 * x2 + y2 * y2;
     }
 
+    /**
+     * Initializes this
+     * <code>ContainerPanel</code>
+     */
     public void init() {
         setGrid();
     }
 
-    public void selectionOnArea(int x, int y) {
+    /**
+     * When dragging mouse, a selection rectangule is displayed, this method
+     * tries to set
+     * <code>BaseElement</code>s selected if inside this area.
+     *
+     * @param x second point's x coordinate
+     * @param y second point's y coordinate
+     */
+    public void selectElementsOnArea(int x, int y) {
         int x1 = Math.min(x, initDragX);
         int x2 = Math.max(x, initDragX);
         int y1 = Math.min(y, initDragY);
@@ -88,6 +147,10 @@ public class ContainerPanel extends JCanvas {
         }
     }
 
+    /**
+     * It sets every
+     * <code>BaseElement</code> in this panel as not selected.
+     */
     public void clearSelection() {
         for (BaseElement baseElement : elements) {
             baseElement.setSelected(false);
@@ -95,6 +158,14 @@ public class ContainerPanel extends JCanvas {
         selectedArea = null;
     }
 
+    /**
+     * Main method used to generate a DOM
+     * <code>Element</code> usually used to generate a XML file with it.
+     *
+     * @param document a initialized DOM document
+     * @return a root <code>Element</code> containing
+     * every <code>BaseElement</code>'s XML representation.
+     */
     public Element toXmlRootElement(Document document) {
         Element root = document.createElement("elements");
         for (BaseElement element : elements) {
@@ -103,37 +174,29 @@ public class ContainerPanel extends JCanvas {
         return root;
     }
 
-    public BaseElement constructElement(String type, int x, int y) {
-
-        BaseElement element = CircuitGenerator.getInstance().constructElement(type,
-                snapGrid(x), snapGrid(y));
-
-        if (element != null) {
-            element.containerPanel = this;
-        }
-
-        return element;
-    }
-
-    public BaseElement constructElement(String type,
-            int x, int y, int x2, int y2, String[] extraParams) {
-
-        BaseElement element = CircuitGenerator.getInstance().constructElement(type,
-                x, y, x2, y2, extraParams);
-
-        if (element != null) {
-            element.setContainerPanel(this);
-        }
-
-        return element;
-    }
-
+    /**
+     * It constructs a
+     * <code>BaseElement</code> then it adds it to this
+     * <code>ContainerPanel</code> param type the full class name of the element
+     * to be constructed.
+     *
+     * @param x starting x coordinate.
+     * @param y starting y coordinate.
+     * @param x2 ending x coordinate.
+     * @param y2 ending y coordinate.
+     * @param extraParams optional extra parameters like number of inputs on an
+     * AndGate.
+     */
     public void constructAndAddElement(String type,
             int x, int y, int x2, int y2, String[] extraParams) {
         addElement(constructElement(type, x, y, x2, y2, extraParams));
     }
     //</editor-fold>
-    
+
+    /**
+     * Method used to print on standard output voltages array and right side
+     * voltages
+     */
     public void printThings() {
         if (Configuration.DEBUG_MODE) {
             if (temporalRightSideVoltages != null) {
@@ -162,6 +225,12 @@ public class ContainerPanel extends JCanvas {
         updatePreview(g);
     }
 
+    /**
+     * Method that analyzes the circuit when it changes. It does this things:
+     * <ul> <li>updates joints of elements</li> <li>stamp voltages on a matrix
+     * to analyze</li> <li>delete unused elements</li> <li>reduces matrix
+     * size</li> </ul>
+     */
     protected void analyze() {
         if (elements.isEmpty() || !runnable) {
             return;
@@ -206,6 +275,7 @@ public class ContainerPanel extends JCanvas {
                     baseElement.setJointIndex(postIndex, jointIndex);
                     if (jointIndex == 0) {
                         baseElement.setVoltage(postIndex, 0.0);
+                        baseElement.setMultiBitsValue(postIndex, "z");
                     }
                 }
             }
@@ -216,9 +286,9 @@ public class ContainerPanel extends JCanvas {
 
         voltageSourceElements = new BaseElement[totalVoltageSourceCount];
         circuitNonLinear = false;
-        
+
         totalVoltageSourceCount = 0;
-        
+
         //<editor-fold defaultstate="collapsed" desc="Set voltage source references">
         int ivs;
         for (BaseElement baseElement : elements) {
@@ -230,12 +300,16 @@ public class ContainerPanel extends JCanvas {
         }
 
         //voltageSourceCount = totalVoltageSourceCount;
-        
+
         int rowCount = joints.size() + totalVoltageSourceCount - 1;
         initializeRows(rowCount);
 
         temporalRightSideVoltages = new double[rowCount];
+        temporalMultibits = new String[rowCount];
+        
         rightSideVoltages = new double[rowCount];
+        multibitsValues = new String[rowCount];
+        
         matrixSize = matrixFullSize = rowCount;
         temporalVoltageMatrix = new double[rowCount][rowCount];
         voltageMatrix = new double[rowCount][rowCount];
@@ -300,7 +374,7 @@ public class ContainerPanel extends JCanvas {
         //</editor-fold>
 
         //<editor-fold defaultstate="collapsed" desc="Matrix reduction">
-        int index, innerIndex = 0;
+        int index, innerIndex;
         for (index = 0; index < rowCount; index++) {
             int quantityM = -1, quantityP = -1;
             double value = 0, rightSideSum = 0;
@@ -352,6 +426,7 @@ public class ContainerPanel extends JCanvas {
                     secondRowInfo.type = RowType.CONSTANT;
                     rowInfo.notUsedInMatrix = true;
                     secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / value;
+                    secondRowInfo.multiBitsValue = temporalMultibits[index];
                     index = -1;
                 } else if (rightSideSum + temporalRightSideVoltages[index] == 0) {
                     if (secondRowInfo.type != RowType.NORMAL) {
@@ -400,7 +475,7 @@ public class ContainerPanel extends JCanvas {
                     break;
             }
         }
-        
+
         for (index = 0; index != rowCount; index++) {
             RowInfo rowInfo = rowsInfo.elementAt(index);
             if (rowInfo.type == RowType.EQUALS_TO_ANOTHER) {
@@ -408,6 +483,7 @@ public class ContainerPanel extends JCanvas {
                 if (secondRowInfo.type == RowType.CONSTANT) {
                     rowInfo.type = secondRowInfo.type;
                     rowInfo.voltage = secondRowInfo.voltage;
+                    rowInfo.multiBitsValue = secondRowInfo.multiBitsValue;
                     rowInfo.mappedColumn = -1;
                 } else {
                     rowInfo.mappedColumn = secondRowInfo.mappedColumn;
@@ -417,6 +493,7 @@ public class ContainerPanel extends JCanvas {
 
         double newMatrix[][] = new double[newCol][newCol];
         double newRightSides[] = new double[newCol];
+        String newMultibits[] = new String[newCol];
 
         int newIndex = 0;
         for (index = 0; index < matrixSize; index++) {
@@ -426,6 +503,7 @@ public class ContainerPanel extends JCanvas {
                 continue;
             }
             newRightSides[newIndex] = temporalRightSideVoltages[index];
+            newMultibits[newIndex] = temporalMultibits[index];
             rowInfo.mappedRow = newIndex;
 
             for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
@@ -441,28 +519,29 @@ public class ContainerPanel extends JCanvas {
 
         temporalRightSideVoltages = newRightSides;
         temporalVoltageMatrix = newMatrix;
+        temporalMultibits = newMultibits;
         rowCount = matrixSize = newCol;
 
         System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                 rowCount);
+        
+        System.arraycopy(temporalMultibits, 0, multibitsValues, 0, rowCount);
 
         for (int i = 0; i < rowCount; i++) {
             System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, rowCount);
         }
-        
-        System.out.println("new size: " + newCol);
 
         //</editor-fold>
         //</editor-fold>       
-        
+
         mapForStamp = true;
-        
-        
+
+
         if (!circuitNonLinear && !lu_factor(temporalVoltageMatrix, matrixSize, circuitPermute)) {
             System.out.println("Singular matrix!");
         }
     }
-    
+
     //<editor-fold defaultstate="collapsed" desc="LU">
     boolean lu_factor(double a[][], int size, int pivot[]) {
         double scaleFactors[];
@@ -544,7 +623,7 @@ public class ContainerPanel extends JCanvas {
         }
         return true;
     }
-    
+
     void lu_solve(double a[][], int n, int ipvt[], double b[]) {
         int i;
 
@@ -586,21 +665,32 @@ public class ContainerPanel extends JCanvas {
     }
     //</editor-fold>
 
-    public void initializeRows(int rowCount) {
+    /**
+     * It initializes the list with a given number of elements
+     *
+     * @param rowCount number of rows to be in the list
+     */
+    protected void initializeRows(int rowCount) {
         rowsInfo = new Vector<RowInfo>(rowCount);
         for (int i = 0; i < rowCount; i++) {
             rowsInfo.add(new RowInfo());
         }
     }
-    
+
     double getIterationRate() {
-        if (speed == 0)
+        if (speed == 0) {
             return 0;
+        }
         return .1 * Math.exp((speed - 61) / 24.);
     }
-    
     long lastIterationTime;
 
+    /**
+     * Method that executes the behaviour of every
+     * <code>BaseElement</code> in this container.<p> For example: if the
+     * baseElement is a
+     * <code>ModuleChip</code> instance it executes its module associated logic.
+     */
     public void runStep() {
         if (elements == null || elements.isEmpty() || !runnable) {
             return;
@@ -614,7 +704,7 @@ public class ContainerPanel extends JCanvas {
         if (1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)) {
             return;
         }
-        
+
         int iteration;
 
         for (iter = 1; iter < 10; iter++) {
@@ -623,28 +713,32 @@ public class ContainerPanel extends JCanvas {
             for (iteration = 0; iteration < maxSubIteration; iteration++) {
                 subIterations = iteration;
                 converged = true;
-                
+
                 System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                         temporalRightSideVoltages.length);
                 
+                System.arraycopy(temporalMultibits, 0, multibitsValues, 0, 
+                        temporalMultibits.length);
+
                 if (circuitNonLinear) {
                     for (int i = 0; i < matrixSize; i++) {
                         System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
                     }
-                }                
+                }
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
-                
+
                 for (BaseElement baseElement : elements) {
-                    baseElement.doStep();                    
-                }                
+                    baseElement.doStep();
+                }
                 if (isPaused) {
                     return;
                 }
                 if (circuitNonLinear) {
-                    if (converged && iteration > 0)
+                    if (converged && iteration > 0) {
                         break;
+                    }
                     if (!lu_factor(temporalVoltageMatrix, matrixSize,
-                        circuitPermute)) {
+                            circuitPermute)) {
                         System.out.println("Singular matrix!");
                         return;
                     }
@@ -653,11 +747,14 @@ public class ContainerPanel extends JCanvas {
                         temporalRightSideVoltages);
                 for (int rowIndex = 0; rowIndex < matrixFullSize; rowIndex++) {
                     RowInfo rowInfo = rowsInfo.get(rowIndex);
-                    double newVoltage = 0;
+                    double newVoltage;
+                    String multibits;
                     if (rowInfo.type == RowType.CONSTANT) {
                         newVoltage = rowInfo.voltage;
+                        multibits = rowInfo.multiBitsValue;
                     } else {
                         newVoltage = rightSideVoltages[rowInfo.mappedColumn];
+                        multibits = multibitsValues[rowInfo.mappedColumn];
                     }
 
                     if (Double.isNaN(newVoltage)) {
@@ -668,6 +765,7 @@ public class ContainerPanel extends JCanvas {
                         Joint joint = joints.elementAt(rowIndex + 1);
                         for (JointReference jointRef : joint.references) {
                             jointRef.element.setVoltage(jointRef.postNumber, newVoltage);
+                            jointRef.element.setMultiBitsValue(jointRef.postNumber, multibits);
                         }
                     } else {
                         int newIndex = rowIndex - (joints.size() - 1);
@@ -675,7 +773,7 @@ public class ContainerPanel extends JCanvas {
                     }
                 }
                 //</editor-fold>   
-                
+
                 if (!circuitNonLinear) {
                     break;
                 }
@@ -695,34 +793,54 @@ public class ContainerPanel extends JCanvas {
         lastIterationTime = temporalLastIterationTime;
     }
 
+    /**
+     * Resumes execution.
+     */
     public void resume() {
         isPaused = false;
     }
 
+    /**
+     * Pauses execution.
+     */
     public void pause() {
         isPaused = true;
     }
-    
+
+    /**
+     * Resets the execution.
+     */
     public void reset() {
         totalTime = 0;
         isPaused = false;
         repaint();
     }
 
+    /**
+     * Static method that prints to standard output just if its running in debug
+     * mode.
+     *
+     * @param message message to print
+     */
     public static void DEBUG(String message) {
         if (Configuration.DEBUG_MODE) {
             System.out.println(message);
         }
     }
-    
     long secTime = 0;
 
+    /**
+     * It updates every element contained in this
+     * <code>ContainerPanel</code>
+     *
+     * @param g graphics used to paint.
+     */
     public void updatePreview(Graphics g) {
         if (needsAnalysis || true /*TODO: remove true*/) {
             analyze();
             needsAnalysis = false;
         }
-        
+
         printThings();
 
         if (!isPaused) {
@@ -731,7 +849,7 @@ public class ContainerPanel extends JCanvas {
                 watchesTableModel.updateValues();
             }
         }
-        
+
         if (!isPaused) {
             long sysTime = System.currentTimeMillis();
             if (sysTime - secTime >= 1000) {
@@ -743,7 +861,7 @@ public class ContainerPanel extends JCanvas {
         } else {
             lastTimeStamp = 0;
         }
-        
+
         //System.out.println("After step");
         //printThings();
 
@@ -785,14 +903,13 @@ public class ContainerPanel extends JCanvas {
 
             g.setColor(old);
         }
-        
+
         frames++;
-        
+
         if (!isPaused && temporalVoltageMatrix != null) {
             long delay = 1000 / 50 - (System.currentTimeMillis() - lastFrameTimeStamp);
             if (delay > 0) {
                 try {
-                    System.out.println("delay: " + delay);
                     Thread.sleep(delay);
                 } catch (InterruptedException e) {
                 }
@@ -802,6 +919,14 @@ public class ContainerPanel extends JCanvas {
         lastFrameTimeStamp = lastTimeStamp;
     }
 
+    /**
+     * It adds a
+     * <code>BaseElement</code> to this container, before that, it sets
+     * <code>element</code>'s containerPanel to this and snaps its coordinates
+     * to the grid size.
+     *
+     * @param element element to be added.
+     */
     public void addElement(BaseElement element) {
         if (element == null) {
             return;
@@ -823,6 +948,9 @@ public class ContainerPanel extends JCanvas {
         elements.clear();
     }
 
+    /**
+     * Constructor.
+     */
     public ContainerPanel() {
         elements = new Vector<BaseElement>(50);
         joints = new Vector<Joint>(100);
@@ -840,16 +968,71 @@ public class ContainerPanel extends JCanvas {
         needsAnalysis = true;
     }
 
+    /**
+     * It sets the grid size.
+     */
     protected void setGrid() {
         gridSize = Configuration.SMALL_GRID ? 8 : 16;
         gridMask = ~(gridSize - 1);
         gridRound = gridSize / 2 - 1;
     }
 
+    /**
+     * It rounds a value to the closest snapped grid number.
+     *
+     * @param x value to be snapped
+     * @return snapped value
+     */
     public int snapGrid(int x) {
         return (x + gridRound) & gridMask;
     }
 
+    /**
+     * Constructs a <code>BaseElement</code> from given parameters.
+     * @param type the full class name of the element to be constructed.
+     * @param x starting x coordinate.
+     * @param y starting y coordinate.
+     * @return a <code>BaseElement</code> instantiated through reflection.
+     */
+    public BaseElement constructElement(String type, int x, int y) {
+        BaseElement element = CircuitGenerator.getInstance().constructElement(type,
+                snapGrid(x), snapGrid(y));
+
+        if (element != null) {
+            element.setContainerPanel(this);
+        }
+        return element;
+    }
+
+    /**
+     * Constructs a <code>BaseElement</code> from given parameters.
+     * @param type the full class name of the element to be constructed.
+     * @param x starting x coordinate.
+     * @param y starting y coordinate.
+     * @param x2 ending x coordinate.
+     * @param y2 ending y coordinate.
+     * @param extraParams optional extra parameters like number of inputs on an AndGate.
+     * @return a <code>BaseElement</code> instantiated through reflection.
+     */
+    public BaseElement constructElement(String type,
+            int x, int y, int x2, int y2, String[] extraParams) {
+
+        BaseElement element = CircuitGenerator.getInstance().constructElement(type,
+                x, y, x2, y2, extraParams);
+        if (element != null) {
+            element.setContainerPanel(this);
+
+        }
+        return element;
+    }
+
+    /**
+     * Moves the closest component's post so the element being dragged changes
+     * it size.
+     *
+     * @param x x coordinate to be moved
+     * @param y y coordinate to be moved
+     */
     public void dragPost(int x, int y) {
         if (draggingPost == -1) {
             int distance1 = distance(mouseComponent.x, mouseComponent.y, x, y);
@@ -866,15 +1049,32 @@ public class ContainerPanel extends JCanvas {
         prepareForAnalysis();
         repaint();
     }
-    
+
+    /**
+     * Returns the index of the
+     * <code>element</code> inside
+     * <code>elements</code> list.
+     *
+     * @param element element to be indexed
+     * @return index of the given element
+     */
     public int getElementPosition(BaseElement element) {
         for (int i = 0; i < elements.size(); i++) {
-            if (elements.elementAt(i) == element)
+            if (elements.elementAt(i) == element) {
                 return i;
+            }
         }
         return -1;
     }
 
+    /**
+     * It moves every selected element to the given x and y coordinates.
+     *
+     * @param x target x coordinate
+     * @param y target y coordinate
+     * @return <code>true</code> if at least one element was
+     * moved, <code>false</code> otherwise
+     */
     public boolean dragSelected(int x, int y) {
         boolean mouseElementSelected = false;
         if (mouseComponent != null && !mouseComponent.isSelected()) {
@@ -916,13 +1116,15 @@ public class ContainerPanel extends JCanvas {
         if (allowed) {
             for (i = 0; i != elements.size(); i++) {
                 BaseElement baseElement = getElement(i);
-                if (baseElement.isSelected()) {                    
+                if (baseElement.isSelected()) {
                     if (Configuration.KEEP_CONNECTED_ON_DRAG
                             && !(baseElement instanceof Wire)) {
                         int[] elementJoints = baseElement.joints;
                         for (int j = 0; j < elementJoints.length; j++) {
                             int k = elementJoints[j];
-                            if (k >= joints.size()) continue;
+                            if (k >= joints.size()) {
+                                continue;
+                            }
                             Joint joint = joints.get(k);
                             if (joint.references.size() > 1) {
                                 for (int ref = 0; ref < joint.references.size(); ref++) {
@@ -930,7 +1132,7 @@ public class ContainerPanel extends JCanvas {
                                     if (jointRef.element != baseElement) {
                                         jointRef.element.getPost(jointRef.postNumber).x += dx;
                                         jointRef.element.getPost(jointRef.postNumber).y += dy;
-                                        
+
                                         jointRef.element.movePoint(jointRef.postNumber, dx, dy);
                                     }
                                 }
@@ -938,8 +1140,9 @@ public class ContainerPanel extends JCanvas {
                         }
                     }
                     if (!Configuration.KEEP_CONNECTED_ON_DRAG
-                            || !(baseElement instanceof Wire))
+                            || !(baseElement instanceof Wire)) {
                         baseElement.move(dx, dy);
+                    }
                 }
             }
             prepareForAnalysis();
@@ -953,6 +1156,12 @@ public class ContainerPanel extends JCanvas {
         return allowed;
     }
 
+    /**
+     * It moves every element to the given x and y coordinates
+     *
+     * @param x x coordinate
+     * @param y y coordinate
+     */
     public void moveAll(int x, int y) {
         int dx = x - dragX;
         int dy = y - dragY;
@@ -966,27 +1175,53 @@ public class ContainerPanel extends JCanvas {
         }
     }
 
+    /**
+     * It tells other methods that analysis is needed.
+     */
     public void prepareForAnalysis() {
         needsAnalysis = true;
         repaint();
     }
 
+    /**
+     * Tells if this
+     * <code>ContainerPanel</code> has any element.
+     *
+     * @return <code>true</code> if there is elements on this container,
+     * <code>false</code> otherwise
+     */
     public boolean containsElements() {
         return !elements.isEmpty();
     }
 
     //<editor-fold defaultstate="collapsed" desc="Stamping">
     //<editor-fold defaultstate="collapsed" desc="Instant stamping">
+    /**
+     * Stamps a voltage source between two nodes.
+     *
+     * @param fromNode source node number
+     * @param toNode target node number
+     * @param voltageSourceIndex index of the voltage source
+     * @param newVoltage voltage to be stamped
+     */
     public void stampVoltageSource(int fromNode, int toNode,
-            int voltageSourceIndex, double newVoltage) {
+            int voltageSourceIndex, double newVoltage, String multibits) {
         int rowIndex = joints.size() + voltageSourceIndex;
         stampVoltageMatrix(rowIndex, fromNode, -1);
         stampVoltageMatrix(rowIndex, toNode, 1);
         setRowInfoRightSideChanges(rowIndex, newVoltage);
+        setRowInfoMultibitsChange(rowIndex, multibits);
         stampVoltageMatrix(fromNode, rowIndex, 1);
         stampVoltageMatrix(toNode, rowIndex, -1);
     }
 
+    /**
+     * Sets a right side voltage on a
+     * <code>RowInfo</code>
+     *
+     * @param rowInfoIndex row info index inside the list
+     * @param newVoltage voltage to be set
+     */
     public void setRowInfoRightSideChanges(int rowInfoIndex, double newVoltage) {
         if (rowInfoIndex <= 0) {
             return;
@@ -998,8 +1233,13 @@ public class ContainerPanel extends JCanvas {
         }
         temporalRightSideVoltages[rowInfoIndex] = newVoltage;
     }
-
-    public void setRowInfoLeftSideChanges(int rowInfoIndex, double newVoltage) {
+    
+    /**
+     * Sets a right side multibits value of a <code>RowInfo</code>
+     * @param rowInfoIndex row info index inside the list
+     * @param multibits multibits value
+     */
+    public void setRowInfoMultibitsChange(int rowInfoIndex, String multibits) {
         if (rowInfoIndex <= 0) {
             return;
         }
@@ -1008,11 +1248,18 @@ public class ContainerPanel extends JCanvas {
         } else {
             rowInfoIndex -= 1;
         }
-        leftSideVoltages[rowInfoIndex] = newVoltage;
+        temporalMultibits[rowInfoIndex] = multibits;
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Wait for next runStep">
+    /**
+     * It sets the voltage source index to the connection between two nodes.
+     *
+     * @param fromNode source node number
+     * @param toNode target node number
+     * @param voltageSourceIndex index of the voltage source
+     */
     public void stampVoltageSource(int fromNode, int toNode, int voltageSourceIndex) {
         int rowIndex = joints.size() + voltageSourceIndex;
         stampVoltageMatrix(rowIndex, fromNode, -1);
@@ -1022,21 +1269,39 @@ public class ContainerPanel extends JCanvas {
         stampVoltageMatrix(toNode, rowIndex, -1);
     }
 
+    /**
+     * It tells a
+     * <code>RowInfo</code> that it voltage changed.
+     *
+     * @param rowInfoIndex index of the <code>RowInfo</code> to update
+     */
     public void setRowInfoRightSideChanges(int rowInfoIndex) {
         if (rowInfoIndex <= 0) {
             return;
         }
         rowsInfo.get(rowInfoIndex - 1).rightSideChanges = true;
     }
-
-    public void setRowInfoLeftSideChanges(int rowInfoIndex) {
+    
+    /**
+     * Sets a right side multibits value of a <code>RowInfo</code>
+     * @param rowInfoIndex row info index inside the list
+     */
+    public void setRowInfoMultibitsChange(int rowInfoIndex) {
         if (rowInfoIndex <= 0) {
             return;
         }
-        rowsInfo.get(rowInfoIndex - 1).leftSideChanges = true;
+        rowsInfo.get(rowInfoIndex - 1).rightSideChanges = true;
     }
     //</editor-fold>
 
+    /**
+     * It stamps the specified voltage to the global matrix used to analyze the
+     * circuit.
+     *
+     * @param row row number in which voltage will be stamped
+     * @param column column number in which voltage will be stamped
+     * @param newVoltage voltage to be stamped
+     */
     public void stampVoltageMatrix(int row, int column, double newVoltage) {
         if (row <= 0 || column <= 0) {
             return;
@@ -1051,21 +1316,36 @@ public class ContainerPanel extends JCanvas {
         temporalVoltageMatrix[row][column] += newVoltage;
     }
 
-    public void stampResistor(int n1, int n2, double r) {
-        double r0 = 1 / r;
+    /**
+     * Stamps a voltage depending on the resistor value. <p> Usually used to
+     * avoid zeros on voltages matrix.
+     *
+     * @param nodeA first node number
+     * @param nodeB second node number
+     * @param resistance resistance value
+     */
+    public void stampResistor(int nodeA, int nodeB, double resistance) {
+        double r0 = 1 / resistance;
         if (Double.isNaN(r0) || Double.isInfinite(r0)) {
             int a = 0;
             a /= a;
         }
-        stampVoltageMatrix(n1, n1, r0);
-        stampVoltageMatrix(n2, n2, r0);
-        stampVoltageMatrix(n1, n2, -r0);
-        stampVoltageMatrix(n2, n1, -r0);
+        stampVoltageMatrix(nodeA, nodeA, r0);
+        stampVoltageMatrix(nodeB, nodeB, r0);
+        stampVoltageMatrix(nodeA, nodeB, -r0);
+        stampVoltageMatrix(nodeB, nodeA, -r0);
     }
 
-    public void updateVoltageSource(int voltageSourceIndex, double newVoltage) {
+    /**
+     * Updates voltage source to the specified voltage.
+     *
+     * @param voltageSourceIndex voltage source index to be updated
+     * @param newVoltage voltage value to be set
+     */
+    public void updateVoltageSource(int voltageSourceIndex, double newVoltage, String multibits) {
         int voltageIndex = joints.size() + voltageSourceIndex;
         setRowInfoRightSideChanges(voltageIndex, newVoltage);
+        setRowInfoMultibitsChange(voltageIndex, multibits);
     }
     //</editor-fold>
 }

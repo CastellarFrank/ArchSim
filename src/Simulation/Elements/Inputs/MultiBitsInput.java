@@ -80,13 +80,13 @@ public class MultiBitsInput extends BaseElement {
     @Override
     public void stampVoltages() {        
         calculateVoltageValue();
-        containerPanel.stampVoltageSource(0, joints[0], voltageSourceReference, voltages[0]);
+        containerPanel.stampVoltageSource(0, joints[0], voltageSourceReference, voltages[0], binaryValues[0]);
     }
     
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("value", 0.0, 0, 0).
+            return new EditInfo("value", 0.0, 0, Long.MAX_VALUE).
                     addComponent(new JLabel("Value: ")).
                     addComponent(new JTextField(binaryValues[0], 10));
         return null;

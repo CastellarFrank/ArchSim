@@ -48,28 +48,34 @@ public class ModuleChip extends BaseElement {
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    public ModuleChip(int x, int y, String[] extraParams) throws ArchException {
+    public ModuleChip(int x, int y, String[] extraParams) {
         super(x, y);
 
         sizeX = 4;
         sizeY = 4;
-        //initialize(extraParams);
     }
 
-    public ModuleChip(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
+    /**
+     * Constructor.
+     * @param x
+     * @param y
+     * @param x2
+     * @param y2
+     * @param extraParams
+     * @throws ModuleDesignNotFoundException if the name specified in extraParams 
+     * doesn't exist or extraParams is <code>null</code>
+     */
+    public ModuleChip(int x, int y, int x2, int y2, String[] extraParams) {
         super(x, y, x2, y2, extraParams);
 
-        //initialize(extraParams);
         sizeX = 4;
         sizeY = 4;
-        newInit(extraParams[0]);
+        newInit(x, y, extraParams[0]);
     }
 
-    public ModuleChip(ModuleInfo info, int x, int y, int x2, int y2, int flags, String[] extraParams)
-            throws ArchException {
+    public ModuleChip(ModuleInfo info, int x, int y, int x2, int y2, int flags, String[] extraParams) {
         super(x, y, x2, y2, flags);
 
-        //initialize(extraParams);
         sizeX = 4;
         sizeY = 4;
     }
@@ -83,7 +89,7 @@ public class ModuleChip extends BaseElement {
         this.containerPanel.simulationScope.register(moduleInstanceId, scope);
     }   
 
-    private void newInit(String moduleName) {
+    private void newInit(int realX, int realY, String moduleName) {
         Element element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
         if (element == null)
             throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
@@ -95,7 +101,18 @@ public class ModuleChip extends BaseElement {
         y = Integer.parseInt(element.getAttribute("y"));
         x2 = Integer.parseInt(element.getAttribute("x2"));
         y2 = Integer.parseInt(element.getAttribute("y2"));
-
+        
+        int ddx = realX - x;
+        int ddy = realY - y;
+        x = realX;
+        y = realY;
+        
+        x2 = x2 + ddx;
+        y2 = y2 + ddy;
+        
+        textX += ddx;
+        textY += ddy;
+        
         setBoundingBox(x, y, x2, y2);
 
         setupPorts(element.getElementsByTagName("port"));
