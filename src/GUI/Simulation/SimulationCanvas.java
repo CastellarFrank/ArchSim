@@ -4,14 +4,14 @@
  */
 package GUI.Simulation;
 
-import DataStructures.CircuitGenerator;
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
 import GUI.Edit.EditionDialog;
 import GUI.MainWindow;
 import GUI.MouseMode;
+import GUI.NestedWatcher.CustomTreeModel;
+import GUI.NestedWatcher.Debugger;
 import GUI.Watcher.Selector.WatchesSelector;
-import GUI.Watcher.Watches;
 import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
@@ -46,7 +46,7 @@ public class SimulationCanvas extends ContainerPanel implements
     public boolean deleting = false;
     public JPopupMenu pop;
     
-    Watches watcherWindow;   
+    Debugger debugger;
     
     ArrayList<DrilldownWindow> drilldowns;
     
@@ -68,7 +68,7 @@ public class SimulationCanvas extends ContainerPanel implements
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     String modId = ((ModuleChip) mouseComponent).getModuleInstanceId();
-                    WatchesSelector selector = new WatchesSelector(parent, watcherWindow, watchesTableModel, simulationScope, modId, parent, true);
+                    WatchesSelector selector = new WatchesSelector(parent, debugger, watchesTableModel, simulationScope, modId, parent, true);
                     selector.setVisible(true);
                 }
             });
@@ -163,8 +163,10 @@ public class SimulationCanvas extends ContainerPanel implements
                 pop.show(e.getComponent(), e.getX(), e.getY());  
                 if (watchesTableModel == null)
                     watchesTableModel = new WatchesTableModel(simulationScope);
-                if (watcherWindow == null)
-                    watcherWindow = new Watches(this);
+                if (debugger == null) {
+                    debuggerModel = new CustomTreeModel(simulationScope, watchesTableModel.getModelData());
+                    debugger = new Debugger(this);
+                }
                 return;
             }
         }
@@ -339,14 +341,18 @@ public class SimulationCanvas extends ContainerPanel implements
     @Override
     public void updatePreview(Graphics g) {
         super.updatePreview(g);
-        if (watcherWindow != null && !watcherWindow.isSelected()) 
-            watcherWindow.refreshModel();
+        //if (watcherWindow != null && !watcherWindow.isSelected()) 
+        //    watcherWindow.refreshModel();
+        if (debugger != null && !debugger.isSelected())
+            debugger.refresh();
         
     }
     
     public void destroyAll() {
-        if (watcherWindow != null)
-            watcherWindow.dispose();
+        //if (watcherWindow != null)
+        //    watcherWindow.dispose();
+        if (debugger != null)
+            debugger.dispose();
         for (DrilldownWindow window : drilldowns) {
             window.dispose();
         }

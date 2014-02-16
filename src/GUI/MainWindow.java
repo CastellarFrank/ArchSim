@@ -7,9 +7,9 @@ package GUI;
 import DataStructures.Loader;
 import DataStructures.ModuleRepository;
 import GUI.Design.DesignWindow;
+import GUI.NestedWatcher.Debugger;
 import GUI.Simulation.DrilldownWindow;
 import GUI.Simulation.SimulationWindow;
-import GUI.Watcher.Watches;
 import Simulation.Configuration;
 import java.awt.Dimension;
 import java.beans.PropertyVetoException;
@@ -56,10 +56,10 @@ public class MainWindow extends javax.swing.JFrame {
         Collections.sort(moduleNames);
     }
     
-    public void addWatcherWindow(Watches watcher) {
-        if (watcher.getDesktopPane() == this.desktopPane)
+    public void addDebuggerWindow(Debugger debugger) {
+        if (debugger.getDesktopPane() == this.desktopPane)
             return;
-        this.desktopPane.add(watcher);
+        this.desktopPane.add(debugger);
     }
     
     public void addDrilldownWindow(DrilldownWindow one) {        

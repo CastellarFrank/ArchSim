@@ -5,6 +5,7 @@
 package GUI;
 
 import DataStructures.CircuitGenerator;
+import GUI.NestedWatcher.CustomTreeModel;
 import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
@@ -19,6 +20,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,7 +46,7 @@ public class ContainerPanel extends JCanvas {
     /**
      * Tells if the simulation is paused*
      */
-    public boolean isPaused = false;
+    public boolean isPaused = true;
     /**
      * <code>SimulationScope</code> used to run this only if its a
      * <code>SimulationCanvas</code>*
@@ -56,6 +58,7 @@ public class ContainerPanel extends JCanvas {
      * <code>Watches</code> window *
      */
     public WatchesTableModel watchesTableModel = null;
+    public CustomTreeModel debuggerModel = null;
     protected Vector<BaseElement> elements;
     protected BaseElement[] voltageSourceElements;
     protected Vector<Joint> joints;

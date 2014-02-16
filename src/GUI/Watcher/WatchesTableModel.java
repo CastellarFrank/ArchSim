@@ -25,6 +25,22 @@ public class WatchesTableModel implements TableModel {
     }
     
     ArrayList<WatchModelEntry> modelData = new ArrayList<WatchModelEntry>();
+
+    /**
+     * Returns this model data
+     * @return data
+     */
+    public ArrayList<WatchModelEntry> getModelData() {
+        return modelData;
+    }
+
+    /**
+     * Sets this model's data.
+     * @param modelData data
+     */
+    public void setModelData(ArrayList<WatchModelEntry> modelData) {
+        this.modelData = modelData;
+    }
     
     /**
      * Erases everything from this table.

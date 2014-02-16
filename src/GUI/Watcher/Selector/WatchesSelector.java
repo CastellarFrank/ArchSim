@@ -5,7 +5,7 @@
 package GUI.Watcher.Selector;
 
 import GUI.MainWindow;
-import GUI.Watcher.Watches;
+import GUI.NestedWatcher.Debugger;
 import GUI.Watcher.WatchesTableModel;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.SimulationScope;
@@ -20,23 +20,23 @@ public class WatchesSelector extends javax.swing.JDialog {
     SimulationScope scope;
     String moduleInstanceId;
     WatchesTableModel watches;
-    Watches watcherWindow;
+    Debugger debugger;
     MainWindow realParent;
     
     /**
      * Creates new form WatchesSelector
      */
-    public WatchesSelector(MainWindow realParent, Watches watcherWindow,
+    public WatchesSelector(MainWindow realParent, Debugger debugger,
             WatchesTableModel watches, SimulationScope simulationScope, 
             String moduleInstanceId, java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
+        this.debugger = debugger;
         this.scope = simulationScope;
         this.moduleInstanceId = moduleInstanceId;
         this.watches = watches;
         this.realParent = realParent;
-        this.watcherWindow = watcherWindow;
         
         InstanceModuleScope modScope = simulationScope.getScope(moduleInstanceId);
         Set<String> names = modScope.getVariableNames();
@@ -116,10 +116,9 @@ public class WatchesSelector extends javax.swing.JDialog {
             else 
                 watches.removeWatch(entry.variableName, moduleInstanceId);
         }
-        watcherWindow.setLocation(realParent.getWidth() - watcherWindow.getWidth() - 17,
-                watcherWindow.getY());
-        watcherWindow.setVisible(true);
-        realParent.addWatcherWindow(watcherWindow);
+        debugger.setVisible(true);
+        realParent.addDebuggerWindow(debugger);
+        
         this.dispose();
     }//GEN-LAST:event_addBtnActionPerformed
 
