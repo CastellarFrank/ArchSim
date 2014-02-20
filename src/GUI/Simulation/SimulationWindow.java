@@ -88,6 +88,10 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         
         this.setLocation((parent.getWidth() - getWidth()) / 2, 
                 (parent.getHeight() - getHeight()) / 2);
+        
+        if (canvas.isPaused) {
+            pauseContinueMenu.setText("Start Execution");
+        }
     }
     
     public void addFilenameToTitle(String fileName) {

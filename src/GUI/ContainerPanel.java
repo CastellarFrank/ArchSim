@@ -67,10 +67,11 @@ public class ContainerPanel extends JCanvas {
     protected int dragX, dragY, initDragX, initDragY, matrixSize, matrixFullSize;
     protected int gridSize, gridMask, gridRound;
     protected double voltageMatrix[][], temporalVoltageMatrix[][], speed = 172.0;
+    protected String mutibitsMatrix[][], temporalMultibitsMatrix[][];
     protected double stepTime, totalTime = 0;
     protected int circuitPermute[];
     protected double temporalRightSideVoltages[], rightSideVoltages[];
-    protected String temporalMultibits[], multibitsValues[];
+    protected String temporalRightSideMultibits[], rightSideMultibitsValues[];
     protected int draggingPost = -1, steps = 0, frames = 0;
     protected Rectangle selectedArea = null;
     protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
@@ -201,7 +202,7 @@ public class ContainerPanel extends JCanvas {
      * voltages
      */
     public void printThings() {
-        if (Configuration.DEBUG_MODE) {
+        if (Configuration.DEBUG_MODE && false) {
             if (temporalRightSideVoltages != null) {
                 System.out.println("RIGHT SIDE VOLTAGES!!! COUNT: " + temporalRightSideVoltages.length);
                 for (int i = 0; i < temporalRightSideVoltages.length; i++) {
@@ -209,6 +210,12 @@ public class ContainerPanel extends JCanvas {
                     System.out.print(b + ",");
                 }
                 System.out.println("\nEND OF RIGHT SIDE VOLTAGES");
+            }
+            if (temporalRightSideMultibits != null) {
+                for (int i = 0; i < temporalRightSideMultibits.length; i++) {
+                    String value = temporalRightSideMultibits[i];
+                    System.out.println("value " + value);
+                }
             }
         }
     }
@@ -226,6 +233,12 @@ public class ContainerPanel extends JCanvas {
     @Override
     public void update(Graphics g) {
         updatePreview(g);
+    }
+    
+    private void initializeArray(String[] array, String defValue) {
+        for(int i = 0; i < array.length; i++) {
+            array[i] = defValue;
+        }
     }
 
     /**
@@ -308,14 +321,22 @@ public class ContainerPanel extends JCanvas {
         initializeRows(rowCount);
 
         temporalRightSideVoltages = new double[rowCount];
-        temporalMultibits = new String[rowCount];
+        temporalRightSideMultibits = new String[rowCount];
+        initializeArray(temporalRightSideMultibits, "z");
         
         rightSideVoltages = new double[rowCount];
-        multibitsValues = new String[rowCount];
+        rightSideMultibitsValues = new String[rowCount];
+        initializeArray(rightSideMultibitsValues, "z");
         
         matrixSize = matrixFullSize = rowCount;
         temporalVoltageMatrix = new double[rowCount][rowCount];
         voltageMatrix = new double[rowCount][rowCount];
+        mutibitsMatrix = new String[rowCount][rowCount];
+        for (int i = 0; i < rowCount; i++)
+            initializeArray(mutibitsMatrix[i], "z");
+        temporalMultibitsMatrix = new String[rowCount][rowCount];
+        for (int i = 0; i < rowCount; i++)
+            initializeArray(temporalMultibitsMatrix[i], "z");
         circuitPermute = new int[matrixSize];
         mapForStamp = false;
 
@@ -429,7 +450,7 @@ public class ContainerPanel extends JCanvas {
                     secondRowInfo.type = RowType.CONSTANT;
                     rowInfo.notUsedInMatrix = true;
                     secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / value;
-                    secondRowInfo.multiBitsValue = temporalMultibits[index];
+                    secondRowInfo.multiBitsValue = temporalRightSideMultibits[index];
                     index = -1;
                 } else if (rightSideSum + temporalRightSideVoltages[index] == 0) {
                     if (secondRowInfo.type != RowType.NORMAL) {
@@ -495,6 +516,7 @@ public class ContainerPanel extends JCanvas {
         }
 
         double newMatrix[][] = new double[newCol][newCol];
+        String newMultibistMatrix[][] = new String[newCol][newCol];
         double newRightSides[] = new double[newCol];
         String newMultibits[] = new String[newCol];
 
@@ -506,14 +528,16 @@ public class ContainerPanel extends JCanvas {
                 continue;
             }
             newRightSides[newIndex] = temporalRightSideVoltages[index];
-            newMultibits[newIndex] = temporalMultibits[index];
+            newMultibits[newIndex] = temporalRightSideMultibits[index];
             rowInfo.mappedRow = newIndex;
 
             for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
                 RowInfo rowInfoJ = rowsInfo.elementAt(innerIndex);
                 if (rowInfoJ.type == RowType.CONSTANT) {
                     newRightSides[newIndex] -= rowInfoJ.voltage * temporalVoltageMatrix[index][innerIndex];
+                    newMultibits[newIndex] = rowInfoJ.multiBitsValue;
                 } else {
+                    newMultibistMatrix[newIndex][rowInfoJ.mappedColumn] = temporalMultibitsMatrix[index][innerIndex];
                     newMatrix[newIndex][rowInfoJ.mappedColumn] += temporalVoltageMatrix[index][innerIndex];
                 }
             }
@@ -522,16 +546,18 @@ public class ContainerPanel extends JCanvas {
 
         temporalRightSideVoltages = newRightSides;
         temporalVoltageMatrix = newMatrix;
-        temporalMultibits = newMultibits;
+        temporalMultibitsMatrix = newMultibistMatrix;
+        temporalRightSideMultibits = newMultibits;
         rowCount = matrixSize = newCol;
 
         System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                 rowCount);
         
-        System.arraycopy(temporalMultibits, 0, multibitsValues, 0, rowCount);
+        System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0, rowCount);
 
         for (int i = 0; i < rowCount; i++) {
             System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, rowCount);
+            System.arraycopy(temporalMultibitsMatrix[i], 0, mutibitsMatrix[i], 0, rowCount);
         }
 
         //</editor-fold>
@@ -720,12 +746,13 @@ public class ContainerPanel extends JCanvas {
                 System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                         temporalRightSideVoltages.length);
                 
-                System.arraycopy(temporalMultibits, 0, multibitsValues, 0, 
-                        temporalMultibits.length);
+                System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0, 
+                        temporalRightSideMultibits.length);
 
                 if (circuitNonLinear) {
                     for (int i = 0; i < matrixSize; i++) {
                         System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
+                        System.arraycopy(temporalMultibitsMatrix[i], 0, mutibitsMatrix, 0, matrixSize);
                     }
                 }
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
@@ -757,7 +784,7 @@ public class ContainerPanel extends JCanvas {
                         multibits = rowInfo.multiBitsValue;
                     } else {
                         newVoltage = rightSideVoltages[rowInfo.mappedColumn];
-                        multibits = multibitsValues[rowInfo.mappedColumn];
+                        multibits = rightSideMultibitsValues[rowInfo.mappedColumn];
                     }
 
                     if (Double.isNaN(newVoltage)) {
@@ -1210,12 +1237,12 @@ public class ContainerPanel extends JCanvas {
     public void stampVoltageSource(int fromNode, int toNode,
             int voltageSourceIndex, double newVoltage, String multibits) {
         int rowIndex = joints.size() + voltageSourceIndex;
-        stampVoltageMatrix(rowIndex, fromNode, -1);
-        stampVoltageMatrix(rowIndex, toNode, 1);
+        stampVoltageMatrix(rowIndex, fromNode, -1, multibits);
+        stampVoltageMatrix(rowIndex, toNode, 1, multibits);
         setRowInfoRightSideChanges(rowIndex, newVoltage);
         setRowInfoMultibitsChange(rowIndex, multibits);
-        stampVoltageMatrix(fromNode, rowIndex, 1);
-        stampVoltageMatrix(toNode, rowIndex, -1);
+        stampVoltageMatrix(fromNode, rowIndex, 1, multibits);
+        stampVoltageMatrix(toNode, rowIndex, -1, multibits);
     }
 
     /**
@@ -1251,7 +1278,7 @@ public class ContainerPanel extends JCanvas {
         } else {
             rowInfoIndex -= 1;
         }
-        temporalMultibits[rowInfoIndex] = multibits;
+        temporalRightSideMultibits[rowInfoIndex] = multibits;
     }
     //</editor-fold>
 
@@ -1265,11 +1292,11 @@ public class ContainerPanel extends JCanvas {
      */
     public void stampVoltageSource(int fromNode, int toNode, int voltageSourceIndex) {
         int rowIndex = joints.size() + voltageSourceIndex;
-        stampVoltageMatrix(rowIndex, fromNode, -1);
-        stampVoltageMatrix(rowIndex, toNode, 1);
+        stampVoltageMatrix(rowIndex, fromNode, -1, "z");
+        stampVoltageMatrix(rowIndex, toNode, 1, "z");
         setRowInfoRightSideChanges(rowIndex);
-        stampVoltageMatrix(fromNode, rowIndex, 1);
-        stampVoltageMatrix(toNode, rowIndex, -1);
+        stampVoltageMatrix(fromNode, rowIndex, 1, "z");
+        stampVoltageMatrix(toNode, rowIndex, -1, "z");
     }
 
     /**
@@ -1305,7 +1332,7 @@ public class ContainerPanel extends JCanvas {
      * @param column column number in which voltage will be stamped
      * @param newVoltage voltage to be stamped
      */
-    public void stampVoltageMatrix(int row, int column, double newVoltage) {
+    public void stampVoltageMatrix(int row, int column, double newVoltage, String multibits) {
         if (row <= 0 || column <= 0) {
             return;
         }
@@ -1317,6 +1344,8 @@ public class ContainerPanel extends JCanvas {
             column -= 1;
         }
         temporalVoltageMatrix[row][column] += newVoltage;
+        if (temporalMultibitsMatrix[row][column] == null)
+            temporalMultibitsMatrix[row][column] = multibits;
     }
 
     /**
@@ -1333,10 +1362,10 @@ public class ContainerPanel extends JCanvas {
             int a = 0;
             a /= a;
         }
-        stampVoltageMatrix(nodeA, nodeA, r0);
-        stampVoltageMatrix(nodeB, nodeB, r0);
-        stampVoltageMatrix(nodeA, nodeB, -r0);
-        stampVoltageMatrix(nodeB, nodeA, -r0);
+        stampVoltageMatrix(nodeA, nodeA, r0, "z");
+        stampVoltageMatrix(nodeB, nodeB, r0, "z");
+        stampVoltageMatrix(nodeA, nodeB, -r0, "z");
+        stampVoltageMatrix(nodeB, nodeA, -r0, "z");
     }
 
     /**

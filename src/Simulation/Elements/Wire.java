@@ -41,12 +41,17 @@ public class Wire extends BaseElement {
         drawThickLine(g, extra1, point2);
         setBbox(point1, point2, 3);
         drawPosts(g);
+        System.out.println("volt1 " + binaryValues[0]);
+        System.out.println("volt2 " + binaryValues[1]);
     }
 
     @Override
     public void stampVoltages() {
+        String select = "z";
+        if (binaryValues != null && binaryValues[1] != null)
+            select = binaryValues[1].substring(from, to+1);
         containerPanel.stampVoltageSource(joints[0], joints[1], 
-                voltageSourceReference, 0, "z");
+                voltageSourceReference, 0, select);
     }
     
     @Override
@@ -62,11 +67,11 @@ public class Wire extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("from" , 0.0, 0, binaryValues[0].length() - 1).
+            return new EditInfo("from" , 0.0, 0, binaryValues[1].length() - 1).
                     addComponent(new JLabel("From: ")).
                     addComponent(new JTextField(from + "", 10));
         if (n == 1)
-            return new EditInfo("to" , 0.0, 0, binaryValues[0].length() - 1).
+            return new EditInfo("to" , 0.0, 0, binaryValues[1].length() - 1).
                     addComponent(new JLabel("     To: ")).
                     addComponent(new JTextField(to + "", 10));
         return null;
