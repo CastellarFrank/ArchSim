@@ -69,7 +69,7 @@ public class LogicOutput extends BaseElement {
 
     @Override
     public void doStep() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override

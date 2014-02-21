@@ -4,6 +4,7 @@
  */
 package GUI.NestedWatcher;
 
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 
 /**
@@ -25,7 +26,8 @@ public class TableRowData {
             this.value = "[...]";
         } else {
             this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
-            Object val = scope.getVariableValue(moduleInstanceId, variableName).value;
+            ExpressionValue info = scope.getVariableValue(moduleInstanceId, variableName);
+            Object val = info == null? null : info.value;
             this.value =  val == null ? "z" : val.toString();
         }
     }

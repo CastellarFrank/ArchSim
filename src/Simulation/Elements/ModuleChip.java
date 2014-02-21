@@ -6,7 +6,6 @@ package Simulation.Elements;
 
 import DataStructures.ModuleInfo;
 import DataStructures.ModuleRepository;
-import Exceptions.ArchException;
 import Exceptions.ModuleDesignNotFoundException;
 import GUI.ContainerPanel;
 import Simulation.Configuration;
@@ -303,8 +302,15 @@ public class ModuleChip extends BaseElement {
             if (ports[i].isOutput)
                 continue;
             String portName = ports[i].portName;
-            Integer value = Convert.voltageToLogicValue(ports[i].voltage);
-            containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).setValue(value);
+            String multibitsValue = binaryValues[i];
+            if (multibitsValue == null || multibitsValue.equals("z")) {
+                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).zValue = true;
+            } else {
+                Integer converted = Integer.parseInt(multibitsValue);
+                containerPanel.simulationScope
+                        .getVariableValue(moduleInstanceId, portName)
+                        .setValue(converted);
+            }
         }
         moduleInstance.executeModule(containerPanel.simulationScope, moduleInstanceId);
         containerPanel.simulationScope.executeScheduledNonBlockingAssigns();
@@ -350,6 +356,7 @@ public class ModuleChip extends BaseElement {
         double curcount, current;
         boolean isVertical, leftOrBottom, isOutput;
         double voltage;
+        String multibits;
         //</editor-fold>
 
         PortElement(int p, PortPosition side, String text) {
