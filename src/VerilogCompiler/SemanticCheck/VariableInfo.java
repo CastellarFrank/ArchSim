@@ -41,6 +41,8 @@ public class VariableInfo {
     
     public VariableInfo getCopy() {
         VariableInfo copy = new VariableInfo();
+        copy.LSB = LSB;
+        copy.MSB = MSB;
         copy.isArray = isArray;
         copy.isVector = isVector;
         copy.isNumeric = isNumeric;

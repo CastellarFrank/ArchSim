@@ -875,6 +875,7 @@ public class ContainerPanel extends JCanvas {
 
         if (!isPaused) {
             runStep();
+            analyze();
             if (watchesTableModel != null) {
                 watchesTableModel.updateValues();
             }

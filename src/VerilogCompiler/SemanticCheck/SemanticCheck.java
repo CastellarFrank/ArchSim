@@ -131,7 +131,7 @@ public class SemanticCheck {
     public InstanceModuleScope variablesToScope() {
         InstanceModuleScope scope = new InstanceModuleScope();
         for (Map.Entry<String, VariableInfo> entry : declaredVariables.entrySet()) {
-            scope.registerVariable(entry.getKey(), entry.getValue());
+            scope.registerVariable(entry.getKey(), entry.getValue().getCopy());
         }
         
         return scope;

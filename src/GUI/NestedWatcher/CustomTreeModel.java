@@ -33,21 +33,31 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     
     public final DefaultMutableTreeNode generateRoot() {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(null, null, null), true);
+        ArrayList<WatchModelEntry> toDelete = new ArrayList<WatchModelEntry>();
+        
         for (WatchModelEntry watchModelEntry : variables) {
             String moduleId = watchModelEntry.moduleInstanceId;
             String variableName = watchModelEntry.variableName;
             VariableInfo info = scope.getVariableInfo(moduleId, variableName);
-            if (info.isArray) {
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(null, variableName, moduleId));
-                Object[] values = (Object[]) scope.getVariableValue(moduleId, variableName).value;
-                for (int i = 0; i < values.length; i++) {
-                    node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i), false));
+            if (info == null)
+                toDelete.add(watchModelEntry);
+            else
+                if (info.isArray) {
+                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(null, variableName, moduleId));
+                    Object[] values = (Object[]) scope.getVariableValue(moduleId, variableName).value;
+                    for (int i = 0; i < values.length; i++) {
+                        node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i), false));
+                    }
+                    rootNode.add(node);
+                } else {
+                    rootNode.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId)));
                 }
-                rootNode.add(node);
-            } else {
-                rootNode.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId)));
-            }
         }
+        for (WatchModelEntry watchModelEntry : toDelete) {
+            variables.remove(watchModelEntry);
+        }
+        if (!toDelete.isEmpty())
+            return generateRoot();
         return rootNode;
     }
     

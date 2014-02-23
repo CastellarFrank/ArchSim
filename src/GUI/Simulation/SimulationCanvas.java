@@ -132,6 +132,9 @@ public class SimulationCanvas extends ContainerPanel implements
         }
 
         if (e.getClickCount() == 1 && deleting && mouseComponent != null) {
+            if (mouseComponent instanceof ModuleChip) {
+                simulationScope.unregister(((ModuleChip)mouseComponent).getModuleInstanceId());
+            }
             this.elements.remove(mouseComponent);
             mouseComponent = null;
             prepareForReanalysis();

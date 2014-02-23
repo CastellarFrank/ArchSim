@@ -10,6 +10,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.Expressions.SimpleNumberExpression;
 import VerilogCompiler.SyntacticTree.NetType;
 import VerilogCompiler.SyntacticTree.PortDirection;
 import VerilogCompiler.SyntacticTree.VNode;
@@ -113,13 +114,12 @@ public class Port extends VNode {
 
     @Override
     public ExpressionType validateSemantics() {
+        VariableInfo info = new VariableInfo();
         if (SemanticCheck.getInstance().variableIsRegistered(identifier)) {
             ErrorHandler.getInstance().handleError(line, column, 
                     identifier + " is already defined");
             return ExpressionType.ERROR;
         } else {
-            VariableInfo info = new VariableInfo();
-            
             info.addAcceptedType(DataType.NET);
             if (direction == PortDirection.OUTPUT)
                 info.addAcceptedType(DataType.VARIABLE);
@@ -127,14 +127,24 @@ public class Port extends VNode {
             if (minExpression != null && !isVector)
                 info.isArray = true;
             if (isVector) info.isVector = true;
-            SemanticCheck.getInstance().registerVariable(identifier, info);
+            
         }
-        if (minExpression != null)
+        long lsb = 0, msb = 0;
+        if (minExpression != null) {
+            lsb = ((SimpleNumberExpression) minExpression).getUnsignedNumber();
             minExpression.validateSemantics();
+        }
         
-        if (maxExpression != null)
+        if (maxExpression != null) {
+            msb = ((SimpleNumberExpression) maxExpression).getUnsignedNumber();
             maxExpression.validateSemantics();
+        }
         
+        if (info.isVector) {
+            info.LSB = (int)lsb;
+            info.MSB = (int)msb;
+        }
+        SemanticCheck.getInstance().registerVariable(identifier, info);
         return null;
     }
 

@@ -10,6 +10,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.VNode;
 
 /**
@@ -64,7 +65,14 @@ public class SimpleLValue extends LValue {
     @Override
     public void setValue(SimulationScope simulationScope, String instanceModuleId, Object value) {
         ExpressionValue address = simulationScope.getVariableValue(instanceModuleId, identifier);
-        address.setValue(value);
+        VariableInfo info = simulationScope.getVariableInfo(instanceModuleId, identifier);
+        int size = info.MSB - info.LSB + 1;
+        if (value != null) {
+            Integer newVal = Integer.parseInt(value.toString().substring(value.toString().length() - size));
+            address.setValue(newVal);
+        } else {
+            address.setValue(value);
+        }
     }
 
     @Override

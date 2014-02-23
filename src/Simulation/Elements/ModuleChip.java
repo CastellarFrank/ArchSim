@@ -174,7 +174,8 @@ public class ModuleChip extends BaseElement {
     public void stampVoltages() {
         for (int i = 0; i < getPostCount(); i++) {
             if (ports[i].isOutput && voltageSources.contains(i))
-                containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex);
+                containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex,
+                        0, binaryValues[i]);
         }
     }
     
@@ -310,12 +311,21 @@ public class ModuleChip extends BaseElement {
                 containerPanel.simulationScope
                         .getVariableValue(moduleInstanceId, portName)
                         .setValue(converted);
-            }
+            } 
         }
         moduleInstance.executeModule(containerPanel.simulationScope, moduleInstanceId);
         containerPanel.simulationScope.executeScheduledNonBlockingAssigns();
         if (Configuration.DEBUG_MODE)
             System.out.println(containerPanel.simulationScope.dumpToString(moduleInstanceId));
+        
+        for (int i = 0; i < postCount; i++) {
+            if (ports[i].isOutput) {
+                Object value = containerPanel.simulationScope
+                        .getVariableValue(moduleInstanceId, ports[i].portName)
+                        .value;
+                binaryValues[i] = value != null ? ((Integer)value).toString(): "z";
+            }
+        }
     }
 
     @Override
