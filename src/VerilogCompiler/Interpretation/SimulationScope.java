@@ -54,6 +54,19 @@ public class SimulationScope {
         return null;
     }
     
+    public String getFormattedValue(String moduleInstanceId, String variable) {
+        if (scopes.containsKey(moduleInstanceId)) {
+            VariableInfo info = scopes.get(moduleInstanceId).getVariableInfo(variable);
+            Object val = info.value.value;
+            if (val instanceof Integer) {
+                String f = "%0" + (info.MSB - info.LSB + 1) + "d";
+                return String.format(f, val);
+            }
+            return val != null ? val.toString() : null;
+        }
+        return null;
+    }
+    
     public VariableInfo getVariableInfo(String moduleInstanceId, String variable) {
         if (scopes.containsKey(moduleInstanceId))
             return scopes.get(moduleInstanceId).getVariableInfo(variable);

@@ -27,8 +27,8 @@ public class TableRowData {
         } else {
             this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
             ExpressionValue info = scope.getVariableValue(moduleInstanceId, variableName);
-            Object val = info == null? null : info.value;
-            this.value =  val == null ? "z" : val.toString();
+            Object val = info == null? null : info.getValueAsString();
+            this.value =  val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
         }
     }
     
@@ -45,7 +45,7 @@ public class TableRowData {
                 Object val = ((Object[])scope.getVariableValue(moduleInstanceId, variableName).value)[index];
                 this.value = val == null ? "z" : val.toString();
             } else
-                this.value = scope.getVariableValue(moduleInstanceId, variableName).value.toString();
+                this.value = scope.getFormattedValue(moduleInstanceId, variableName);
         }
     }
 
@@ -93,6 +93,6 @@ public class TableRowData {
     }
     
     public void update(SimulationScope scope) {
-        value = scope.getVariableValue(moduleInstanceId, variableName).value.toString();
+        value = scope.getVariableValue(moduleInstanceId, variableName).getValueAsString();
     }
 }

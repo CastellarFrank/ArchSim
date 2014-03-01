@@ -13,7 +13,7 @@ import VerilogCompiler.SyntacticTree.Base;
  */
 public class Convert {
     public static Integer getInteger(ExpressionValue value) {
-        return Integer.parseInt(value.value.toString(), Convert.baseToRadix(value.base));
+        return Integer.parseInt(value.getValueAsString(), Convert.baseToRadix(value.base));
     }
     
     public static Integer binaryToDecimal(Integer value) {
@@ -31,7 +31,7 @@ public class Convert {
     }
     
     public static Boolean getBoolean(ExpressionValue value) {
-        return Integer.parseInt(value.value.toString()) == 1;
+        return Integer.parseInt(value.getValueAsString()) == 1;
     }
     
     public static String arrayToString(Object[] array) {

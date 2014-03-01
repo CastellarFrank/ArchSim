@@ -96,8 +96,8 @@ public class BinaryExpression extends Expression {
 
         int leftRadix = Convert.baseToRadix(l.base), rightRadix = Convert.baseToRadix(r.base);
 
-        String leftValue = l.value.toString();
-        String rightValue = r.value.toString();
+        String leftValue = l.getValueAsString();
+        String rightValue = r.getValueAsString();
 
         long maxBits = Math.max(l.bits, r.bits);
 

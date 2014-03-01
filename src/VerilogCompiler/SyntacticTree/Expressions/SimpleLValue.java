@@ -68,7 +68,10 @@ public class SimpleLValue extends LValue {
         VariableInfo info = simulationScope.getVariableInfo(instanceModuleId, identifier);
         int size = info.MSB - info.LSB + 1;
         if (value != null) {
-            Integer newVal = Integer.parseInt(value.toString().substring(value.toString().length() - size));
+            String format = "%0" + size + "d";
+            String adjustedValue = String.format(format, value);
+            int index = adjustedValue.toString().length() - size;
+            Integer newVal = Integer.parseInt(adjustedValue.toString().substring(adjustedValue.toString().length() - size));
             address.setValue(newVal);
         } else {
             address.setValue(value);

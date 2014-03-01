@@ -25,6 +25,25 @@ public class ExpressionValue {
         this.zValue = true;
         this.xValue = false;
     }
+    
+    public String getValueAsString() {
+        //return value != null ? value.toString() : null;
+        
+        if (value instanceof Integer) {
+          
+            String val = ((Integer) value).toString();
+            
+            try {
+                String adjustedValue = String.format("%0" + bits + "d", val);
+                return adjustedValue;
+            }catch (Exception e) {
+                String format = "%0" + bits + "d";
+                return value.toString();
+            }
+            
+        }
+        return value != null ? value.toString() : null;
+    }
 
     public ExpressionValue(Object value, long bits) {
         this.value = value;
@@ -50,6 +69,7 @@ public class ExpressionValue {
     
     public ExpressionValue getCopy() {
         ExpressionValue copy = new ExpressionValue();
+        copy.bits = this.bits;
         
         Object newValue = null;
         if (value instanceof Object[]) {

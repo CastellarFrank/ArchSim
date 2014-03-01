@@ -105,7 +105,7 @@ public class WatchesTableModel implements TableModel {
             else if (value.zValue)
                 watchModelEntry.value = "z";
             else
-                watchModelEntry.value = value.value.toString();
+                watchModelEntry.value = scope.getFormattedValue(watchModelEntry.moduleInstanceId, watchModelEntry.variableName);
         }
     }
     

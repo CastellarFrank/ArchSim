@@ -175,7 +175,7 @@ public class ModuleChip extends BaseElement {
         for (int i = 0; i < getPostCount(); i++) {
             if (ports[i].isOutput && voltageSources.contains(i))
                 containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex,
-                        0, binaryValues[i]);
+                        0, ports[i].previousValue);
         }
     }
     
@@ -320,10 +320,13 @@ public class ModuleChip extends BaseElement {
         
         for (int i = 0; i < postCount; i++) {
             if (ports[i].isOutput) {
-                Object value = containerPanel.simulationScope
+                /*String value = containerPanel.simulationScope
                         .getVariableValue(moduleInstanceId, ports[i].portName)
-                        .value;
-                binaryValues[i] = value != null ? ((Integer)value).toString(): "z";
+                        .getValueAsString();*/
+                String value = containerPanel.simulationScope
+                        .getFormattedValue(moduleInstanceId, ports[i].portName);
+                binaryValues[i] = value == null ? "z" : value;
+                ports[i].previousValue = binaryValues[i];
             }
         }
     }
@@ -367,6 +370,7 @@ public class ModuleChip extends BaseElement {
         boolean isVertical, leftOrBottom, isOutput;
         double voltage;
         String multibits;
+        String previousValue;
         //</editor-fold>
 
         PortElement(int p, PortPosition side, String text) {
