@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="LV2COMPLEX" textX="125" textY="102" type="GUI.Design.ChipRectangule" x="96" x2="225" y="56" y2="89"><param>LV2COMPLEX</param><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="x" position="0"/></element></elements><behaviour>module LV2COMPLEX(output reg x); 
+	COMPLEX test(1, x);	
+endmodule</behaviour></module>

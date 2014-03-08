@@ -116,6 +116,15 @@ public class ModuleRepository {
     }
     
     /**
+     * It clears every structure on this class
+     */
+    public void clear() {
+        moduleInfos.clear();
+        modulesLogic.clear();
+        designPrototypes.clear();
+    }
+    
+    /**
      * Returns a set that contains all names registered in this <code>ModuleRepository</code>
      * @return a set of names
      */

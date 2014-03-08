@@ -54,6 +54,7 @@ public class MainWindow extends javax.swing.JFrame {
         Loader.getInstance().loadModules();
         moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
         Collections.sort(moduleNames);
+        needsRefresh = false;
     }
     
     public void addDebuggerWindow(Debugger debugger) {

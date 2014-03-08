@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" type="Simulation.Elements.NamedWire" x="224" x2="176" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="224" x2="272" y="168" y2="168"/><element id="0" type="Simulation.Elements.Wire" x="176" x2="224" y="192" y2="192"/></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="Instruction_Memory" textX="96" textY="84" type="GUI.Design.ChipRectangule" x="56" x2="249" y="40" y2="73"><param>Instruction_Memory</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="Read_Addr" position="0"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="Instruction" position="0"/></element></elements><behaviour>//////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
 // 

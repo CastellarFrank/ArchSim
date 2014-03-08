@@ -115,6 +115,7 @@ public class Port extends VNode {
     @Override
     public ExpressionType validateSemantics() {
         VariableInfo info = new VariableInfo();
+        info.isPort = true;
         if (SemanticCheck.getInstance().variableIsRegistered(identifier)) {
             ErrorHandler.getInstance().handleError(line, column, 
                     identifier + " is already defined");

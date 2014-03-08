@@ -25,6 +25,7 @@ public class ModuleDecl extends Declaration {
     String moduleName;
     ArrayList<Port> portList;
     ArrayList<ModuleItem> moduleItemList;
+    String parentModuleInstanceId;
     
     //<editor-fold defaultstate="collapsed" desc="Decorations">
     int inputPortCount = 0;
@@ -52,6 +53,14 @@ public class ModuleDecl extends Declaration {
 
     public void setHasModuleInstances(boolean hasModuleInstances) {
         this.hasModuleInstances = hasModuleInstances;
+    }
+
+    public String getParentModuleInstanceId() {
+        return parentModuleInstanceId;
+    }
+
+    public void setParentModuleInstanceId(String parentModuleInstanceId) {
+        this.parentModuleInstanceId = parentModuleInstanceId;
     }
 
     public InstanceModuleScope getScope() {
@@ -135,8 +144,7 @@ public class ModuleDecl extends Declaration {
     
     public void initModule(SimulationScope simulationScope, String moduleInstanceId) {
         for (ModuleItem moduleItem : moduleItemList) {
-            if (moduleItem instanceof InitialBlock)
-                moduleItem.executeModuleItem(simulationScope, moduleInstanceId);
+            moduleItem.initModuleItem(simulationScope, moduleInstanceId);
         }
     }
     

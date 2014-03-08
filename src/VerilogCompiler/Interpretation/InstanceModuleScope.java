@@ -55,7 +55,7 @@ public class InstanceModuleScope {
     public String dumpToString() {
         String result = "";
         for (Map.Entry<String, VariableInfo> variable : declaredVariables.entrySet()) {
-            ExpressionValue value = variable.getValue().value;
+            ExpressionValue value = variable.getValue().getExpressionValue();
             String stringValue = value + "";
             if (value != null && value.value != null && value.value instanceof Object[])
                 stringValue = Convert.arrayToString((Object[])value.value);
@@ -69,7 +69,7 @@ public class InstanceModuleScope {
     }
     
     public ExpressionValue getVariableValue(String variable) {
-        return declaredVariables.get(variable).value;
+        return declaredVariables.get(variable).getExpressionValue();
     }
     
     public void setVariableValue(String variable, ExpressionValue value) {

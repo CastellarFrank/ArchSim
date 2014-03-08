@@ -48,8 +48,15 @@ public class Wire extends BaseElement {
     @Override
     public void stampVoltages() {
         String select = "z";
-        if (binaryValues != null && binaryValues[1] != null)
+        if (binaryValues != null && binaryValues[1] != null) {
+            int size = to - from + 1;
+            if (size > binaryValues[1].length()) {
+                String extra = new String(new char[binaryValues[1].length() - size])
+                        .replace('\0', '0');
+                binaryValues[1] = extra + binaryValues[1];
+            }
             select = binaryValues[1].substring(from, to+1);
+        }
         containerPanel.stampVoltageSource(joints[0], joints[1], 
                 voltageSourceReference, 0, select);
     }

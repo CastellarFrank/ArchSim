@@ -93,6 +93,7 @@ public class Loader {
      * into the <code>ModuleRepository</code> singleton class.
      */
     public void loadModules() {
+        ModuleRepository.getInstance().clear();
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
         List<File> modules = (List<File>) FileUtils.listFiles(directory, null, true);

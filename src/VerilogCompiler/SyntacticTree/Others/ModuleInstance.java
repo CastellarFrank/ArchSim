@@ -5,6 +5,7 @@
 package VerilogCompiler.SyntacticTree.Others;
 
 import DataStructures.ModuleRepository;
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
@@ -12,6 +13,10 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import VerilogCompiler.SyntacticTree.Expressions.Expression;
+import VerilogCompiler.SyntacticTree.Expressions.IdentifierExpression;
+import VerilogCompiler.SyntacticTree.Expressions.IndexExpression;
+import VerilogCompiler.SyntacticTree.Expressions.RangeExpression;
+import VerilogCompiler.SyntacticTree.PortDirection;
 import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.util.ArrayList;
@@ -54,9 +59,80 @@ public class ModuleInstance extends VNode {
     }
     
     public void executeModuleInstance(SimulationScope simulationScope, String parentModuleInstanceId) {
-        System.out.println("Executing module instance inside " + parentModuleInstanceId);
-        System.out.println(moduleInstance);
-        System.out.println("End of instance");
+        //System.out.println("Executing module instance inside " + parentModuleInstanceId);
+        //System.out.println(moduleInstance);
+        moduleInstance.setParentModuleInstanceId(parentModuleInstanceId);
+        
+        ArrayList<Port> ports = moduleInstance.getPortList();
+        int index = 0;
+        for (Port port: ports) {            
+            if (port.direction == PortDirection.INPUT) {
+                Expression value = moduleConnectionList.get(index);
+                ExpressionValue expVal = value.evaluate(simulationScope, parentModuleInstanceId);
+                simulationScope.getScope(moduleInstanceId).setVariableValue(port.identifier, expVal);
+            }
+            if (port.direction == PortDirection.OUTPUT) {
+                
+            }
+            index++;
+        }
+        
+        moduleInstance.executeModule(simulationScope, moduleInstanceId);
+        
+        index = 0;
+        for (Port port: ports) {            
+            if (port.direction == PortDirection.OUTPUT) {
+                ExpressionValue expVal = simulationScope.getVariableValue(moduleInstanceId, port.identifier);
+                Expression value = moduleConnectionList.get(index);
+                
+                if (value instanceof IdentifierExpression) {
+                    IdentifierExpression exp = (IdentifierExpression) value;
+                    simulationScope.getScope(parentModuleInstanceId)
+                            .setVariableValue(exp.getIdentifier(), expVal);
+                } else if (value instanceof IndexExpression) {
+                    IndexExpression exp = (IndexExpression) value;
+                    ExpressionValue target = simulationScope.getScope(parentModuleInstanceId)
+                            .getVariableValue(exp.getIdentifier());
+                    if (target.value != null && (Object[])target.value != null
+                            && expVal.value != null && (Object[])expVal.value != null) {
+                        Object[] elems = (Object[])target.value;
+                        Object[] news = (Object[])expVal.value;
+                        
+                        Integer arrIndex = (Integer) exp.getExpression()
+                                .evaluate(simulationScope, parentModuleInstanceId).value;
+                        
+                        if (arrIndex != null) {
+                            elems[arrIndex] = news[arrIndex];
+                        }
+                        
+                    }
+                } else if (value instanceof RangeExpression) {
+                    RangeExpression exp = (RangeExpression) value;
+                    ExpressionValue target = simulationScope.getScope(parentModuleInstanceId)
+                            .getVariableValue(exp.getIdentifier());
+                    if (target.value != null && (Object[])target.value != null
+                            && expVal.value != null && (Object[])expVal.value != null) {
+                        Object[] elems = (Object[])target.value;
+                        Object[] news = (Object[])expVal.value;
+                        
+                        Integer min = (Integer) exp.getMinValue()
+                                .evaluate(simulationScope, parentModuleInstanceId).value;
+                        
+                        Integer max = (Integer) exp.getMaxValue()
+                                .evaluate(simulationScope, parentModuleInstanceId).value;
+                        
+                        if (min != null && max != null) {
+                            for (int i = min; i <= max; i++) {
+                                elems[i] = news[i];
+                            }
+                        }                        
+                    }
+                }
+            }
+            index++;
+        }
+        
+        //System.out.println("End of instance");
     }
 
     @Override
@@ -101,6 +177,7 @@ public class ModuleInstance extends VNode {
         ModuleInstance newOne = new ModuleInstance(identifier, exps, line, column);
         newOne.setModuleName(moduleName);
         newOne.moduleInstance = (ModuleDecl) moduleInstance.getCopy();
+        newOne.moduleInstanceId = ModuleInstanceIdGenerator.generate();
         return newOne;
     }
     

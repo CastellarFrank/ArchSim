@@ -51,7 +51,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     PreviewPanel preview;
     ErrorPanel errors;
     String fileName = "";
-    boolean modified = false;
+    boolean modified = false, compiled = false;
 
     /**
      * Creates new form DesignWindow
@@ -109,6 +109,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         if (!modified && source != null && source.hasBeenModified) {
             addFilenameToTitle(fileName + "*");
             modified = true;
+            compiled = false;
             update(g);
         }
         super.paintComponent(g);
@@ -173,7 +174,14 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         String tempFilename = target.getName().replaceFirst(".xml", "");
         removeModuleInfo(tempFilename);
         
+        if (target.exists())
+            target.delete();
+        
         try {
+            if (!compiled){
+                ModuleDecl module = compileWithoutSemantics();
+                compileLogic(module);
+            }
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document document = docBuilder.newDocument();
@@ -220,6 +228,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                 "/" + fileName);
         
         try {
+            //compileLogic(module);
+            
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document document = docBuilder.newDocument();
@@ -247,12 +257,14 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             StreamResult result = new StreamResult(target);
 
             transformer.transform(domSource, result);
+            
+            parent.needsRefresh = true;
         } catch (ParserConfigurationException ex) {
             Logger.getLogger(DesignWindow.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
-        parent.needsRefresh = true;
+        
     }
 
     public void destroyFrame() {
@@ -343,6 +355,21 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             dispose();
         }
     }
+    
+    public void compileLogic(ModuleDecl module) {        
+        if (module != null) {
+            module.validateSemantics();
+            if (ErrorHandler.getInstance().hasErrors())
+                showErrorPanel(ErrorHandler.getInstance().getErrors());
+            else {
+                preview.removeAll();
+                generateCircuitFromModule(module);
+                tabs.setSelectedIndex(0);
+                compiled = true;
+            }
+        } else {
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -363,7 +390,6 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         clearLogsMenu = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         compileMenu = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
 
         setClosable(true);
         setMaximizable(true);
@@ -435,9 +461,6 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         });
         jMenu3.add(compileMenu);
 
-        jMenuItem2.setText("Generate Preview");
-        jMenu3.add(jMenuItem2);
-
         jMenuBar1.add(jMenu3);
 
         setJMenuBar(jMenuBar1);
@@ -450,7 +473,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE)
+            .addComponent(tabs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
         );
 
         pack();
@@ -466,17 +489,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
 
     private void compileMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compileMenuActionPerformed
         ModuleDecl module = compileWithoutSemantics();
-        if (module != null) {
-            module.validateSemantics();
-            if (ErrorHandler.getInstance().hasErrors())
-                showErrorPanel(ErrorHandler.getInstance().getErrors());
-            else {
-                preview.removeAll();
-                generateCircuitFromModule(module);
-                tabs.setSelectedIndex(0);
-            }
-        } else {
-        }
+        compileLogic(module);
     }//GEN-LAST:event_compileMenuActionPerformed
 
     private void clearLogsMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearLogsMenuActionPerformed
@@ -499,7 +512,6 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenuItem saveOption;
     private javax.swing.JTabbedPane tabs;

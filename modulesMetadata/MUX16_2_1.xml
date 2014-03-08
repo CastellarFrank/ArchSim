@@ -1,1 +1,1 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><moduleInfo><name>MUX16_2_1</name><ports><port name="signal1" type="INPUT"/><port name="signal2" type="INPUT"/><port name="control" type="INPUT"/><port name="signal" type="OUTPUT"/></ports></moduleInfo>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><moduleInfo><name>MUX16_2_1</name><ports><port index="0" name="signal1" type="INPUT"/><port index="0" name="signal2" type="INPUT"/><port index="0" name="control" type="INPUT"/><port index="0" name="signal" type="OUTPUT"/></ports></moduleInfo>

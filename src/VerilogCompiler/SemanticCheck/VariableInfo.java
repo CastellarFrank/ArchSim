@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class VariableInfo {
+    public boolean isPort = false;
     public boolean isArray = false;
     public boolean isVector = false;
     public boolean isNumeric = false;
@@ -39,10 +40,15 @@ public class VariableInfo {
             isBigEndian = true;
     }
     
+    public ExpressionValue getExpressionValue() {
+        return value;
+    }
+    
     public VariableInfo getCopy() {
         VariableInfo copy = new VariableInfo();
         copy.LSB = LSB;
         copy.MSB = MSB;
+        copy.isPort = isPort;
         copy.isArray = isArray;
         copy.isVector = isVector;
         copy.isNumeric = isNumeric;

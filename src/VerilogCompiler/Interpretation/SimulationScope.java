@@ -59,7 +59,10 @@ public class SimulationScope {
             VariableInfo info = scopes.get(moduleInstanceId).getVariableInfo(variable);
             Object val = info.value.value;
             if (val instanceof Integer) {
-                String f = "%0" + (info.MSB - info.LSB + 1) + "d";
+                if (info.MSB - info.LSB + 1 == 0)
+                    return val.toString();
+                
+                String f = "%0" + Math.abs(info.MSB - info.LSB + 1) + "d";
                 return String.format(f, val);
             }
             return val != null ? val.toString() : null;

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="COMPLEX" textX="95" textY="94" type="GUI.Design.ChipRectangule" x="88" x2="153" y="48" y2="81"><param>COMPLEX</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="x" position="0"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="y" position="1"/></element></elements><behaviour>module COMPLEX(input reg x, output reg[0:1] y); 
+	adder test(x, x, y);	
+endmodule</behaviour></module>

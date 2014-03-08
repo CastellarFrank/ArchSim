@@ -62,6 +62,15 @@ public class ModuleInstantiation extends ModuleItem {
         }
         return null;
     }
+    
+    @Override
+    public void initModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        /*TODO*/
+        super.executeModuleItem(simulationScope, moduleInstanceId);
+        for (ModuleInstance moduleInstance : moduleInstanceList) {
+            moduleInstance.initModuleInstance(simulationScope);
+        }
+    }
 
     @Override
     public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {

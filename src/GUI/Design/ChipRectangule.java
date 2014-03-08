@@ -14,6 +14,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.w3c.dom.Document;
@@ -187,6 +188,12 @@ public class ChipRectangule extends BaseElement {
         rectPointsX = new int[]{xr, xr + xs, xr + xs, xr};
         rectPointsY = new int[]{yr, yr, yr + ys, yr + ys};
         setBbox(xr, yr, rectPointsX[2], rectPointsY[2]);
+        
+        if (textX == 0 || textY == 0) {
+            FontMetrics fm = getFontMetrics();
+            textX = (rectPointsX[0] + rectPointsX[1] - fm.stringWidth(moduleName)) / 2;
+            textY = rectPointsY[2] + fm.getAscent();            
+        }
 
         int px = x0, py = y0;
         for (ChipPort port : ports) {
@@ -216,6 +223,12 @@ public class ChipRectangule extends BaseElement {
             port.containerPanel = this.containerPanel;
             port.setPoint(px, py, dx, dy, dax, day, sx, sy, cspc);
         }
+    }
+    
+    private FontMetrics getFontMetrics() {
+        Font newFont = new Font("SansSerif", Font.BOLD, 11 * csize);
+        FontMetrics fm = Toolkit.getDefaultToolkit().getFontMetrics(newFont);
+        return fm;
     }
 
     @Override
@@ -284,6 +297,8 @@ public class ChipRectangule extends BaseElement {
 
     @Override
     public boolean contains(int x, int y) {
+        if (textBoundingBox == null)
+            return false;
         if (textBoundingBox.contains(x, y)) {
             selectedText = true;
         } else {

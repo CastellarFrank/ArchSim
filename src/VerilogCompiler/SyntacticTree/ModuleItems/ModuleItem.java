@@ -20,4 +20,8 @@ public abstract class ModuleItem extends VNode {
     public void executeModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         //System.out.println("executing module item: " + this.getClass().getSimpleName());
     }
+    
+    public void initModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        //System.out.println("executing module item: " + this.getClass().getSimpleName());
+    }
 }
