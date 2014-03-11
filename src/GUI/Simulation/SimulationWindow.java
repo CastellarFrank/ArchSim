@@ -223,7 +223,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         addWireMenu = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
         pauseContinueMenu = new javax.swing.JMenuItem();
 
         setBackground(new java.awt.Color(255, 255, 255));
@@ -399,11 +398,13 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu2.setText("Execution");
 
         jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
-        jMenuItem1.setText("Run");
+        jMenuItem1.setText("Restart");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem1);
-
-        jMenuItem2.setText("Do Step");
-        jMenu2.add(jMenuItem2);
 
         pauseContinueMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_MASK));
         pauseContinueMenu.setText("Pause");
@@ -426,7 +427,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 444, Short.MAX_VALUE)
+            .addGap(0, 456, Short.MAX_VALUE)
         );
 
         pack();
@@ -507,6 +508,10 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         setAddingElementInfo(MultiBitsOutput.class.getName(), new String[] { "z" });
     }//GEN-LAST:event_multiBitsOutputMenuActionPerformed
 
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAndMenu;
     private javax.swing.JMenuItem addMultMenu;
@@ -526,7 +531,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenu jMenu6;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenuItem lInputMenu;
