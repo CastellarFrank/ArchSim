@@ -108,6 +108,17 @@ public class ModuleDecl extends Declaration {
     public void setModuleItemList(ArrayList<ModuleItem> moduleItemList) {
         this.moduleItemList = moduleItemList;
     }
+    
+    public ArrayList<ModuleInstantiation> getModuleInstances() {
+        ArrayList<ModuleInstantiation> inst = new ArrayList<ModuleInstantiation>();
+        
+        for (ModuleItem item : getModuleItemList()) {
+            if (item instanceof ModuleInstantiation)
+                inst.add((ModuleInstantiation) item);
+            
+        }
+        return inst;
+    }
     //</editor-fold>    
 
     @Override
