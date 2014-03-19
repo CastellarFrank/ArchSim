@@ -22,6 +22,7 @@ public class DrilldownPanel extends ContainerPanel {
 
     public DrilldownPanel(ModuleInfo moduleInfo) {
         this.moduleInfo = moduleInfo;
+        init();
         
         String moduleName = moduleInfo.getModuleName();
         ModuleDecl decl = ModuleRepository.getInstance().getModuleLogic(moduleName);
