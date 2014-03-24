@@ -21,6 +21,10 @@ public class ModuleInfo {
     private String moduleName;
     private ArrayList<PortInfo> portsInfo;
     private boolean leaf = false;
+    /**
+     *It says if this module information instance is valid or not.
+     */
+    public boolean valid = true;
     private String source;
 
     /**

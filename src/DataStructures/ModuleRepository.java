@@ -55,6 +55,14 @@ public class ModuleRepository {
     public void registerModule(String moduleName, ModuleInfo info) {
         moduleInfos.put(moduleName, info);
     }
+    
+    /**
+     * Unregisters a new <code>ModuleInfo</code> under the specified name if it exists
+     * @param moduleName name of the module
+     */
+    public void unregisterModule(String moduleName) {
+        moduleInfos.remove(moduleName);
+    }
 
     /**
      * Tells if a given module is registered.

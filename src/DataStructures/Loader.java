@@ -97,27 +97,36 @@ public class Loader {
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
         List<File> modules = (List<File>) FileUtils.listFiles(directory, null, true);
+        
+        for (File file : modules) {
+            ModuleInfo moduleInfo = new ModuleInfo();
+            moduleInfo.valid = false;
+            ModuleRepository.getInstance().registerModule(file.getName().replace(".xml", ""), moduleInfo);
+        }
+        
         for (File file : modules) {
             if (Configuration.DEBUG_MODE) {
                 System.out.println("Loading module... " + file.getAbsolutePath());
             }            
             String source = getSourceCode(file.getName());
             ModuleDecl parsed = getModuleLogic(source);
-            if (parsed != null || true) {
+            if (parsed != null) {
                 ModuleInfo moduleInfo = getModuleInfo(file.getName());
+                if (moduleInfo == null) continue;
                 moduleInfo.setSource(source);
                 
                 if (!parsed.hasModuleInstances()) 
                     moduleInfo.setIsLeaf(true);
                 
                 if (moduleInfo != null) {
+                    ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
                     ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
                     ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
                 } else {
                     System.out.println("Module Info is null");
                 }
             } else {
-                System.out.println("ModuleDecl is null. Possibly parse error");
+                System.out.println("ModuleDecl (" + file.getName() + ") is null. Possibly parse error");
             }
         }
     }
