@@ -55,9 +55,11 @@ public class BlockingStatement extends Statement {
     
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
-        System.out.println(expression);
+        //System.out.println(expression);
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
-        lvalue.setValue(simulationScope, moduleName, value.value);
+        if (value != null) {
+            lvalue.setValue(simulationScope, moduleName, value.value);
+        }
     }
 
     @Override

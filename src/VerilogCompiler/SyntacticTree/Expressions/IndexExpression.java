@@ -80,16 +80,19 @@ public class IndexExpression extends PrimaryExpression {
                 ExpressionValue complete = simulationScope.getVariableValue(moduleName, identifier);
                 ExpressionValue min = expression.evaluate(simulationScope, moduleName);
                 
-                Integer minLimit = Integer.parseInt(min.value.toString());
-                
-                int realMin = adjustPositionToSize(minLimit, simulationScope, moduleName);
-                
-                Object[] values = (Object[]) complete.value;
-                
-                if (realMin < 0 || realMin > values.length)
-                    /*ERROR!!!*/
-                    return null;
-                return new ExpressionValue(values[realMin], 0);
+                if (min.value != null) {                
+                    Integer minLimit = Integer.parseInt(min.value.toString(), 2);
+
+                    int realMin = adjustPositionToSize(minLimit, simulationScope, moduleName);
+
+                    Object[] values = (Object[]) complete.value;
+
+                    if (realMin < 0 || realMin > values.length)
+                        /*ERROR!!!*/
+                        return null;
+                    return new ExpressionValue(values[realMin], 0);
+                }
+                return null;
             default: return null;
         }
     }

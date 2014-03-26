@@ -58,7 +58,12 @@ public class Concatenation extends LValue {
             String moduleName, Object value) {
         if (Configuration.DEBUG_MODE)
             System.out.println("binary number " + value);
-        int intValue = (Integer) value;
+        long intValue = 0;
+        if (value instanceof Integer) {
+            intValue = (Integer) value;
+        } else if (value instanceof Long) {
+            intValue = (Long) value;
+        }
         int currentPos = 31;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
             if (currentPos < 0) break;

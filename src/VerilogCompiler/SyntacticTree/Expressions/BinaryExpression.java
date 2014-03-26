@@ -148,14 +148,17 @@ public class BinaryExpression extends Expression {
                 return new ExpressionValue(Integer.parseInt(leftValue) >= Integer.parseInt(rightValue) ? 1 : 0,
                         1);
             case _OP_BIT_AND:
-                return new ExpressionValue(Integer.parseInt(leftValue) & Integer.parseInt(rightValue),
-                        maxBits);
+                Integer and = Integer.parseInt(leftValue, 2) & Integer.parseInt(rightValue, 2);
+                and = Integer.parseInt(Integer.toBinaryString(and));
+                return new ExpressionValue(and, maxBits);
             case _OP_BIT_OR:
-                return new ExpressionValue(Integer.parseInt(leftValue) | Integer.parseInt(rightValue),
-                        maxBits);
+                Integer or = Integer.parseInt(leftValue, 2) | Integer.parseInt(rightValue, 2);
+                or = Integer.parseInt(Integer.toBinaryString(or));
+                return new ExpressionValue(or, maxBits);
             case _OP_BIT_XOR:
-                return new ExpressionValue(Integer.parseInt(leftValue) ^ Integer.parseInt(rightValue),
-                        maxBits);
+                Integer xor = Integer.parseInt(leftValue, 2) ^ Integer.parseInt(rightValue, 2);
+                xor = Integer.parseInt(Integer.toBinaryString(xor));
+                return new ExpressionValue(xor, maxBits);
             case _OP_BIT_XNOR:
                 return new ExpressionValue(Integer.parseInt(leftValue) ^ ~Integer.parseInt(rightValue),
                         maxBits);

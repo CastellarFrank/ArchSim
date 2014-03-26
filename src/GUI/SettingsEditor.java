@@ -56,6 +56,47 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             return "themes/idea.xml";
         return "";
     }
+    
+    public void applyChanges(final boolean closeAfter) {
+        Configuration.MODULES_DIRECTORY_PATH = modulesDirectoryTF.getText();
+        Configuration.MODULE_METADATA_DIRECTORY_PATH = modulesMetaDirectoryTF.getText();
+        
+        Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
+        Configuration.DEBUG_MODE = debugModeCB.isSelected();
+        Configuration.LOGIC_VALUES_AS_NUMBER = asNumbersCB.isSelected();
+        Configuration.SMALL_GRID = smallGridCB.isSelected();
+        
+        Configuration.LOGIC_0_VOLTAGE = Double.parseDouble(lvalue0TF.getText());
+        Configuration.LOGIC_1_VOLTAGE = Double.parseDouble(lvalue1TF.getText());
+        Configuration.REPAINT_PAUSE = Integer.parseInt(pauseTF.getText());
+        
+        Configuration.KEEP_CONNECTED_ON_DRAG = strongConCB.isSelected();
+        
+        Configuration.saveToFile(Configuration.CONFIG_FILE_NAME);
+        Configuration.THEME = indexToTheme(themeCB.getSelectedIndex());
+        
+        JInternalFrame[] frames = this.getDesktopPane().getAllFrames();
+        for (JInternalFrame jInternalFrame : frames) {
+            if (jInternalFrame instanceof DesignWindow) {
+                ((DesignWindow)jInternalFrame).refreshTheme();
+            }
+        }
+        
+        status.setText("Settings successfully saved.");
+        status.setForeground(Color.GREEN.darker());
+        
+        int delay = 5000; 
+        ActionListener taskPerformer = new ActionListener() {
+            boolean close = closeAfter;
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                status.setText("");
+                if (close)
+                    setVisible(false);
+            }
+        };
+        new Timer(delay, taskPerformer).start();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -94,6 +135,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         saveButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         status = new javax.swing.JLabel();
+        applyBtn = new javax.swing.JButton();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -300,6 +342,13 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             }
         });
 
+        applyBtn.setText("Apply");
+        applyBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                applyBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -311,10 +360,12 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(status)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveButton)
-                .addGap(19, 19, 19))
+                .addGap(18, 18, 18)
+                .addComponent(applyBtn)
+                .addGap(27, 27, 27))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -322,12 +373,14 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                 .addComponent(tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(saveButton)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(saveButton)
+                        .addComponent(applyBtn))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         pack();
@@ -348,41 +401,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_browseButtonActionPerformed
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
-        Configuration.MODULES_DIRECTORY_PATH = modulesDirectoryTF.getText();
-        Configuration.MODULE_METADATA_DIRECTORY_PATH = modulesMetaDirectoryTF.getText();
-        
-        Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
-        Configuration.DEBUG_MODE = debugModeCB.isSelected();
-        Configuration.LOGIC_VALUES_AS_NUMBER = asNumbersCB.isSelected();
-        Configuration.SMALL_GRID = smallGridCB.isSelected();
-        
-        Configuration.LOGIC_0_VOLTAGE = Double.parseDouble(lvalue0TF.getText());
-        Configuration.LOGIC_1_VOLTAGE = Double.parseDouble(lvalue1TF.getText());
-        Configuration.REPAINT_PAUSE = Integer.parseInt(pauseTF.getText());
-        
-        Configuration.KEEP_CONNECTED_ON_DRAG = strongConCB.isSelected();
-        
-        Configuration.saveToFile(Configuration.CONFIG_FILE_NAME);
-        Configuration.THEME = indexToTheme(themeCB.getSelectedIndex());
-        
-        JInternalFrame[] frames = this.getDesktopPane().getAllFrames();
-        for (JInternalFrame jInternalFrame : frames) {
-            if (jInternalFrame instanceof DesignWindow) {
-                ((DesignWindow)jInternalFrame).refreshTheme();
-            }
-        }
-        
-        status.setText("Settings successfully saved.");
-        status.setForeground(Color.GREEN.darker());
-        
-        int delay = 5000; 
-        ActionListener taskPerformer = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                status.setText("");
-            }
-        };
-        new Timer(delay, taskPerformer).start();
+        applyChanges(true);
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void browseButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButton1ActionPerformed
@@ -395,7 +414,12 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         modulesMetaDirectoryTF.setText(target.getAbsolutePath());
     }//GEN-LAST:event_browseButton1ActionPerformed
 
+    private void applyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyBtnActionPerformed
+        applyChanges(false);
+    }//GEN-LAST:event_applyBtnActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton applyBtn;
     private javax.swing.JCheckBox asNumbersCB;
     private javax.swing.JButton browseButton;
     private javax.swing.JButton browseButton1;

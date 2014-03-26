@@ -9,7 +9,6 @@ import DataStructures.ModuleRepository;
 import Exceptions.ModuleDesignNotFoundException;
 import GUI.ContainerPanel;
 import Simulation.Configuration;
-import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
@@ -20,6 +19,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -90,8 +90,9 @@ public class ModuleChip extends BaseElement {
 
     private void newInit(int realX, int realY, String moduleName) {
         Element element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
-        if (element == null)
+        if (element == null) {
             throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
+        }
         this.moduleName = element.getAttribute("moduleName");
         textX = Integer.parseInt(element.getAttribute("textX"));
         textY = Integer.parseInt(element.getAttribute("textY"));
@@ -153,7 +154,9 @@ public class ModuleChip extends BaseElement {
                     side = PortPosition.EAST;
                 }
             }
-            if (isOutput) voltageSources.add(i);
+            if (isOutput) {
+                voltageSources.add(i);
+            }
             
             PortElement elem = new PortElement(position, side, portName);
             elem.isVertical = isVertical;
@@ -173,9 +176,10 @@ public class ModuleChip extends BaseElement {
     @Override
     public void stampVoltages() {
         for (int i = 0; i < getPostCount(); i++) {
-            if (ports[i].isOutput && voltageSources.contains(i))
+            if (ports[i].isOutput && voltageSources.contains(i)) {
                 containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex,
                         0, ports[i].previousValue);
+            }
         }
     }
     
@@ -300,14 +304,17 @@ public class ModuleChip extends BaseElement {
         }
         int postCount = getPostCount();
         for (int i = 0; i < postCount; i++) {
-            if (ports[i].isOutput)
+            if (ports[i].isOutput) {
                 continue;
+            }
             String portName = ports[i].portName;
             String multibitsValue = binaryValues[i];
-            if (multibitsValue == null || multibitsValue.equals("z")) {
+            if (multibitsValue == null || multibitsValue.contains("z")) {
                 containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).zValue = true;
-            } else {
-                Integer converted = Integer.parseInt(multibitsValue);
+            } else if (multibitsValue.contains("x")) {
+                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).xValue = true;
+            }else {
+                BigInteger converted = new BigInteger(multibitsValue);
                 containerPanel.simulationScope
                         .getVariableValue(moduleInstanceId, portName)
                         .setValue(converted);
@@ -315,9 +322,9 @@ public class ModuleChip extends BaseElement {
         }
         moduleInstance.executeModule(containerPanel.simulationScope, moduleInstanceId);
         containerPanel.simulationScope.executeScheduledNonBlockingAssigns();
-        if (Configuration.DEBUG_MODE)
+        if (Configuration.DEBUG_MODE) {
             System.out.println(containerPanel.simulationScope.dumpToString(moduleInstanceId));
-        
+        }
         for (int i = 0; i < postCount; i++) {
             if (ports[i].isOutput) {
                 /*String value = containerPanel.simulationScope

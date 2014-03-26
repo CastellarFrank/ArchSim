@@ -12,6 +12,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.VNode;
+import java.math.BigInteger;
 
 /**
  *
@@ -66,13 +67,36 @@ public class SimpleLValue extends LValue {
     public void setValue(SimulationScope simulationScope, String instanceModuleId, Object value) {
         ExpressionValue address = simulationScope.getVariableValue(instanceModuleId, identifier);
         VariableInfo info = simulationScope.getVariableInfo(instanceModuleId, identifier);
-        int size = info.MSB - info.LSB + 1;
+        int size = Math.abs(info.MSB - info.LSB) + 1;
+        String format = "%0" + size + "d";
         if (value != null) {
-            String format = "%0" + size + "d";
-            String adjustedValue = String.format(format, value);
-            int index = adjustedValue.toString().length() - size;
-            Integer newVal = Integer.parseInt(adjustedValue.toString().substring(adjustedValue.toString().length() - size));
-            address.setValue(newVal);
+            try {  
+                Integer realVal = 0;
+                if (value instanceof String) {
+                    realVal = new BigInteger(value.toString()).intValue();
+                } else if (value instanceof Integer) {
+                    realVal = (Integer) value;
+                } else if (value instanceof BigInteger) {
+                    realVal = ((BigInteger) value).intValue();
+                }
+                String adjustedValue = value.toString();
+                
+                if (size != value.toString().length()) {
+                    adjustedValue = String.format(format, realVal);
+                }
+                
+                int index = adjustedValue.toString().length() - size;
+                
+                String portion = adjustedValue.toString().substring(adjustedValue.toString().length() - size);
+                
+                //Integer newVal = Integer.parseInt(portion);
+                address.setValue(portion);
+            }catch (Exception e) {
+                System.out.println("error format: " + format);
+                System.out.println(value);
+                e.printStackTrace();
+                System.exit(0);
+            }
         } else {
             address.setValue(value);
         }

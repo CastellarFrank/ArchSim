@@ -77,8 +77,9 @@ public class SensitiveList extends Expression {
 
     @Override
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
-        if (acceptAll)
+        if (acceptAll) {
             return new ExpressionValue(1, 1);
+        }
         int result = 1;
         for (EventExpression eventExpression : items) {
             ExpressionValue val = eventExpression.evaluate(simulationScope, moduleName);

@@ -6,6 +6,7 @@ package VerilogCompiler.Interpretation;
 
 import Simulation.Configuration;
 import VerilogCompiler.SyntacticTree.Base;
+import java.math.BigInteger;
 
 /**
  *
@@ -27,11 +28,20 @@ public class Convert {
     }
     
     public static Integer decimalToBinary(Integer value) {
-        return Integer.parseInt(Integer.toBinaryString(value));
+        String binaryString = Integer.toBinaryString(value);
+        
+        if (binaryString.length() < 32 || value > 0) {
+            return Integer.parseInt(binaryString);
+        } else {
+            Integer abs = Math.abs(value);
+            String newBinary = Integer.toBinaryString(abs);
+            
+            return Integer.parseInt("-" + newBinary);
+        }
     }
     
     public static Boolean getBoolean(ExpressionValue value) {
-        return Integer.parseInt(value.getValueAsString()) == 1;
+        return Long.parseLong(value.getValueAsString()) == 1;
     }
     
     public static String arrayToString(Object[] array) {

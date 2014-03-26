@@ -5,6 +5,7 @@
 package VerilogCompiler.Interpretation;
 
 import VerilogCompiler.SyntacticTree.Base;
+import java.math.BigInteger;
 
 /**
  *
@@ -41,6 +42,16 @@ public class ExpressionValue {
                 return value.toString();
             }
             
+        } else if (value instanceof BigInteger) {
+            String val = ((BigInteger)value).toString();
+            
+            try {
+                String adjustedValue = String.format("%0" + bits + "d", val);
+                return adjustedValue;
+            }catch (Exception e) {
+                String format = "%0" + bits + "d";
+                return value.toString();
+            }
         }
         return value != null ? value.toString() : null;
     }

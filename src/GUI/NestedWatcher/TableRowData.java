@@ -29,6 +29,12 @@ public class TableRowData {
             ExpressionValue info = scope.getVariableValue(moduleInstanceId, variableName);
             Object val = info == null? null : info.getValueAsString();
             this.value =  val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
+            try {
+                Integer vale = Integer.parseInt(value, 2);
+                this.value = this.value + " (" + vale + ")";
+            }catch (Exception e) {
+
+            }
         }
     }
     
@@ -44,8 +50,15 @@ public class TableRowData {
             if (isRoot) {
                 Object val = ((Object[])scope.getVariableValue(moduleInstanceId, variableName).value)[index];
                 this.value = val == null ? "z" : val.toString();
-            } else
+            } else {
                 this.value = scope.getFormattedValue(moduleInstanceId, variableName);
+                try {
+                    Integer val = Integer.parseInt(value, 2);
+                    this.value = this.value + " (" + val + ")";
+                }catch (Exception e) {
+                    
+                }
+            }
         }
     }
 

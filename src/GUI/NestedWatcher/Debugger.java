@@ -114,7 +114,7 @@ public class Debugger extends javax.swing.JInternalFrame {
                 .addComponent(delete)
                 .addGap(18, 18, 18)
                 .addComponent(deleteAll)
-                .addGap(0, 63, Short.MAX_VALUE))
+                .addGap(0, 295, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -124,7 +124,7 @@ public class Debugger extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(delete)
                     .addComponent(deleteAll))
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         pack();

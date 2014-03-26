@@ -6,6 +6,7 @@ package VerilogCompiler.Interpretation;
 
 import Simulation.Configuration;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,73 +17,87 @@ import java.util.Set;
  */
 public class SimulationScope {
     //<editor-fold defaultstate="collapsed" desc="Attributes">
-    HashMap<String, InstanceModuleScope> scopes;    
+
+    HashMap<String, InstanceModuleScope> scopes;
     public static String currentModuleName = null;
     //</editor-fold>
 
     public SimulationScope() {
-        scopes = new HashMap<String, InstanceModuleScope>();        
+        scopes = new HashMap<String, InstanceModuleScope>();
     }
-    
+
     public void register(String moduleInstanceId, InstanceModuleScope scope) {
         scopes.put(moduleInstanceId, scope);
     }
-    
+
     public void unregister(String moduleInstaceId) {
-        if (Configuration.DEBUG_MODE)
+        if (Configuration.DEBUG_MODE) {
             System.out.println("unregistering " + moduleInstaceId + " instance module scope");
+        }
         scopes.remove(moduleInstaceId);
     }
-    
+
     public void executeScheduledNonBlockingAssigns() {
-        for (Map.Entry<String, InstanceModuleScope> scope: scopes.entrySet()) {
+        for (Map.Entry<String, InstanceModuleScope> scope : scopes.entrySet()) {
             scope.getValue().executeNonBlockingAssigns();
         }
     }
-    
+
     public String dumpToString(String moduleInstanceId) {
         return getScope(moduleInstanceId).dumpToString();
     }
-    
+
     public InstanceModuleScope getScope(String moduleInstanceId) {
         return scopes.get(moduleInstanceId);
     }
-    
+
     public ExpressionValue getVariableValue(String moduleInstanceId, String variable) {
-        if (scopes.containsKey(moduleInstanceId))
+        if (scopes.containsKey(moduleInstanceId)) {
             return scopes.get(moduleInstanceId).getVariableValue(variable);
+        }
         return null;
     }
-    
+
     public String getFormattedValue(String moduleInstanceId, String variable) {
         if (scopes.containsKey(moduleInstanceId)) {
             VariableInfo info = scopes.get(moduleInstanceId).getVariableInfo(variable);
+            if (info == null || info.value == null) {
+                return null;
+            }
             Object val = info.value.value;
-            if (val instanceof Integer) {
-                if (info.MSB - info.LSB + 1 == 0)
-                    return val.toString();
-                
-                String f = "%0" + Math.abs(info.MSB - info.LSB + 1) + "d";
-                return String.format(f, val);
+            if (val instanceof Integer || val instanceof BigInteger) {
+                return padWithZeros(val, Math.abs(info.MSB - info.LSB) + 1);
             }
             return val != null ? val.toString() : null;
         }
         return null;
     }
-    
+
+    public String padWithZeros(Object val, int size) {
+        if (val instanceof Integer || val instanceof BigInteger) {
+            if (size == 0) {
+                return val.toString();
+            }
+
+            String f = "%0" + Math.abs(size) + "d";
+            return String.format(f, val);
+        }return null;
+    }
+
     public VariableInfo getVariableInfo(String moduleInstanceId, String variable) {
-        if (scopes.containsKey(moduleInstanceId))
+        if (scopes.containsKey(moduleInstanceId)) {
             return scopes.get(moduleInstanceId).getVariableInfo(variable);
+        }
         return null;
     }
-    
+
     public void init() {
         Set<String> keys = scopes.keySet();
         for (String key : keys) {
             scopes.get(key).init(this, key);
         }
     }
-    
+
     public void runStep() {
         Set<String> keys = scopes.keySet();
         for (String key : keys) {

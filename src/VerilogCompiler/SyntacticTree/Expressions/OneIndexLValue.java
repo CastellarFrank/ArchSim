@@ -76,6 +76,8 @@ public class OneIndexLValue extends LValue {
     @Override
     public void setValue(SimulationScope simulationScope, String moduleInstanceId, Object value) {
         ExpressionValue index = expression.evaluate(simulationScope, moduleInstanceId);
+        if (index.xValue || index.zValue)
+            return;
         int intIndex = Convert.getInteger(index);
         ExpressionValue address = simulationScope.getScope(moduleInstanceId).getVariableValue(identifier);
         ((Object[])address.value)[intIndex] = value;

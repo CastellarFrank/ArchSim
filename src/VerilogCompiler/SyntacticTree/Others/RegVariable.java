@@ -7,6 +7,7 @@ package VerilogCompiler.SyntacticTree.Others;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
+import VerilogCompiler.SyntacticTree.Expressions.SimpleNumberExpression;
 import VerilogCompiler.SyntacticTree.Range;
 import VerilogCompiler.SyntacticTree.VNode;
 
@@ -48,6 +49,17 @@ public class RegVariable extends VNode {
     
     public boolean isArray(){
         return range != null;
+    }
+    
+    public int getSize() {
+        int size = 0;
+        if (range != null) {
+            range.validateSemantics();
+            size = (int)((SimpleNumberExpression)range.getMinValue()).getUnsignedNumber();
+            size -= (int)((SimpleNumberExpression)range.getMaxValue()).getUnsignedNumber();
+            size = Math.abs(size) + 1;
+        }
+        return size;
     }
     
     @Override

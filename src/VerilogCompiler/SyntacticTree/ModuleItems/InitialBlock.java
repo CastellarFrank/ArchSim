@@ -61,6 +61,16 @@ public class InitialBlock extends ModuleItem {
     }
 
     @Override
+    public void initModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        if (sensitiveList == null || Convert.getBoolean(sensitiveList.evaluate(simulationScope, moduleInstanceId))) {
+            statement.execute(simulationScope, moduleInstanceId);
+        } else {
+            System.out.println("DEBUG: " + "initial block avoided.");
+        }
+    }
+    
+
+    @Override
     public VNode getCopy() {
         SensitiveList listCopy = null;
         if (sensitiveList != null)

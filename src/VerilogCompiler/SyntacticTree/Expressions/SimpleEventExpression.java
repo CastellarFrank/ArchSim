@@ -8,6 +8,7 @@ import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.VNode;
+import java.math.BigInteger;
 
 /**
  *
@@ -15,6 +16,7 @@ import VerilogCompiler.SyntacticTree.VNode;
  */
 public class SimpleEventExpression extends EventExpression {
     Expression expression;
+    int previousValue;
 
     public SimpleEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -43,12 +45,17 @@ public class SimpleEventExpression extends EventExpression {
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
         ExpressionValue exp = expression.evaluate(simulationScope, moduleName);
         
-        if (exp.xValue || exp.zValue)
+        if (exp.xValue || exp.zValue) {
             return new ExpressionValue();
+        }
+        BigInteger intValue = new BigInteger(exp.value.toString());
         
-        Integer intValue = Integer.parseInt(exp.value.toString());
+        if (previousValue != intValue.intValue()) {
+            previousValue = intValue.intValue();
+            return new ExpressionValue(1, 1);
+        }
         
-        return new ExpressionValue(intValue == 0 ? 0 : 1, 1);
+        return new ExpressionValue(0, 1);
     }
 
     @Override

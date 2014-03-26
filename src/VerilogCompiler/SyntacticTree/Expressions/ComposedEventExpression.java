@@ -66,8 +66,14 @@ public class ComposedEventExpression extends EventExpression{
         ExpressionValue l = left.evaluate(simulationScope, moduleName);
         ExpressionValue r = right.evaluate(simulationScope, moduleName);
         
-        if (l.xValue || r.xValue || l.zValue || r.zValue)
+        if (l.xValue && r.xValue && l.zValue && r.zValue)
             return new ExpressionValue();
+        
+        if (l.xValue || l.zValue)
+            return r;
+        
+        if (r.xValue || r.zValue)
+            return l;
         
         Integer leftValue = Integer.parseInt(l.value.toString());
         Integer rightValue = Integer.parseInt(r.value.toString());

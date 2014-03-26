@@ -27,6 +27,10 @@ public class Wire extends BaseElement {
 
     public Wire(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
+        if (extraParams != null && extraParams.length == 2) {
+            from = Integer.parseInt(extraParams[0]);
+            to = Integer.parseInt(extraParams[1]);
+        }
     }
 
     public Wire(int x, int y, int x2, int y2, int flags) {
@@ -41,21 +45,21 @@ public class Wire extends BaseElement {
         drawThickLine(g, extra1, point2);
         setBbox(point1, point2, 3);
         drawPosts(g);
-        System.out.println("volt1 " + binaryValues[0]);
-        System.out.println("volt2 " + binaryValues[1]);
+        //System.out.println("volt1 " + binaryValues[0]);
+        //System.out.println("volt2 " + binaryValues[1]);
     }
 
     @Override
     public void stampVoltages() {
         String select = "z";
-        if (binaryValues != null && binaryValues[1] != null) {
+        if (binaryValues != null && binaryValues[0] != null) {
             int size = to - from + 1;
-            if (size > binaryValues[1].length()) {
-                String extra = new String(new char[binaryValues[1].length() - size])
+            if (size > binaryValues[0].length()) {
+                String extra = new String(new char[size - binaryValues[0].length()])
                         .replace('\0', '0');
-                binaryValues[1] = extra + binaryValues[1];
+                binaryValues[0] = extra + binaryValues[0];
             }
-            select = binaryValues[1].substring(from, to+1);
+            select = binaryValues[0].substring(from, to+1);
         }
         containerPanel.stampVoltageSource(joints[0], joints[1], 
                 voltageSourceReference, 0, select);
@@ -74,11 +78,11 @@ public class Wire extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("from" , 0.0, 0, binaryValues[1].length() - 1).
+            return new EditInfo("from" , 0.0, 0, binaryValues[0].length() - 1).
                     addComponent(new JLabel("From: ")).
                     addComponent(new JTextField(from + "", 10));
         if (n == 1)
-            return new EditInfo("to" , 0.0, 0, binaryValues[1].length() - 1).
+            return new EditInfo("to" , 0.0, 0, binaryValues[0].length() - 1).
                     addComponent(new JLabel("     To: ")).
                     addComponent(new JTextField(to + "", 10));
         return null;
@@ -98,6 +102,16 @@ public class Wire extends BaseElement {
     public Element getXmlElement(Document document) {
         Element element = super.getXmlElement(document);
         element.setAttribute("type", Wire.class.getName());
+        
+        Element extraParam0 = document.createElement("param");
+        extraParam0.setTextContent(from + "");
+        
+        element.appendChild(extraParam0);
+        
+        Element extraParam1 = document.createElement("param");
+        extraParam1.setTextContent(to + "");
+        
+        element.appendChild(extraParam1);
         
         return element;
     }

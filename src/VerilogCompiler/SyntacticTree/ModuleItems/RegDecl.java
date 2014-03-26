@@ -71,10 +71,16 @@ public class RegDecl extends ModuleItem {
                 ErrorHandler.getInstance().handleError(line, column, 
                         regVariable.getIdentifier() + " is already defined");
             } else {
+                int arraySize = regVariable.getSize();
+                if (arraySize != 0)
+                    size = arraySize;
                 VariableInfo varInfo = new VariableInfo();
                 varInfo.type = DataType.VARIABLE;
                 varInfo.isVector = isVector;
                 varInfo.isArray = regVariable.isArray();
+                varInfo.LSB = 0;
+                varInfo.MSB = size;
+                varInfo.isBigEndian = true;
                 if (isVector) {
                     Object[] values = new Object[size];
                     ExpressionValue value = new ExpressionValue(values, 0);
@@ -99,7 +105,8 @@ public class RegDecl extends ModuleItem {
         for (RegVariable regVariable : regVariableList) {
             newRgs.add((RegVariable)regVariable.getCopy());
         }
-        return new RegDecl(newRange, newRgs, line, column);
+        RegDecl copy = new RegDecl(newRange, newRgs, line, column);
+        return copy;
     }
     
 }

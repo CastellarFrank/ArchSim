@@ -16,6 +16,8 @@ import VerilogCompiler.SyntacticTree.VNode;
 public class PosEdgeEventExpression extends EventExpression {
     Expression expression;
     ExpressionValue previousValue = new ExpressionValue(1, 1);
+    
+    Integer prevCondition = 0;
 
     public PosEdgeEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -48,12 +50,16 @@ public class PosEdgeEventExpression extends EventExpression {
         if (newValue.xValue || newValue.zValue)
             return new ExpressionValue();
         
-        Integer nValue = Integer.parseInt(newValue.value.toString());
-        Integer oldValue = Integer.parseInt(previousValue.value.toString());
+        Integer nValue = Integer.parseInt(newValue.value.toString());       
         
         previousValue = newValue;
         
-        if (oldValue == 0 && nValue == 1)
+        int prev = prevCondition.intValue();
+        prevCondition = nValue;
+        
+        System.out.println("new " + nValue + " - old " + prev);
+        
+        if (prev == 0 && nValue == 1)
             return new ExpressionValue(1, 1);
         else 
             return new ExpressionValue(0, 1);
