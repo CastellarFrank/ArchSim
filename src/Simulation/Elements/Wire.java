@@ -52,14 +52,30 @@ public class Wire extends BaseElement {
     @Override
     public void stampVoltages() {
         String select = "z";
-        if (binaryValues != null && binaryValues[0] != null) {
-            int size = to - from + 1;
-            if (size > binaryValues[0].length()) {
-                String extra = new String(new char[size - binaryValues[0].length()])
-                        .replace('\0', '0');
-                binaryValues[0] = extra + binaryValues[0];
+        if (binaryValues != null && binaryValues[1] != null) {
+            String using = binaryValues[1];
+            int index = 1;
+            if (using == null || using.contains("z") || using .contains("x")) {
+                if (binaryValues[0] != null)
+                    index = 0;
             }
-            select = binaryValues[0].substring(from, to+1);
+            
+            int size = to - from + 1;
+            if (size > binaryValues[index].length()) {
+                String extra = new String(new char[size - binaryValues[index].length()])
+                        .replace('\0', '0');
+                binaryValues[index] = extra + binaryValues[index];
+            }
+            int min = from;
+            int max = to;
+            if (max < min) {
+                min = binaryValues[index].length() - min - 1;
+                max = binaryValues[index].length() - max - 1;
+                if (min < 0 || max < 0 || min > binaryValues[index].length()){
+                    min = max = 0;
+                }
+            }
+            select = binaryValues[index].substring(min, max + 1);
         }
         containerPanel.stampVoltageSource(joints[0], joints[1], 
                 voltageSourceReference, 0, select);
@@ -77,12 +93,15 @@ public class Wire extends BaseElement {
     
     @Override
     public EditInfo getEditInfo(int n) {
+        String value = binaryValues[1];
+        if (value == null || value.contains("x") || value.contains("z"))
+            value = binaryValues[0];
         if (n == 0)
-            return new EditInfo("from" , 0.0, 0, binaryValues[0].length() - 1).
+            return new EditInfo("from" , 0.0, 0, Integer.MAX_VALUE).
                     addComponent(new JLabel("From: ")).
                     addComponent(new JTextField(from + "", 10));
         if (n == 1)
-            return new EditInfo("to" , 0.0, 0, binaryValues[0].length() - 1).
+            return new EditInfo("to" , 0.0, 0, Integer.MAX_VALUE).
                     addComponent(new JLabel("     To: ")).
                     addComponent(new JTextField(to + "", 10));
         return null;

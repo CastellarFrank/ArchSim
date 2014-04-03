@@ -14,6 +14,7 @@ import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -63,6 +64,10 @@ public class Concatenation extends LValue {
             intValue = (Integer) value;
         } else if (value instanceof Long) {
             intValue = (Long) value;
+        } else if (value instanceof BigInteger) {
+            BigInteger tmp = (BigInteger) value;
+            BigInteger s2 = new BigInteger(tmp.toString(), 2);
+            intValue = s2.longValue();
         }
         int currentPos = 31;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
@@ -74,7 +79,7 @@ public class Concatenation extends LValue {
             long min = currentPos - loc.bits + 1;
             if (min < 0) min = 0;
             long portion = MathHelper.getBitSelection(intValue, min, currentPos);
-            loc.value = new Long(portion);
+            loc.value = new BigInteger(Long.toBinaryString(portion));
             
             currentPos -= min - 1;
         }

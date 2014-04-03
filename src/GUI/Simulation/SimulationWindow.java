@@ -214,7 +214,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu5 = new javax.swing.JMenu();
         lInputMenu = new javax.swing.JMenuItem();
         multiBitsMenu = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
         jMenu6 = new javax.swing.JMenu();
         lOuputMenu = new javax.swing.JMenuItem();
         multiBitsOutputMenu = new javax.swing.JMenuItem();
@@ -256,7 +255,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu1.add(saveMenu);
         jMenu1.add(jSeparator1);
 
-        closeMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.CTRL_MASK));
         closeMenu.setText("Close");
         closeMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -331,6 +329,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
         jMenu5.setText("Add Input");
 
+        lInputMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.CTRL_MASK));
         lInputMenu.setText("Logic Input");
         lInputMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -339,6 +338,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         });
         jMenu5.add(lInputMenu);
 
+        multiBitsMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.CTRL_MASK));
         multiBitsMenu.setText("MultiBits Input");
         multiBitsMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -346,9 +346,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             }
         });
         jMenu5.add(multiBitsMenu);
-
-        jMenuItem6.setText("Clock");
-        jMenu5.add(jMenuItem6);
 
         jMenu3.add(jMenu5);
 
@@ -372,7 +369,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
         jMenu3.add(jMenu6);
 
-        addMultMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.ALT_MASK));
         addMultMenu.setText("Add Multiplexor");
         addMultMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -384,7 +380,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         modulesMenu.setText("Add Module");
         jMenu3.add(modulesMenu);
 
-        addWireMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.ALT_MASK));
+        addWireMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_W, java.awt.event.InputEvent.CTRL_MASK));
         addWireMenu.setText("Add Wire");
         addWireMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -427,7 +423,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 456, Short.MAX_VALUE)
+            .addGap(0, 460, Short.MAX_VALUE)
         );
 
         pack();
@@ -531,7 +527,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenu jMenu6;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenuItem lInputMenu;
     private javax.swing.JMenuItem lOuputMenu;

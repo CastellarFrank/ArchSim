@@ -72,17 +72,22 @@ public class SimpleLValue extends LValue {
         if (value != null) {
             try {  
                 Integer realVal = 0;
+                String adjustedValue = null;
                 if (value instanceof String) {
                     realVal = new BigInteger(value.toString()).intValue();
+                    adjustedValue = value.toString();
                 } else if (value instanceof Integer) {
                     realVal = (Integer) value;
                 } else if (value instanceof BigInteger) {
                     realVal = ((BigInteger) value).intValue();
+                    adjustedValue = ((BigInteger) value).toString();
                 }
-                String adjustedValue = value.toString();
+                if (adjustedValue == null)
+                    adjustedValue = realVal.toString();
                 
                 if (size != value.toString().length()) {
-                    adjustedValue = String.format(format, realVal);
+                    adjustedValue = String.format("%1$" + size + "s", adjustedValue).replace(' ', '0');
+                    //adjustedValue = String.format(format, realVal);
                 }
                 
                 int index = adjustedValue.toString().length() - size;

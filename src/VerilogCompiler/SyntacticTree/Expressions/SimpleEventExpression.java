@@ -16,7 +16,7 @@ import java.math.BigInteger;
  */
 public class SimpleEventExpression extends EventExpression {
     Expression expression;
-    int previousValue;
+    int previousValue = Integer.MIN_VALUE;
 
     public SimpleEventExpression(Expression expression, int line, int column) {
         super(line, column);

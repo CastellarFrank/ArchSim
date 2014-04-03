@@ -4,6 +4,7 @@
  */
 package GUI.Edit;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 
@@ -54,7 +55,7 @@ public class EditInfo {
     
     public boolean accepts(String newValue) {
         try {
-            Integer result = Integer.parseInt(newValue);
+            Integer result = new BigInteger(newValue).intValue();
             if (result <= maxval && result >= minval)
                 return true;
             return false;

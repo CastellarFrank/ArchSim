@@ -27,16 +27,17 @@ public class Convert {
         return 0;
     }
     
-    public static Integer decimalToBinary(Integer value) {
+    public static BigInteger decimalToBinary(Integer value) {
         String binaryString = Integer.toBinaryString(value);
         
         if (binaryString.length() < 32 || value > 0) {
-            return Integer.parseInt(binaryString);
+            return new BigInteger(binaryString);
+            //return Integer.parseInt(binaryString);
         } else {
-            Integer abs = Math.abs(value);
-            String newBinary = Integer.toBinaryString(abs);
+            //Integer abs = Math.abs(value);
+            String newBinary = Integer.toBinaryString(value);
             
-            return Integer.parseInt("-" + newBinary);
+            return new BigInteger(newBinary);
         }
     }
     

@@ -69,7 +69,11 @@ public class IfStatement extends Statement {
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = condition.evaluate(simulationScope, moduleName);
-        Integer intValue = Integer.parseInt(value.value.toString());
+        Integer intValue = 0;
+        
+        if (value != null && value.value != null)
+            intValue = Integer.parseInt(value.value.toString());
+        
         if (intValue == 1)
             trueBlock.execute(simulationScope, moduleName);
         else if (falseBlock != null)

@@ -69,6 +69,7 @@ public class CaseStatement extends Statement {
             ArrayList<ExpressionValue> result = caseItem.getValue(simulationScope, moduleName);
             if (result == null) { //default
                 caseItem.execute(simulationScope, moduleName);
+                break;
             } else {
                 for (ExpressionValue expressionValue : result) {
                     if (value == null) {
@@ -76,7 +77,7 @@ public class CaseStatement extends Statement {
                                 (expressionValue.xValue == value.xValue || 
                                 expressionValue.zValue == value.zValue)) {
                             caseItem.execute(simulationScope, moduleName);
-                            break;
+                            return;
                         }
                     } else {
                         if (expressionValue != null && 
@@ -85,7 +86,7 @@ public class CaseStatement extends Statement {
                                 value.value != null && 
                                 Convert.getInteger(expressionValue) == Convert.getInteger(value))) {
                             caseItem.execute(simulationScope, moduleName);
-                            break;
+                            return;
                         }
                     }
                 }

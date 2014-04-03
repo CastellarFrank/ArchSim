@@ -11,6 +11,7 @@ import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Operator;
 import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 /**
@@ -98,17 +99,18 @@ public class BinaryExpression extends Expression {
 
         String leftValue = l.getValueAsString();
         String rightValue = r.getValueAsString();
-
+        
         long maxBits = Math.max(l.bits, r.bits);
 
         switch (expressionOperator) {
             case _OP_ADD:
-                return new ExpressionValue(Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
-                        + Integer.parseInt(rightValue, rightRadix)),
-                        maxBits + 1);
+                BigInteger add = Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
+                        + Integer.parseInt(rightValue, rightRadix));
+                return new ExpressionValue(add, maxBits + 1);
             case _OP_MINUS:
-                return new ExpressionValue(Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
-                        - Integer.parseInt(rightValue, rightRadix)),
+                BigInteger sub = Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
+                        - Integer.parseInt(rightValue, rightRadix));
+                return new ExpressionValue(sub,
                         maxBits + 1);
             case _OP_TIMES:
                 return new ExpressionValue(Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
@@ -119,15 +121,20 @@ public class BinaryExpression extends Expression {
                         / Integer.parseInt(rightValue, rightRadix)),
                         l.bits - r.bits + 1);
             case _OP_MOD:
-                return new ExpressionValue(Convert.decimalToBinary(Integer.parseInt(leftValue, leftRadix)
-                        % Integer.parseInt(rightValue, rightRadix)),
+                BigInteger l1 = new BigInteger(leftValue, leftRadix);
+                BigInteger r1 = new BigInteger(rightValue, rightRadix);
+                BigInteger res = l1.mod(r1);
+                return new ExpressionValue(Convert.decimalToBinary(res.intValue()),
                         Math.min(l.bits, r.bits));
             case _OP_EQ:
-                return new ExpressionValue(Integer.parseInt(leftValue, leftRadix) 
-                        == Integer.parseInt(rightValue, rightRadix) ? 1 : 0,
+                BigInteger lbi = new BigInteger(leftValue, leftRadix);
+                BigInteger rbi = new BigInteger(rightValue, rightRadix);
+                return new ExpressionValue(lbi.compareTo(rbi) == 0 ? 1 : 0,
                         1);
             case _OP_NOTEQ:
-                return new ExpressionValue(Integer.parseInt(leftValue) != Integer.parseInt(rightValue) ? 1 : 0,
+                BigInteger lbi2 = new BigInteger(leftValue, leftRadix);
+                BigInteger rbi2 = new BigInteger(rightValue, rightRadix);
+                return new ExpressionValue(lbi2.compareTo(rbi2) == 0 ? 0 : 1,
                         1);
             case _OP_LOG_AND:
                 return new ExpressionValue(Integer.parseInt(leftValue) == 1

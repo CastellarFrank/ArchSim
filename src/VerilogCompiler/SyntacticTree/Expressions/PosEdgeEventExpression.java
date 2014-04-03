@@ -57,8 +57,6 @@ public class PosEdgeEventExpression extends EventExpression {
         int prev = prevCondition.intValue();
         prevCondition = nValue;
         
-        System.out.println("new " + nValue + " - old " + prev);
-        
         if (prev == 0 && nValue == 1)
             return new ExpressionValue(1, 1);
         else 

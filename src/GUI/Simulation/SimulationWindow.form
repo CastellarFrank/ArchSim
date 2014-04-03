@@ -24,9 +24,6 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="closeMenu">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Ctrl+W"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Close"/>
               </Properties>
               <Events>
@@ -110,6 +107,9 @@
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="lInputMenu">
                   <Properties>
+                    <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                      <KeyStroke key="Ctrl+1"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Logic Input"/>
                   </Properties>
                   <Events>
@@ -118,16 +118,14 @@
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="multiBitsMenu">
                   <Properties>
+                    <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                      <KeyStroke key="Ctrl+2"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="MultiBits Input"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="multiBitsMenuActionPerformed"/>
                   </Events>
-                </MenuItem>
-                <MenuItem class="javax.swing.JMenuItem" name="jMenuItem6">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Clock"/>
-                  </Properties>
                 </MenuItem>
               </SubComponents>
             </Menu>
@@ -156,9 +154,6 @@
             </Menu>
             <MenuItem class="javax.swing.JMenuItem" name="addMultMenu">
               <Properties>
-                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Alt+M"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Add Multiplexor"/>
               </Properties>
               <Events>
@@ -173,7 +168,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="addWireMenu">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
-                  <KeyStroke key="Alt+W"/>
+                  <KeyStroke key="Ctrl+W"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Add Wire"/>
               </Properties>
@@ -247,7 +242,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="456" max="32767" attributes="0"/>
+          <EmptySpace min="0" pref="460" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>

@@ -12,6 +12,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class TableRowData {
+
     private String variableName;
     private String value;
     private int index = -1;
@@ -27,17 +28,16 @@ public class TableRowData {
         } else {
             this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
             ExpressionValue info = scope.getVariableValue(moduleInstanceId, variableName);
-            Object val = info == null? null : info.getValueAsString();
-            this.value =  val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
+            Object val = info == null ? null : info.getValueAsString();
+            this.value = val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
             try {
                 Integer vale = Integer.parseInt(value, 2);
                 this.value = this.value + " (" + vale + ")";
-            }catch (Exception e) {
-
+            } catch (Exception e) {
             }
         }
     }
-    
+
     public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, int index) {
         this.variableName = variableName;
         this.moduleInstanceId = moduleInstanceId;
@@ -48,16 +48,15 @@ public class TableRowData {
         } else {
             this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
             if (isRoot) {
-                Object val = ((Object[])scope.getVariableValue(moduleInstanceId, variableName).value)[index];
+                Object val = ((Object[]) scope.getVariableValue(moduleInstanceId, variableName).value)[index];
                 this.value = val == null ? "z" : val.toString();
             } else {
                 this.value = scope.getFormattedValue(moduleInstanceId, variableName);
-                try {
-                    Integer val = Integer.parseInt(value, 2);
-                    this.value = this.value + " (" + val + ")";
-                }catch (Exception e) {
-                    
-                }
+            }
+            try {
+                Integer val = Integer.parseInt(value, 2);
+                this.value = this.value + " (" + val + ")";
+            } catch (Exception e) {
             }
         }
     }
@@ -79,10 +78,11 @@ public class TableRowData {
     }
 
     public String getVariableName() {
-        if (index == -1)
+        if (index == -1) {
             return variableName;
-        else
+        } else {
             return "[" + index + "]";
+        }
     }
 
     public void setVariableName(String variableName) {
@@ -104,8 +104,13 @@ public class TableRowData {
     public void setIsRoot(boolean isRoot) {
         this.isRoot = isRoot;
     }
-    
+
     public void update(SimulationScope scope) {
-        value = scope.getVariableValue(moduleInstanceId, variableName).getValueAsString();
+        value = scope.getFormattedValue(moduleInstanceId, variableName);
+        try {
+            Integer val = Integer.parseInt(value, 2);
+            this.value = this.value + " (" + val + ")";
+        } catch (Exception e) {
+        }
     }
 }

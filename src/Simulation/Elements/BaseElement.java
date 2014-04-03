@@ -229,7 +229,8 @@ public abstract class BaseElement implements Editable {
     }
 
     public boolean collidesWith(int x, int y) {
-        return boundingBox.contains(x, y);
+        Rectangle rect = new Rectangle(boundingBox.x + 1, boundingBox.y + 1, boundingBox.width - 2, boundingBox.height - 2);
+        return rect.contains(x, y);
     }
 
     //<editor-fold defaultstate="collapsed" desc="Abstract Methods">

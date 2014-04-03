@@ -86,7 +86,7 @@ public class MultiBitsInput extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("value", 0.0, 0, Long.MAX_VALUE).
+            return new EditInfo("value", 0.0, Long.MIN_VALUE, Long.MAX_VALUE).
                     addComponent(new JLabel("Value: ")).
                     addComponent(new JTextField(binaryValues[0], 10));
         return null;
