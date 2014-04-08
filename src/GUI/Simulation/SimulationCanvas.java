@@ -62,7 +62,7 @@ public class SimulationCanvas extends ContainerPanel implements
 
             this.parent = parentP;
             
-            pop = new JPopupMenu("Add Watch");
+            pop = new JPopupMenu("Options");
             JMenuItem menu = new JMenuItem(new AbstractAction() {
 
                 @Override
@@ -73,7 +73,25 @@ public class SimulationCanvas extends ContainerPanel implements
                 }
             });
             menu.setText("Add Watch");
+            
+            JMenuItem viewMenu = new JMenuItem(new AbstractAction() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (mouseComponent != null && mouseComponent instanceof ModuleChip) {
+                        ModuleChip chip = (ModuleChip) mouseComponent;
+                        DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
+                        drilldowns.add(window);
+                        parent.addDrilldownWindow(window);
+                    }                    
+                }
+            });
+            
+            viewMenu.setText("View code");                        
+            
             pop.add(menu);
+            pop.add(viewMenu);
+            
             this.add(pop);
 
             addMouseListener(this);
@@ -111,10 +129,10 @@ public class SimulationCanvas extends ContainerPanel implements
                 return;
             }
             if (mouseComponent instanceof ModuleChip) {
-                ModuleChip chip = (ModuleChip) mouseComponent;
+                /*ModuleChip chip = (ModuleChip) mouseComponent;
                 DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
                 drilldowns.add(window);
-                parent.addDrilldownWindow(window);
+                parent.addDrilldownWindow(window);*/
             } else {
                 if (mouseComponent.getEditInfo(0) != null) {
                     EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
@@ -302,6 +320,13 @@ public class SimulationCanvas extends ContainerPanel implements
         }
         if (mouseComponent != previousMouse) {
             repaint();
+        }
+        if(mouseComponent != null && mouseComponent instanceof ModuleChip) {
+            ModuleChip chip = (ModuleChip) mouseComponent;
+            setToolTipText(chip.getPortsInformation());
+            
+        } else {
+            setToolTipText(null);
         }
     }
 

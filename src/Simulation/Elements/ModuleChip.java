@@ -183,6 +183,13 @@ public class ModuleChip extends BaseElement {
         }
     }
     
+    public String getPortsInformation() {
+        if (moduleInstance != null) {
+            return moduleInstance.getPortSummary();
+        }
+        return null;
+    }
+    
     @Override
     public int getVoltageSourceCount() {
         return voltageSources.size();

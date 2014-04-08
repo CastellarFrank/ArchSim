@@ -4,6 +4,7 @@
  */
 package GUI;
 
+import DataStructures.Loader;
 import GUI.Design.DesignWindow;
 import Simulation.Configuration;
 import java.awt.Color;
@@ -58,8 +59,20 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     }
     
     public void applyChanges(final boolean closeAfter) {
-        Configuration.MODULES_DIRECTORY_PATH = modulesDirectoryTF.getText();
-        Configuration.MODULE_METADATA_DIRECTORY_PATH = modulesMetaDirectoryTF.getText();
+        boolean needsReload = false;
+        if (!modulesDirectoryTF.getText().equals(Configuration.MODULES_DIRECTORY_PATH)) {
+            Configuration.MODULES_DIRECTORY_PATH = modulesDirectoryTF.getText();
+            needsReload = true;
+        }
+        
+        if (!modulesMetaDirectoryTF.getText().equals(Configuration.MODULE_METADATA_DIRECTORY_PATH)) {
+            Configuration.MODULE_METADATA_DIRECTORY_PATH = modulesMetaDirectoryTF.getText();
+            needsReload = true;
+        }
+        
+        if (needsReload) {
+            Loader.getInstance().loadModules();
+        }
         
         Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
         Configuration.DEBUG_MODE = debugModeCB.isSelected();

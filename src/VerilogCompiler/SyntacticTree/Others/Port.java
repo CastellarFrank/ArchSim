@@ -28,6 +28,7 @@ public class Port extends VNode {
     Expression    maxExpression;
     boolean       isVector;
     int           sideIndex;
+    int           signalSize;
 
     public Port(PortDirection direction, NetType dataType, String identifier, Expression minExpression, Expression maxExpression, int line, int column) {
         super(line, column);
@@ -144,18 +145,27 @@ public class Port extends VNode {
         if (info.isVector) {
             info.LSB = (int)lsb;
             info.MSB = (int)msb;
+            signalSize = Math.abs(info.LSB - info.MSB) + 1;
         }
         SemanticCheck.getInstance().registerVariable(identifier, info);
         return null;
+    }
+
+    public int getSignalSize() {
+        return signalSize;
     }
 
     @Override
     public VNode getCopy() {
         Expression newMin = minExpression != null ? (Expression)minExpression.getCopy() : null;
         Expression newMax = minExpression != null ? (Expression)maxExpression.getCopy() : null;
-        return new Port(direction, dataType, identifier,
+        Port copy = new Port(direction, dataType, identifier,
                 newMin, newMax, 
                 isVector, line, column);
+        
+        copy.signalSize = this.signalSize;
+        
+        return copy;
     }
     
 }

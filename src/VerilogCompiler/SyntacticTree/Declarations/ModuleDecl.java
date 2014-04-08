@@ -26,6 +26,7 @@ public class ModuleDecl extends Declaration {
     ArrayList<Port> portList;
     ArrayList<ModuleItem> moduleItemList;
     String parentModuleInstanceId;
+    String portSummary;
     
     //<editor-fold defaultstate="collapsed" desc="Decorations">
     int inputPortCount = 0;
@@ -130,6 +131,7 @@ public class ModuleDecl extends Declaration {
 
     @Override
     public ExpressionType validateSemantics() {
+        StringBuilder builder = new StringBuilder();
         for (Port port : portList) {
             switch(port.getDirection()) {
                 case INOUT:
@@ -140,7 +142,14 @@ public class ModuleDecl extends Declaration {
                     outputPortCount++; break;
             }
             port.validateSemantics();
+            builder.append(port.getIdentifier());
+            builder.append(" is a ");
+            builder.append(port.getSignalSize());
+            builder.append(" bits signal.");
+            builder.append("\n");
         }
+        
+        portSummary = builder.toString();
         
         for (ModuleItem moduleItem : moduleItemList) {
             if (moduleItem instanceof ModuleInstantiation)
@@ -151,6 +160,14 @@ public class ModuleDecl extends Declaration {
         scope = SemanticCheck.getInstance().variablesToScope();
         
         return null;
+    }
+
+    public String getPortSummary() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<html>");
+        builder.append(portSummary.replaceAll("\n", "<br/>"));
+        builder.append("</html>");
+        return builder.toString();
     }
     
     public void initModule(SimulationScope simulationScope, String moduleInstanceId) {
@@ -185,6 +202,7 @@ public class ModuleDecl extends Declaration {
         copy.inoutPortCount = this.inoutPortCount;
         copy.outputPortCount = this.outputPortCount;
         copy.inputPortCount = this.inputPortCount;
+        copy.portSummary = this.portSummary;
         
         copy.scope = scope.getCopy();
         //</editor-fold>

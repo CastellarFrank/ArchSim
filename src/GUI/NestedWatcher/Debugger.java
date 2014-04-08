@@ -9,6 +9,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Dimension;
 import java.awt.Point;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.DefaultMutableTreeNode;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.Highlighter;
@@ -89,13 +90,10 @@ public class Debugger extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         scroll = new javax.swing.JScrollPane();
-        delete = new javax.swing.JButton();
         deleteAll = new javax.swing.JButton();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-
-        delete.setText("Delete");
 
         deleteAll.setText("Delete All");
         deleteAll.addActionListener(new java.awt.event.ActionListener() {
@@ -108,23 +106,18 @@ public class Debugger extends javax.swing.JInternalFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scroll)
+            .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addGap(46, 46, 46)
-                .addComponent(delete)
-                .addGap(18, 18, 18)
                 .addComponent(deleteAll)
-                .addGap(0, 295, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(delete)
-                    .addComponent(deleteAll))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(deleteAll)
+                .addContainerGap(35, Short.MAX_VALUE))
         );
 
         pack();
@@ -136,7 +129,6 @@ public class Debugger extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_deleteAllActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton delete;
     private javax.swing.JButton deleteAll;
     private javax.swing.JScrollPane scroll;
     // End of variables declaration//GEN-END:variables
