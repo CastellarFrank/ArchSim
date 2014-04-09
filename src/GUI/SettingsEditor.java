@@ -21,10 +21,11 @@ import javax.swing.Timer;
  */
 public class SettingsEditor extends javax.swing.JInternalFrame {
 
+    MainWindow parent;
     /**
      * Creates new form SettingsEditor
      */
-    public SettingsEditor() {
+    public SettingsEditor(MainWindow parent) {
         initComponents();
         
         File mods = new File(Configuration.MODULES_DIRECTORY_PATH);
@@ -42,6 +43,8 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         
         this.modulesDirectoryTF.setText(mods.getAbsolutePath());
         this.modulesMetaDirectoryTF.setText(metas.getAbsolutePath());
+        
+        this.parent = parent;
     }
     
     public String indexToTheme(int index) {
@@ -72,6 +75,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         
         if (needsReload) {
             Loader.getInstance().loadModules();
+            parent.needsRefresh = true;
         }
         
         Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();

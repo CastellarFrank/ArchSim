@@ -231,7 +231,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void changeSettingsMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeSettingsMenuActionPerformed
         if (settingsEditor == null) {
-            settingsEditor = new SettingsEditor();
+            settingsEditor = new SettingsEditor(this);
             desktopPane.add(settingsEditor);
         }
         settingsEditor.setVisible(true);

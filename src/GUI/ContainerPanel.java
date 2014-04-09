@@ -9,6 +9,7 @@ import GUI.NestedWatcher.CustomTreeModel;
 import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
+import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Wire;
 import Simulation.Joint;
 import Simulation.JointReference;
@@ -971,6 +972,8 @@ public class ContainerPanel extends JCanvas {
         element.y2 = snapGrid(element.y2);
         element.setPoints();
 
+        if (!(element instanceof ModuleChip) && element.x == element.x2 && element.y == element.y2)
+            return;
         elements.add(element);
     }
 
