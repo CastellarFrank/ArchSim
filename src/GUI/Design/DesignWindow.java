@@ -19,6 +19,7 @@ import VerilogCompiler.parser;
 import java.awt.Graphics;
 import java.io.File;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java_cup.runtime.Symbol;
@@ -47,8 +48,8 @@ import org.w3c.dom.NodeList;
 public class DesignWindow extends javax.swing.JInternalFrame {
 
     MainWindow parent;
-    VerilogPanel source;
     PreviewPanel preview;
+    SourcePanel newSource;
     ErrorPanel errors;
     String fileName = "";
     boolean modified = false, compiled = false;
@@ -80,19 +81,18 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         //</editor-fold>
         
         this.parent = parent;
-
-        source = new VerilogPanel();
+        
         preview = new PreviewPanel(parent);
         errors = new ErrorPanel();
+        newSource = new SourcePanel();
         this.tabs.setTabPlacement(JTabbedPane.LEFT);
         this.tabs.addTab("Design Preview", preview);
 
+        //this.tabs.addTab("Source", source);
 
-        this.tabs.addTab("Source", source);
-
-        this.tabs.addTab("Error Log", errors);
+        this.tabs.addTab("Source", newSource);
         
-        this.tabs.addTab("test", new SourceTest());
+        //this.tabs.addTab("Error Log", errors);        
 
         addTabChangeListener();
         this.tabs.setSelectedIndex(1);
@@ -108,7 +108,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
 
     @Override
     protected void paintComponent(Graphics g) {        
-        if (!modified && source != null && source.hasBeenModified) {
+        if (!modified && newSource != null && newSource.hasBeenModified) {
             addFilenameToTitle(fileName + "*");
             modified = true;
             compiled = false;
@@ -118,7 +118,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
     
     public void refreshTheme() {
-        this.source.refreshTheme();
+        this.newSource.refreshTheme();
     }
     
     public void addFilenameToTitle(String fileName) {
@@ -159,7 +159,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                     }
                 }*/
                 if (tabs.getSelectedIndex() == 1) {
-                    source.setSelected();
+                    newSource.setSelected();
                 }
             }
         });
@@ -194,7 +194,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             root.appendChild(elements);
 
             Element program = document.createElement("behaviour");
-            program.setTextContent(source.getProgram());
+            program.setTextContent(newSource.getProgram());
             root.appendChild(program);
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -208,7 +208,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
-        source.hasBeenModified = false;
+        newSource.hasBeenModified = false;
         addFilenameToTitle(tempFilename);
         modified = false;
         if (Configuration.COMPILE_ON_SAVE) 
@@ -274,8 +274,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     
     public void loadFromDocument(Document document) {
         NodeList behaviour = document.getElementsByTagName("behaviour");
-        source.setProgram(behaviour.item(0).getTextContent());
-        source.hasBeenModified = false;
+        newSource.setProgram(behaviour.item(0).getTextContent());
+        newSource.hasBeenModified = false;
         
         NodeList elements = document.getElementsByTagName("element");
         
@@ -315,15 +315,20 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         this.tabs.setSelectedIndex(2);
     }
     
+    public void showClickableErrors(ArrayList<String> errors) {
+        this.newSource.setErrors(errors);
+    }
+    
     public ModuleDecl compileWithoutSemantics() {
         try {
             ErrorHandler.getInstance().reset();
             SemanticCheck.getInstance().resetAll();
-            parser parser = new parser(new VerilogLexer(new StringReader(source.getProgram())));
+            parser parser = new parser(new VerilogLexer(new StringReader(newSource.getProgram())));
             Symbol result = parser.parse();
             if (result == null) {
                 if (ErrorHandler.getInstance().hasErrors()) {
                     showErrorPanel(ErrorHandler.getInstance().getErrors());
+                    showClickableErrors(ErrorHandler.getInstance().getErrorList());
                 }
                 return null;
             }
@@ -344,7 +349,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }
     
     public void closeLogic() {
-        if (source.hasBeenModified) {
+        if (newSource.hasBeenModified) {
             int result = JOptionPane.showConfirmDialog(this, "Would you like to save before exit?",
                     "Exiting", JOptionPane.YES_OPTION);
             if (result == JOptionPane.YES_OPTION) {
@@ -361,8 +366,10 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     public void compileLogic(ModuleDecl module) {        
         if (module != null) {
             module.validateSemantics();
-            if (ErrorHandler.getInstance().hasErrors())
-                showErrorPanel(ErrorHandler.getInstance().getErrors());
+            if (ErrorHandler.getInstance().hasErrors()) {
+                //showErrorPanel(ErrorHandler.getInstance().getErrors());
+                showClickableErrors(ErrorHandler.getInstance().getErrorList());
+            }
             else {
                 preview.removeAll();
                 generateCircuitFromModule(module);
@@ -495,7 +502,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_compileMenuActionPerformed
 
     private void clearLogsMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearLogsMenuActionPerformed
-        this.errors.clearLogs();
+        //this.errors.clearLogs();
+        this.newSource.clearLogs();
     }//GEN-LAST:event_clearLogsMenuActionPerformed
 
     private void closeMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeMenuActionPerformed
@@ -503,7 +511,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_closeMenuActionPerformed
 
     private void formInternalFrameOpened(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameOpened
-        source.setSelected();
+        newSource.setSelected();
     }//GEN-LAST:event_formInternalFrameOpened
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
