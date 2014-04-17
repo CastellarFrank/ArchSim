@@ -32,14 +32,12 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         File metas = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH);
         
         this.compileOnSaveCB.setSelected(Configuration.COMPILE_ON_SAVE);
-        this.smallGridCB.setSelected(Configuration.SMALL_GRID);
         this.debugModeCB.setSelected(Configuration.DEBUG_MODE);
         this.asNumbersCB.setSelected(Configuration.LOGIC_VALUES_AS_NUMBER);
         this.strongConCB.setSelected(Configuration.KEEP_CONNECTED_ON_DRAG);
         
         this.lvalue0TF.setText(Configuration.LOGIC_0_VOLTAGE.toString());
         this.lvalue1TF.setText(Configuration.LOGIC_1_VOLTAGE.toString());
-        this.pauseTF.setText(Configuration.REPAINT_PAUSE.toString());
         
         this.modulesDirectoryTF.setText(mods.getAbsolutePath());
         this.modulesMetaDirectoryTF.setText(metas.getAbsolutePath());
@@ -81,11 +79,11 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
         Configuration.DEBUG_MODE = debugModeCB.isSelected();
         Configuration.LOGIC_VALUES_AS_NUMBER = asNumbersCB.isSelected();
-        Configuration.SMALL_GRID = smallGridCB.isSelected();
+        Configuration.SMALL_GRID = true;
         
         Configuration.LOGIC_0_VOLTAGE = Double.parseDouble(lvalue0TF.getText());
         Configuration.LOGIC_1_VOLTAGE = Double.parseDouble(lvalue1TF.getText());
-        Configuration.REPAINT_PAUSE = Integer.parseInt(pauseTF.getText());
+        Configuration.REPAINT_PAUSE = 10;
         
         Configuration.KEEP_CONNECTED_ON_DRAG = strongConCB.isSelected();
         
@@ -112,7 +110,9 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     setVisible(false);
             }
         };
-        new Timer(delay, taskPerformer).start();
+        Timer timer = new Timer(delay, taskPerformer);
+        timer.setRepeats(false);
+        timer.start();
     }
 
     /**
@@ -125,7 +125,6 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         tabs = new javax.swing.JTabbedPane();
-        jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         modulesDirectoryTF = new javax.swing.JTextField();
@@ -135,7 +134,6 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         browseButton1 = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JSeparator();
         compileOnSaveCB = new javax.swing.JCheckBox();
-        smallGridCB = new javax.swing.JCheckBox();
         debugModeCB = new javax.swing.JCheckBox();
         asNumbersCB = new javax.swing.JCheckBox();
         jSeparator3 = new javax.swing.JSeparator();
@@ -143,9 +141,6 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         jLabel3 = new javax.swing.JLabel();
         lvalue0TF = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        pauseTF = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
         strongConCB = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
         themeCB = new javax.swing.JComboBox();
@@ -177,19 +172,6 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             }
         });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 592, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 360, Short.MAX_VALUE)
-        );
-
-        tabs.addTab("Simulation Settings", jPanel2);
-
         jLabel1.setText("Module storage directory");
 
         browseButton.setText("...");
@@ -210,9 +192,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
 
         compileOnSaveCB.setText("Compile on save");
 
-        smallGridCB.setText("Small size grid");
-
-        debugModeCB.setText("Debug Mode");
+        debugModeCB.setText("Developer Mode");
 
         asNumbersCB.setText("Show logic values as numbers");
 
@@ -225,15 +205,9 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
 
         jLabel4.setText("Logic value 0 voltage:");
 
-        jLabel5.setText("Pause between repaints:");
-
-        pauseTF.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-
-        jLabel6.setText("ms");
-
         strongConCB.setText("Keep elements connected on drag");
 
-        jLabel7.setText("Theme");
+        jLabel7.setText("Text Editor Theme");
 
         themeCB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Default", "Dark", "Visual Studio", "Eclipse", "Idea" }));
 
@@ -268,14 +242,12 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGap(28, 28, 28)
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(strongConCB)
+                                            .addComponent(debugModeCB)
                                             .addGroup(jPanel1Layout.createSequentialGroup()
                                                 .addComponent(compileOnSaveCB)
                                                 .addGap(18, 18, 18)
-                                                .addComponent(smallGridCB)
-                                                .addGap(18, 18, 18)
-                                                .addComponent(debugModeCB)
-                                                .addGap(18, 18, 18)
+                                                .addComponent(strongConCB)
+                                                .addGap(23, 23, 23)
                                                 .addComponent(asNumbersCB)))))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
@@ -290,17 +262,9 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel7)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(jLabel5)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel6)))
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE)))))
                 .addGap(18, 18, 18))
         );
@@ -322,11 +286,10 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(compileOnSaveCB)
-                    .addComponent(smallGridCB)
-                    .addComponent(debugModeCB)
-                    .addComponent(asNumbersCB))
+                    .addComponent(asNumbersCB)
+                    .addComponent(strongConCB))
                 .addGap(5, 5, 5)
-                .addComponent(strongConCB)
+                .addComponent(debugModeCB)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(35, 35, 35)
@@ -336,21 +299,13 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addComponent(lvalue0TF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
                 .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel5)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(pauseTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel6)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(25, 25, 25))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         tabs.addTab("General Settings", jPanel1);
-
-        tabs.setSelectedIndex(1);
 
         saveButton.setText("Save");
         saveButton.addActionListener(new java.awt.event.ActionListener() {
@@ -375,9 +330,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(status)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(status))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(saveButton)
                 .addGap(18, 18, 18)
@@ -387,17 +340,18 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(saveButton)
                         .addComponent(applyBtn))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(41, Short.MAX_VALUE))
+                        .addGap(13, 13, 13)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -407,33 +361,33 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         setVisible(false);
     }//GEN-LAST:event_formInternalFrameClosing
 
-    private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
-        JFileChooser fileChooser = new JFileChooser(Configuration.MODULES_DIRECTORY_PATH);
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int choose = fileChooser.showOpenDialog(this);
-        if (choose != JFileChooser.APPROVE_OPTION)
-            return;
-        File target = fileChooser.getSelectedFile();
-        modulesDirectoryTF.setText(target.getAbsolutePath());
-    }//GEN-LAST:event_browseButtonActionPerformed
-
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         applyChanges(true);
     }//GEN-LAST:event_saveButtonActionPerformed
+
+    private void applyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyBtnActionPerformed
+        applyChanges(false);
+    }//GEN-LAST:event_applyBtnActionPerformed
 
     private void browseButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButton1ActionPerformed
         JFileChooser fileChooser = new JFileChooser(Configuration.MODULE_METADATA_DIRECTORY_PATH);
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int choose = fileChooser.showOpenDialog(this);
         if (choose != JFileChooser.APPROVE_OPTION)
-            return;
+        return;
         File target = fileChooser.getSelectedFile();
         modulesMetaDirectoryTF.setText(target.getAbsolutePath());
     }//GEN-LAST:event_browseButton1ActionPerformed
 
-    private void applyBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyBtnActionPerformed
-        applyChanges(false);
-    }//GEN-LAST:event_applyBtnActionPerformed
+    private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
+        JFileChooser fileChooser = new JFileChooser(Configuration.MODULES_DIRECTORY_PATH);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int choose = fileChooser.showOpenDialog(this);
+        if (choose != JFileChooser.APPROVE_OPTION)
+        return;
+        File target = fileChooser.getSelectedFile();
+        modulesDirectoryTF.setText(target.getAbsolutePath());
+    }//GEN-LAST:event_browseButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton applyBtn;
@@ -446,11 +400,8 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
@@ -458,9 +409,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private javax.swing.JTextField lvalue1TF;
     private javax.swing.JTextField modulesDirectoryTF;
     private javax.swing.JTextField modulesMetaDirectoryTF;
-    private javax.swing.JTextField pauseTF;
     private javax.swing.JButton saveButton;
-    private javax.swing.JCheckBox smallGridCB;
     private javax.swing.JLabel status;
     private javax.swing.JCheckBox strongConCB;
     private javax.swing.JTabbedPane tabs;

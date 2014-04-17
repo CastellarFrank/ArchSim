@@ -34,6 +34,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     SettingsEditor settingsEditor = null;
     public ArrayList<String> moduleNames = null;
+    public ArrayList<MenuInfo> moduleMenus = null;
     public boolean needsRefresh = false;
     
     /**
@@ -46,15 +47,20 @@ public class MainWindow extends javax.swing.JFrame {
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         Loader.getInstance().setup();
         
-        moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
-        Collections.sort(moduleNames);
+        prepareModuleMenu();
     }
     
     public void refreshModules() {
         Loader.getInstance().loadModules();
+        prepareModuleMenu();
+    }
+    
+    private void prepareModuleMenu() {
         moduleNames = new ArrayList<String>(ModuleRepository.getInstance().getModuleNames());
         Collections.sort(moduleNames);
         needsRefresh = false;
+        
+        moduleMenus = ModuleRepository.getInstance().getMenuStructure();
     }
     
     public void addDebuggerWindow(Debugger debugger) {
@@ -160,6 +166,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         aboutMenuItem.setMnemonic('a');
         aboutMenuItem.setText("About");
+        aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutMenuItemActionPerformed(evt);
+            }
+        });
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -236,6 +247,12 @@ public class MainWindow extends javax.swing.JFrame {
         }
         settingsEditor.setVisible(true);
     }//GEN-LAST:event_changeSettingsMenuActionPerformed
+
+    private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
+        About ab = new About();
+        ab.setLocation((getWidth() - ab.getWidth())/2, (getHeight() - ab.getHeight())/2);
+        ab.setVisible(true);        
+    }//GEN-LAST:event_aboutMenuItemActionPerformed
 
     
     private void openSimulationFile(Document document, String fileName) {

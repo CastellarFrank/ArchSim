@@ -19,9 +19,10 @@ import Simulation.SimulationFactory;
 import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.util.ArrayList;
+import java.awt.image.BufferedImage;
 import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -168,8 +169,7 @@ public class ContainerPanel extends JCanvas {
      * <code>Element</code> usually used to generate a XML file with it.
      *
      * @param document a initialized DOM document
-     * @return a root <code>Element</code> containing
-     * every <code>BaseElement</code>'s XML representation.
+     * @return a root <code>Element</code> containing      * every <code>BaseElement</code>'s XML representation.
      */
     public Element toXmlRootElement(Document document) {
         Element root = document.createElement("elements");
@@ -226,7 +226,38 @@ public class ContainerPanel extends JCanvas {
         Color old = g.getColor();
         g.setColor(Configuration.BACKGROUND_COLOR);
         //super.paintComponent(g);        
+        
         g.fillRect(-this.getX(), -this.getY(), getWidth() * 2, getHeight() * 2);
+        
+        
+
+        int spacing = 16;
+        int height = getHeight() / spacing;
+        int width = getWidth() / spacing;
+        
+        if (Configuration.DRAW_DOTTED_BG) {
+            background = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+            Graphics2D g2d = background.createGraphics();
+            g2d.setColor(Color.WHITE.darker());
+            for (int count = 0; count <= width; count++) {
+                int x = (int) Math.round(count * spacing);
+                int y = 0;
+                for (int c2 = 0; c2 <= height; c2++) {
+                    y = (int) Math.round(c2 * spacing);
+                    g2d.drawRect(x, y, 1, 1);
+                }
+            }
+            g2d.dispose();
+
+
+            g2d = (Graphics2D) g.create();
+            int x = (getWidth() - background.getWidth()) / 2;
+            int y = (getHeight() - background.getHeight()) / 2;
+            g2d.drawImage(background, x, y, this);
+            g2d.dispose();
+        }
+        
         g.setColor(old);
         updatePreview(g);
     }
@@ -235,9 +266,9 @@ public class ContainerPanel extends JCanvas {
     public void update(Graphics g) {
         updatePreview(g);
     }
-    
+
     private void initializeArray(String[] array, String defValue) {
-        for(int i = 0; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             array[i] = defValue;
         }
     }
@@ -324,20 +355,22 @@ public class ContainerPanel extends JCanvas {
         temporalRightSideVoltages = new double[rowCount];
         temporalRightSideMultibits = new String[rowCount];
         initializeArray(temporalRightSideMultibits, "z");
-        
+
         rightSideVoltages = new double[rowCount];
         rightSideMultibitsValues = new String[rowCount];
         initializeArray(rightSideMultibitsValues, "z");
-        
+
         matrixSize = matrixFullSize = rowCount;
         temporalVoltageMatrix = new double[rowCount][rowCount];
         voltageMatrix = new double[rowCount][rowCount];
         mutibitsMatrix = new String[rowCount][rowCount];
-        for (int i = 0; i < rowCount; i++)
+        for (int i = 0; i < rowCount; i++) {
             initializeArray(mutibitsMatrix[i], "z");
+        }
         temporalMultibitsMatrix = new String[rowCount][rowCount];
-        for (int i = 0; i < rowCount; i++)
+        for (int i = 0; i < rowCount; i++) {
             initializeArray(temporalMultibitsMatrix[i], "z");
+        }
         circuitPermute = new int[matrixSize];
         mapForStamp = false;
 
@@ -553,7 +586,7 @@ public class ContainerPanel extends JCanvas {
 
         System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                 rowCount);
-        
+
         System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0, rowCount);
 
         for (int i = 0; i < rowCount; i++) {
@@ -746,8 +779,8 @@ public class ContainerPanel extends JCanvas {
 
                 System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
                         temporalRightSideVoltages.length);
-                
-                System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0, 
+
+                System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0,
                         temporalRightSideMultibits.length);
 
                 if (circuitNonLinear) {
@@ -929,7 +962,7 @@ public class ContainerPanel extends JCanvas {
             newElementBeenDrawn.draw(g);
         } else if (selectedArea != null) {
             Color old = g.getColor();
-            g.setColor(Color.YELLOW.darker());
+            g.setColor(Configuration.SELECT_RECT_COLOR);
             g.drawRect(selectedArea.x, selectedArea.y,
                     selectedArea.width, selectedArea.height);
 
@@ -972,8 +1005,9 @@ public class ContainerPanel extends JCanvas {
         element.y2 = snapGrid(element.y2);
         element.setPoints();
 
-        if (!(element instanceof ModuleChip) && element.x == element.x2 && element.y == element.y2)
+        if (!(element instanceof ModuleChip) && element.x == element.x2 && element.y == element.y2) {
             return;
+        }
         elements.add(element);
     }
 
@@ -981,22 +1015,25 @@ public class ContainerPanel extends JCanvas {
     public void removeAll() {
         elements.clear();
     }
+    
+    BufferedImage background;
+    int dotCount = 100;
 
     /**
      * Constructor.
      */
-    public ContainerPanel() {
+    public ContainerPanel() {       
         elements = new Vector<BaseElement>(50);
         joints = new Vector<Joint>(100);
         simulationScope = SimulationFactory.createSimulationScope();
 
         BaseElement.defaultColor = Color.BLACK;
         BaseElement.whiteColor = Color.WHITE;
-        BaseElement.selectedColor = new Color(255, 128, 0);
-        BaseElement.lowSignalColor = new Color(102, 51, 0);
-        BaseElement.highSignalColor = Color.GREEN.darker();
-        BaseElement.highImpedanceSignalColor = Color.RED;
-        BaseElement.unknownSignalColor = Color.BLUE;
+        BaseElement.selectedColor = new Color(255,215,0);
+        BaseElement.lowSignalColor = new Color(255, 128, 0).darker();
+        BaseElement.highSignalColor = Color.GREEN.brighter();
+        BaseElement.highImpedanceSignalColor = Color.BLUE;
+        BaseElement.unknownSignalColor = Color.RED;
         BaseElement.textColor = Color.DARK_GRAY;
 
         needsAnalysis = true;
@@ -1022,7 +1059,9 @@ public class ContainerPanel extends JCanvas {
     }
 
     /**
-     * Constructs a <code>BaseElement</code> from given parameters.
+     * Constructs a
+     * <code>BaseElement</code> from given parameters.
+     *
      * @param type the full class name of the element to be constructed.
      * @param x starting x coordinate.
      * @param y starting y coordinate.
@@ -1039,13 +1078,16 @@ public class ContainerPanel extends JCanvas {
     }
 
     /**
-     * Constructs a <code>BaseElement</code> from given parameters.
+     * Constructs a
+     * <code>BaseElement</code> from given parameters.
+     *
      * @param type the full class name of the element to be constructed.
      * @param x starting x coordinate.
      * @param y starting y coordinate.
      * @param x2 ending x coordinate.
      * @param y2 ending y coordinate.
-     * @param extraParams optional extra parameters like number of inputs on an AndGate.
+     * @param extraParams optional extra parameters like number of inputs on an
+     * AndGate.
      * @return a <code>BaseElement</code> instantiated through reflection.
      */
     public BaseElement constructElement(String type,
@@ -1106,8 +1148,7 @@ public class ContainerPanel extends JCanvas {
      *
      * @param x target x coordinate
      * @param y target y coordinate
-     * @return <code>true</code> if at least one element was
-     * moved, <code>false</code> otherwise
+     * @return <code>true</code> if at least one element was      * moved, <code>false</code> otherwise
      */
     public boolean dragSelected(int x, int y) {
         boolean mouseElementSelected = false;
@@ -1267,9 +1308,11 @@ public class ContainerPanel extends JCanvas {
         }
         temporalRightSideVoltages[rowInfoIndex] = newVoltage;
     }
-    
+
     /**
-     * Sets a right side multibits value of a <code>RowInfo</code>
+     * Sets a right side multibits value of a
+     * <code>RowInfo</code>
+     *
      * @param rowInfoIndex row info index inside the list
      * @param multibits multibits value
      */
@@ -1315,9 +1358,11 @@ public class ContainerPanel extends JCanvas {
         }
         rowsInfo.get(rowInfoIndex - 1).rightSideChanges = true;
     }
-    
+
     /**
-     * Sets a right side multibits value of a <code>RowInfo</code>
+     * Sets a right side multibits value of a
+     * <code>RowInfo</code>
+     *
      * @param rowInfoIndex row info index inside the list
      */
     public void setRowInfoMultibitsChange(int rowInfoIndex) {
@@ -1348,8 +1393,9 @@ public class ContainerPanel extends JCanvas {
             column -= 1;
         }
         temporalVoltageMatrix[row][column] += newVoltage;
-        if (temporalMultibitsMatrix[row][column] == null)
+        if (temporalMultibitsMatrix[row][column] == null) {
             temporalMultibitsMatrix[row][column] = multibits;
+        }
     }
 
     /**

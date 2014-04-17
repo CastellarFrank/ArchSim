@@ -128,17 +128,17 @@ public class SimulationCanvas extends ContainerPanel implements
             if (mouseComponent == null) {
                 return;
             }
-            if (mouseComponent instanceof ModuleChip) {
+            //if (mouseComponent instanceof ModuleChip) {
                 /*ModuleChip chip = (ModuleChip) mouseComponent;
                 DrilldownWindow window = new DrilldownWindow(chip.getModuleName());
                 drilldowns.add(window);
                 parent.addDrilldownWindow(window);*/
-            } else {
+            //} else {
                 if (mouseComponent.getEditInfo(0) != null) {
                     EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
                     dialog.setVisible(true);
                 }
-            }
+            //}
         } else {
             if (draggingClass != null) {
                 int x = e.getX(), y = e.getY();

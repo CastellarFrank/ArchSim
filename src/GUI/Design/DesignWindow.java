@@ -173,6 +173,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         if (choose != JFileChooser.APPROVE_OPTION)
             return;
         File target = fileChooser.getSelectedFile();
+        
         String tempFilename = target.getName().replaceFirst(".xml", "");
         removeModuleInfo(tempFilename);
         

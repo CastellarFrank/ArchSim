@@ -19,7 +19,7 @@ public class ErrorHandler {
     }
     
     public void handleError(int line, int column, String error) {
-        String errorMessage = "Error in line %d:%d: %s";
+        String errorMessage = "%d:%d: %s";
         errors.add(String.format(errorMessage, line+1, column+1, error));
     }
     
@@ -30,6 +30,10 @@ public class ErrorHandler {
         }
         
         return result;
+    }
+    
+    public ArrayList<String> getErrorList() {
+        return errors;
     }
     
     public boolean hasErrors() {

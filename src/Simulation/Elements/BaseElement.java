@@ -605,6 +605,8 @@ public abstract class BaseElement implements Editable {
 
     public void drawText(Graphics g, String text) {
         FontMetrics fm = g.getFontMetrics();
+        
+        if (text == null) return;
         int w = fm.stringWidth(text);
         int textX = x2, oldTextX = x2;
 

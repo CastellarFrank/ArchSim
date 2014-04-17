@@ -32,7 +32,7 @@ public class TableRowData {
             this.value = val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
             try {
                 Integer vale = Integer.parseInt(value, 2);
-                this.value = this.value + " (" + vale + ")";
+                //this.value = this.value + " (" + vale + ")";
             } catch (Exception e) {
             }
         }
@@ -55,7 +55,7 @@ public class TableRowData {
             }
             try {
                 Integer val = Integer.parseInt(value, 2);
-                this.value = this.value + " (" + val + ")";
+                //this.value = this.value + " (" + val + ")";
             } catch (Exception e) {
             }
         }
@@ -109,7 +109,7 @@ public class TableRowData {
         value = scope.getFormattedValue(moduleInstanceId, variableName);
         try {
             Integer val = Integer.parseInt(value, 2);
-            this.value = this.value + " (" + val + ")";
+            //this.value = this.value + " (" + val + ")";
         } catch (Exception e) {
         }
     }

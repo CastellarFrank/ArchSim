@@ -4,6 +4,7 @@
  */
 package DataStructures;
 
+import GUI.MenuInfo;
 import Simulation.Configuration;
 import VerilogCompiler.CompilationHelper;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
@@ -20,7 +21,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * Singleton Class used to load settings and modules on application starting process.
+ * Singleton Class used to load settings and modules on application starting
+ * process.
+ *
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Loader {
@@ -38,8 +41,10 @@ public class Loader {
     }
 
     /**
-     * Loads the settings configuration file into <code>Configuration</code> class.
-     * So after this call, every configuration is available through <code>Configuration</code> class.
+     * Loads the settings configuration file into
+     * <code>Configuration</code> class. So after this call, every configuration
+     * is available through
+     * <code>Configuration</code> class.
      */
     public void loadSettings() {
         //Cargará los settings de un xml y las pondrá en Configuration
@@ -65,18 +70,19 @@ public class Loader {
                 try {
                     Field field = Configuration.class.getDeclaredField(name);
                     Object fieldValue = null;
-                    if (type.equals(String.class.getSimpleName()))
+                    if (type.equals(String.class.getSimpleName())) {
                         fieldValue = value;
-                    else if (type.equals(Integer.class.getSimpleName()))
+                    } else if (type.equals(Integer.class.getSimpleName())) {
                         fieldValue = Integer.parseInt(value);
-                    else if (type.equals(Boolean.class.getSimpleName()))
+                    } else if (type.equals(Boolean.class.getSimpleName())) {
                         fieldValue = Boolean.parseBoolean(value);
-                    else if (type.equals(Double.class.getSimpleName()))
+                    } else if (type.equals(Double.class.getSimpleName())) {
                         fieldValue = Double.parseDouble(value);
-                    
+                    }
+
                     field.set(null, fieldValue);
                 } catch (NoSuchFieldException ex) {
-                    System.err.println("No field called " + value + " in configuration (" 
+                    System.err.println("No field called " + value + " in configuration ("
                             + ex.getMessage() + ")");
                 } catch (SecurityException ex) {
                     System.err.println(ex.getMessage());
@@ -89,82 +95,123 @@ public class Loader {
     }
 
     /**
-     * Loads every module definition file found on <code>Configuration.MODULES_DIRECTORY_PATH</code>
-     * into the <code>ModuleRepository</code> singleton class.
+     * Loads every module definition file found on
+     * <code>Configuration.MODULES_DIRECTORY_PATH</code> into the
+     * <code>ModuleRepository</code> singleton class.
      */
     public void loadModules() {
         ModuleRepository.getInstance().clear();
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
-        List<File> modules = (List<File>) FileUtils.listFiles(directory, null, true);
+        //List<File> modules = (List<File>) FileUtils.listFiles(directory, null, false);
+
+        File[] modules = directory.listFiles();
         
         for (File file : modules) {
             ModuleInfo moduleInfo = new ModuleInfo();
             moduleInfo.valid = false;
             ModuleRepository.getInstance().registerModule(file.getName().replace(".xml", ""), moduleInfo);
         }
-        
+
+        ArrayList<MenuInfo> menus = new ArrayList<MenuInfo>();
+
         for (File file : modules) {
-            if (Configuration.DEBUG_MODE) {
-                System.out.println("Loading module... " + file.getAbsolutePath());
-            }            
-            String source = getSourceCode(file.getName());
-            ModuleDecl parsed = getModuleLogic(source);
-            if (parsed != null) {
-                ModuleInfo moduleInfo = getModuleInfo(file.getName());
-                if (moduleInfo == null) continue;
-                moduleInfo.setSource(source);
-                
-                if (!parsed.hasModuleInstances()) 
-                    moduleInfo.setIsLeaf(true);
-                
-                if (moduleInfo != null) {
-                    ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
-                    ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
-                    ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
-                } else {
-                    System.out.println("Module Info is null");
+            if (file.isFile()) {
+                MenuInfo info = checkPossibleModule(file);
+                if (info != null) {
+                    menus.add(info);
                 }
             } else {
-                System.out.println("ModuleDecl (" + file.getName() + ") is null. Possibly parse error");
+                String folder = file.getName();
+                MenuInfo dir = new MenuInfo(folder, false);
+
+                List<File> project = (List<File>) FileUtils.listFiles(file, null, true);
+
+                for (File projectModule : project) {
+                    MenuInfo info = checkPossibleModule(projectModule);
+                    if (info != null) {
+                        dir.addChild(info);
+                    }
+                }
+                
+                menus.add(dir);
             }
         }
+        
+        ModuleRepository.getInstance().setMenuData(menus);
     }
-    
+
+    private MenuInfo checkPossibleModule(File file) {
+        if (Configuration.DEBUG_MODE) {
+            System.out.println("Loading module... " + file.getAbsolutePath());
+        }
+        String source = getSourceCode(file);
+        ModuleDecl parsed = getModuleLogic(source);
+        if (parsed != null) {
+            ModuleInfo moduleInfo = getModuleInfo(file.getName());
+            if (moduleInfo == null) {
+                return null;
+            }
+            moduleInfo.setSource(source);
+
+            if (!parsed.hasModuleInstances()) {
+                moduleInfo.setIsLeaf(true);
+            }
+
+            if (moduleInfo != null) {
+                ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
+                ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
+                ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
+                ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
+
+                MenuInfo info = new MenuInfo(moduleInfo.getModuleName(), true);
+                return info;
+            } else {
+                System.out.println("Module Info is null");
+            }
+        } else {
+            System.out.println("ModuleDecl (" + file.getName() + ") is null. Possibly parse error");
+        }
+        return null;
+    }
+
     /**
      * Given a file name of a module definition file it returns its source code.
-     * @param xmlFileName name (extension included) of the XML file of a module definition.
-     * @return Verilog source used at definition time. 
+     *
+     * @param xmlFileName name (extension included) of the XML file of a module
+     * definition.
+     * @return Verilog source used at definition time.
      */
-    public String getSourceCode(String xmlFileName) {
-        File moduleFile = new File(Configuration.MODULES_DIRECTORY_PATH + 
-                "/" + xmlFileName);
-        if (!moduleFile.exists())
+    public String getSourceCode(File moduleFile) {
+        if (!moduleFile.exists()) {
             return null;
+        }
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(moduleFile);
 
             doc.normalize();
-            
+
             NodeList program = doc.getElementsByTagName("behaviour");
             if (program.getLength() != 1) {
                 /*ERROR*/
                 return null;
             }
-            String source = ((Element)program.item(0)).getTextContent();
+            String source = ((Element) program.item(0)).getTextContent();
             return source;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
         return null;
     }
-    
+
     /**
      * It parses and returns a memory representation of a Verilog source code.
+     *
      * @param source Verilog source code
-     * @return a <code>ModuleDecl</code> instance result of parsing the source code.
+     * @return a <code>ModuleDecl</code> instance result of parsing the source
+     * code.
      */
     public ModuleDecl getModuleLogic(String source) {
         try {
@@ -176,8 +223,11 @@ public class Loader {
     }
 
     /**
-     * It parses a XML file named <code>xmlFileName</code> its metadata.
-     * @param xmlFileName name (extension included) of the XML file of a module definition.
+     * It parses a XML file named
+     * <code>xmlFileName</code> its metadata.
+     *
+     * @param xmlFileName name (extension included) of the XML file of a module
+     * definition.
      * @return <code>ModuleInfo</code> instance
      */
     public ModuleInfo getModuleInfo(String xmlFileName) {
@@ -232,7 +282,9 @@ public class Loader {
     }
 
     /**
-     * Static method to get the instance of a <code>Loader</code> singleton
+     * Static method to get the instance of a
+     * <code>Loader</code> singleton
+     *
      * @return the <code>Loader</code> singleton instance.
      */
     public static Loader getInstance() {

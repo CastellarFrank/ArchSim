@@ -145,7 +145,7 @@ public class ModuleDecl extends Declaration {
             builder.append(port.getIdentifier());
             builder.append(" is a ");
             builder.append(port.getSignalSize());
-            builder.append(" bits signal.");
+            builder.append(" bit(s) signal.");
             builder.append("\n");
         }
         

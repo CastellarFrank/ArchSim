@@ -8,6 +8,7 @@ import DataStructures.ModuleInfo;
 import DataStructures.ModuleRepository;
 import Exceptions.ModuleDesignNotFoundException;
 import GUI.ContainerPanel;
+import GUI.Edit.EditInfo;
 import Simulation.Configuration;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
@@ -21,6 +22,8 @@ import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -44,6 +47,8 @@ public class ModuleChip extends BaseElement {
     ArrayList<Integer> voltageSources = new ArrayList<Integer>();
     
     public boolean isInitialized = false;
+    
+    private String userReference;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -94,6 +99,7 @@ public class ModuleChip extends BaseElement {
             throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
         }
         this.moduleName = element.getAttribute("moduleName");
+        this.userReference = this.moduleName + ModuleRepository.getInstance().getNextIndex(this.moduleName);
         textX = Integer.parseInt(element.getAttribute("textX"));
         textY = Integer.parseInt(element.getAttribute("textY"));
 
@@ -356,6 +362,22 @@ public class ModuleChip extends BaseElement {
     @Override
     public Point getPost(int n) {
         return ports[n].post;
+    }
+    
+    @Override
+    public EditInfo getEditInfo(int n) {
+        if (n == 0)
+            return new EditInfo("from" , 0.0, 0, Integer.MAX_VALUE, false).
+                    addComponent(new JLabel("ID: ")).
+                    addComponent(new JTextField(userReference, 16));
+        return null;
+    }
+    
+    @Override
+    public void setEditValue(int n, EditInfo editInfo) {
+        if (n == 0) {
+            userReference = editInfo.value;
+        }
     }
 
     @Override

@@ -49,7 +49,19 @@ public class MultiBitsOutput extends BaseElement {
         g.setColor(needsHighlight() ? selectedColor : defaultColor);
         setBbox(point1, lead1, 0);
         drawText(g, binaryValues[0]);
-        setVoltageColor(g, voltages[0]);
+        
+        
+        if (binaryValues != null && binaryValues[0] != null) {
+            if (needsHighlight())
+                g.setColor(BaseElement.selectedColor);
+            else if (binaryValues[0].contains("z"))
+                g.setColor(BaseElement.highImpedanceSignalColor);
+            else if (binaryValues[0].contains("x"))
+                g.setColor(BaseElement.unknownSignalColor);
+            else
+                setVoltageColor(g, voltages[0]);
+        }
+        
         drawThickLine(g, point1, lead1);
         drawPosts(g);
     }

@@ -6,6 +6,7 @@ package GUI.Simulation;
 
 import GUI.Design.DesignWindow;
 import GUI.MainWindow;
+import GUI.MenuInfo;
 import Simulation.Elements.Gates.AndGate;
 import Simulation.Elements.Gates.NandGate;
 import Simulation.Elements.Gates.NorGate;
@@ -16,16 +17,17 @@ import Simulation.Elements.Gates.XorGate;
 import Simulation.Elements.Inputs.LogicInput;
 import Simulation.Elements.Inputs.MultiBitsInput;
 import Simulation.Elements.ModuleChip;
-import Simulation.Elements.Multiplexor;
 import Simulation.Elements.Outputs.LogicOutput;
 import Simulation.Elements.Outputs.MultiBitsOutput;
 import Simulation.Elements.Wire;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -79,9 +81,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             parent.refreshModules();
         }
         
-        for (String moduleName : parent.moduleNames) {
-            modulesMenu.add(makeMenuItem(moduleName));
-        }
+        createMenuStructure(parent.moduleMenus);
         
         canvas = new SimulationCanvas(parent);
         this.setContentPane(canvas);
@@ -94,6 +94,16 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         }
     }
     
+    private void createMenuStructure(ArrayList<MenuInfo> menus) {
+        for (MenuInfo menu : menus) {
+            if (menu.isMenuItem) {
+                modulesMenu.add(makeMenuItem(menu.label));
+            } else {
+                modulesMenu.add(makeMenu(menu));
+            }
+        }
+    }
+    
     public void addFilenameToTitle(String fileName) {
         setTitle(getTitle() + " - " + fileName);
     }
@@ -102,6 +112,16 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         JMenuItem menu = new JMenuItem(moduleName + " module.");
         menu.setActionCommand(moduleName);
         menu.addActionListener(this);
+        
+        return menu;
+    }
+    
+    public final JMenu makeMenu(MenuInfo info) {
+        JMenu menu = new JMenu(info.label);
+        
+        for (MenuInfo child : info.children) {
+            menu.add(makeMenuItem(child.label));
+        }
         
         return menu;
     }
@@ -217,7 +237,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu6 = new javax.swing.JMenu();
         lOuputMenu = new javax.swing.JMenuItem();
         multiBitsOutputMenu = new javax.swing.JMenuItem();
-        addMultMenu = new javax.swing.JMenuItem();
         modulesMenu = new javax.swing.JMenu();
         addWireMenu = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
@@ -369,14 +388,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
         jMenu3.add(jMenu6);
 
-        addMultMenu.setText("Add Multiplexor");
-        addMultMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addMultMenuActionPerformed(evt);
-            }
-        });
-        jMenu3.add(addMultMenu);
-
         modulesMenu.setText("Add Module");
         jMenu3.add(modulesMenu);
 
@@ -423,15 +434,11 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 460, Short.MAX_VALUE)
+            .addGap(0, 468, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void addMultMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addMultMenuActionPerformed
-        setAddingElementInfo(Multiplexor.class.getName(), extraParams2);
-    }//GEN-LAST:event_addMultMenuActionPerformed
 
     private void addAndMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addAndMenuActionPerformed
         setAddingElementInfo(AndGate.class.getName(), extraParams2);
@@ -510,7 +517,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAndMenu;
-    private javax.swing.JMenuItem addMultMenu;
     private javax.swing.JMenuItem addNandMenu;
     private javax.swing.JMenuItem addNorMenu;
     private javax.swing.JMenuItem addOrMenu;

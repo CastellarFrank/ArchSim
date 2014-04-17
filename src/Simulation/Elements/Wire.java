@@ -40,6 +40,12 @@ public class Wire extends BaseElement {
     @Override
     public void draw(Graphics g) {
         setVoltageColor(g, voltages[0]);
+        if (binaryValues != null && binaryValues[0] != null && !needsHighlight()) {
+            if (binaryValues[0].contains("z"))
+                g.setColor(BaseElement.highImpedanceSignalColor);
+            if (binaryValues[0].contains("x"))
+                g.setColor(BaseElement.unknownSignalColor);
+        }
         Point extra1 = new Point(point1.x, point2.y);
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, point2);

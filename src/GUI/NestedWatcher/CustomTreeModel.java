@@ -7,6 +7,7 @@ package GUI.NestedWatcher;
 import GUI.Watcher.WatchModelEntry;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.VariableInfo;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
@@ -17,7 +18,7 @@ import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
  */
 public class CustomTreeModel extends AbstractTreeTableModel {
 
-    private String[] titles = {"Variable", "Value"};
+    private String[] titles = {"Variable", "Binary Value", "Decimal Value", "Hex Value"};
     private ArrayList<WatchModelEntry> variables;
     private SimulationScope scope;
 
@@ -99,6 +100,20 @@ public class CustomTreeModel extends AbstractTreeTableModel {
                         return data.getVariableName();
                     case 1:
                         return data.getValue();
+                    case 2:
+                        try {
+                            BigInteger d = new BigInteger(data.getValue(), 2);
+                            return d;
+                        } catch (Exception e) {
+                            return "";
+                        }
+                    case 3:
+                        try {
+                            BigInteger d = new BigInteger(data.getValue(), 2);
+                            return d.toString(16);
+                        } catch (Exception e) {
+                            return "";
+                        }
                 }
             }
 
@@ -113,6 +128,20 @@ public class CustomTreeModel extends AbstractTreeTableModel {
                         return data.getVariableName();
                     case 1:
                         return data.getValue();
+                    case 2:
+                        try {
+                            BigInteger d = new BigInteger(data.getValue(), 2);
+                            return d;
+                        } catch (Exception e) {
+                            return "";
+                        }
+                    case 3:
+                        try {
+                            BigInteger d = new BigInteger(data.getValue(), 2);
+                            return d.toString(16);
+                        } catch (Exception e) {
+                            return "";
+                        }
                 }
             }
 

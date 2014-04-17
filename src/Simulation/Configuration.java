@@ -33,6 +33,7 @@ public class Configuration {
     public static final String CONFIG_FILE_NAME = "globalSettings.xml";
     public static String THEME = "themes/default-alt.xml";
     public static Boolean COMPILE_ON_SAVE = true;
+    public static Boolean DRAW_DOTTED_BG = true;
     
     public static Double LOGIC_1_VOLTAGE = 2.5;
     public static Double LOGIC_0_VOLTAGE = 0.0;
@@ -42,7 +43,8 @@ public class Configuration {
     public static Boolean LOGIC_VALUES_AS_NUMBER = false;
     public static Boolean KEEP_CONNECTED_ON_DRAG = true;
     
-    public static Color BACKGROUND_COLOR = Color.WHITE;
+    public static Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
+    public static Color SELECT_RECT_COLOR = new Color(255,215,0);
     
     public static HashMap<String, Setting> otherSettings = new HashMap<String, Setting>();
     

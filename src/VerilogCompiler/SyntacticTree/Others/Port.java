@@ -146,6 +146,8 @@ public class Port extends VNode {
             info.LSB = (int)lsb;
             info.MSB = (int)msb;
             signalSize = Math.abs(info.LSB - info.MSB) + 1;
+        } else {
+            signalSize = 1;
         }
         SemanticCheck.getInstance().registerVariable(identifier, info);
         return null;

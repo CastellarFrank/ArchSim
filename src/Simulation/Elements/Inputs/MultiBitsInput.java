@@ -56,7 +56,17 @@ public class MultiBitsInput extends BaseElement {
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         setBbox(point1, lead1, 0);
         drawText(g, binaryValues[0]);
+        
         setVoltageColor(g, voltages[0]);
+        if (binaryValues != null && binaryValues[0] != null && !needsHighlight()) {
+            if (needsHighlight())
+                g.setColor(BaseElement.selectedColor);
+            else if (binaryValues[0].contains("z"))
+                g.setColor(BaseElement.highImpedanceSignalColor);
+            else if (binaryValues[0].contains("x"))
+                g.setColor(BaseElement.unknownSignalColor);
+                
+        }
         Point extra1 = new Point(point1.x, lead1.y);
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, lead1);

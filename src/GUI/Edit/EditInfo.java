@@ -18,9 +18,19 @@ public class EditInfo {
     public String name, text;
     public String value;
     public double minval, maxval;
+    public boolean validate;
     
     ArrayList<JComponent> components;
     //</editor-fold>
+    
+    public EditInfo(String name, double currentValue, double minValue, double maxValue, boolean validate) {
+	this.name = name;
+	this.value = currentValue + "";
+	this.minval = minValue;
+        this.maxval = maxValue;
+        components = new ArrayList<JComponent>();
+        this.validate = validate;
+    }
     
     public EditInfo(String name, double currentValue, double minValue, double maxValue) {
 	this.name = name;
@@ -28,6 +38,7 @@ public class EditInfo {
 	this.minval = minValue;
         this.maxval = maxValue;
         components = new ArrayList<JComponent>();
+        this.validate = true;
     }
     
     public EditInfo(String name, String currentValue, double minValue, double maxValue) {
@@ -54,6 +65,7 @@ public class EditInfo {
     }
     
     public boolean accepts(String newValue) {
+        if (!validate) return true;
         try {
             Integer result = new BigInteger(newValue).intValue();
             if (result <= maxval && result >= minval)
