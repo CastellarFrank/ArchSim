@@ -7,6 +7,7 @@ package GUI.NestedWatcher;
 import Simulation.Elements.ModuleChip;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
+import VerilogCompiler.SemanticCheck.VariableInfo;
 
 /**
  *
@@ -19,12 +20,19 @@ public class TableRowData {
     private int index = -1;
     private String moduleInstanceId;
     private boolean isRoot;
+    private boolean isCategory;
     ModuleChip chip;
+    
+    public TableRowData(String label, boolean isCategory) {
+        this.variableName = label;
+        this.isCategory = isCategory;
+    }
 
     public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, ModuleChip chip) {
         this.variableName = variableName;
         this.moduleInstanceId = moduleInstanceId;
         this.chip = chip;
+        this.isCategory = false;
         if (scope == null) {
             this.isRoot = true;
             this.value = "[...]";
@@ -46,13 +54,17 @@ public class TableRowData {
         this.moduleInstanceId = moduleInstanceId;
         this.index = index;
         this.chip = chip;
+        this.isCategory = false;
         if (scope == null) {
             this.isRoot = true;
             this.value = "[...]";
         } else {
             this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
-            if (isRoot) {
+            VariableInfo info = scope.getVariableInfo(moduleInstanceId, variableName);
+            if (isRoot) {                
                 Object val = ((Object[]) scope.getVariableValue(moduleInstanceId, variableName).value)[index];
+                if (val != null)
+                    val = scope.padWithZeros(val, info.MSB - info.LSB);
                 this.value = val == null ? "z" : val.toString();
             } else {
                 this.value = scope.getFormattedValue(moduleInstanceId, variableName);
@@ -83,7 +95,7 @@ public class TableRowData {
 
     public String getVariableName() {
         if (index == -1) {
-            return (chip != null ? chip.getUserReference() + "." : "") + variableName;
+            return /*(chip != null ? chip.getUserReference() + "." : "") + */variableName;
         } else {
             return "[" + index + "]";
         }
@@ -99,6 +111,14 @@ public class TableRowData {
 
     public void setValue(String value) {
         this.value = value;
+    }
+    
+    public boolean isCategory() {
+        return isCategory;
+    }
+    
+    public String getLabel() {
+        return variableName;
     }
 
     public boolean isRoot() {

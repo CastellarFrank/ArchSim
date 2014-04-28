@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="OverAdder" textX="60" textY="86" type="GUI.Design.ChipRectangule" x="56" x2="121" y="40" y2="73"><param>OverAdder</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="na" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="nb" position="2"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="nc" position="0"/></element></elements><behaviour>module OverAdder(input reg[0:15] na,
+               input reg[0:15] nb,
+               output reg[0:15] nc); 
+
+	reg[0:15] part;
+	Half_Adder adder(na, nb, part);
+
+	Half_Adder add2(part, 1, nc);
+	
+endmodule</behaviour></module>

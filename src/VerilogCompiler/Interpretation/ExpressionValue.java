@@ -52,6 +52,8 @@ public class ExpressionValue {
                 String format = "%0" + bits + "d";
                 return value.toString();
             }
+        } else if (value instanceof Object[]) {
+            return "z";
         }
         return value != null ? value.toString() : null;
     }

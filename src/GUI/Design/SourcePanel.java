@@ -54,7 +54,7 @@ public class SourcePanel extends javax.swing.JPanel {
                 JList list = (JList) ev.getSource();
                 if (ev.getClickCount() == 2) {
                     int index = list.locationToIndex(ev.getPoint());
-                    System.out.println(list.getModel().getElementAt(index));
+                    //System.out.println(list.getModel().getElementAt(index));
                     String line = list.getModel().getElementAt(index).toString();
                     if (line.matches("[0-9]+:.*")) {
                         int lineNumber = Integer.parseInt(line.substring(0, line.indexOf(":")));

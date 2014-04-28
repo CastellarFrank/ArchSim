@@ -10,6 +10,7 @@ import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
@@ -37,10 +38,24 @@ public class CustomTreeModel extends AbstractTreeTableModel {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(null, null, null, null), true);
         ArrayList<WatchModelEntry> toDelete = new ArrayList<WatchModelEntry>();
         
+        HashMap<String, DefaultMutableTreeNode> categories = new HashMap<String, DefaultMutableTreeNode>();
+        
+        for (WatchModelEntry watchModelEntry : variables) {
+            ModuleChip chip = watchModelEntry.chip;
+            if (chip != null) {
+                if (categories.containsKey(chip.getUserReference())) continue;
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(chip.getUserReference(), true));
+                categories.put(chip.getUserReference(), node);
+            }
+        }
+        
         for (WatchModelEntry watchModelEntry : variables) {
             String moduleId = watchModelEntry.moduleInstanceId;
             String variableName = watchModelEntry.variableName;
             ModuleChip chip = watchModelEntry.chip;
+            
+            DefaultMutableTreeNode parent = categories.get(chip.getUserReference());
+            
             VariableInfo info = scope.getVariableInfo(moduleId, variableName);
             if (info == null)
                 toDelete.add(watchModelEntry);
@@ -51,11 +66,16 @@ public class CustomTreeModel extends AbstractTreeTableModel {
                     for (int i = 0; i < values.length; i++) {
                         node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i, chip), false));
                     }
-                    rootNode.add(node);
+                    parent.add(node);
                 } else {
-                    rootNode.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, chip)));
+                    parent.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, chip)));
                 }
         }
+        
+        for (DefaultMutableTreeNode node : categories.values()) {
+            rootNode.add(node);
+        }
+        
         for (WatchModelEntry watchModelEntry : toDelete) {
             variables.remove(watchModelEntry);
         }
@@ -97,25 +117,30 @@ public class CustomTreeModel extends AbstractTreeTableModel {
         if (arg0 instanceof TableRowData) {
             TableRowData data = (TableRowData) arg0;
             if (data != null) {
-                switch (arg1) {
-                    case 0:
-                        return data.getVariableName();
-                    case 1:
-                        return data.getValue();
-                    case 2:
-                        try {
-                            BigInteger d = new BigInteger(data.getValue(), 2);
-                            return d;
-                        } catch (Exception e) {
-                            return "";
-                        }
-                    case 3:
-                        try {
-                            BigInteger d = new BigInteger(data.getValue(), 2);
-                            return d.toString(16);
-                        } catch (Exception e) {
-                            return "";
-                        }
+                if (!data.isCategory()) {
+                    switch (arg1) {
+                        case 0:
+                            return data.getVariableName();
+                        case 1:
+                            return data.getValue();
+                        case 2:
+                            try {
+                                BigInteger d = new BigInteger(data.getValue(), 2);
+                                return d;
+                            } catch (Exception e) {
+                                return "";
+                            }
+                        case 3:
+                            try {
+                                BigInteger d = new BigInteger(data.getValue(), 2);
+                                return d.toString(16);
+                            } catch (Exception e) {
+                                return "";
+                            }
+                    }
+                } else {
+                    if (arg1 == 0)
+                        return data.getLabel();
                 }
             }
 
@@ -125,25 +150,30 @@ public class CustomTreeModel extends AbstractTreeTableModel {
             DefaultMutableTreeNode dataNode = (DefaultMutableTreeNode) arg0;
             TableRowData data = (TableRowData) dataNode.getUserObject();
             if (data != null) {
-                switch (arg1) {
-                    case 0:
-                        return data.getVariableName();
-                    case 1:
-                        return data.getValue();
-                    case 2:
-                        try {
-                            BigInteger d = new BigInteger(data.getValue(), 2);
-                            return d;
-                        } catch (Exception e) {
-                            return "";
-                        }
-                    case 3:
-                        try {
-                            BigInteger d = new BigInteger(data.getValue(), 2);
-                            return d.toString(16);
-                        } catch (Exception e) {
-                            return "";
-                        }
+                if (!data.isCategory()) {
+                    switch (arg1) {
+                        case 0:
+                            return data.getVariableName();
+                        case 1:
+                            return data.getValue();
+                        case 2:
+                            try {
+                                BigInteger d = new BigInteger(data.getValue(), 2);
+                                return d;
+                            } catch (Exception e) {
+                                return "";
+                            }
+                        case 3:
+                            try {
+                                BigInteger d = new BigInteger(data.getValue(), 2);
+                                return d.toString(16);
+                            } catch (Exception e) {
+                                return "";
+                            }
+                    }
+                } else {
+                    if (arg1 == 0)
+                        return data.getLabel();
                 }
             }
 

@@ -67,7 +67,8 @@ public class SimulationScope {
             Object val = info.value.value;
             if (val instanceof Integer || val instanceof BigInteger) {
                 return padWithZeros(val, Math.abs(info.MSB - info.LSB) + 1);
-            }
+            } else if (val instanceof Object[])
+                return "z";
             return val != null ? val.toString() : null;
         }
         return null;
@@ -81,10 +82,15 @@ public class SimulationScope {
             if (size == 0) {
                 return val.toString();
             }
-
             String f = "%0" + Math.abs(size) + "d";
             return String.format(f, val);
-        }return null;
+        } else if (val instanceof String) {
+            if (val.toString().length() == 16) return val.toString();
+            String f = "%0" + (16 - val.toString().length()) + "d";
+            return String.format(f, 0) + val;
+        }
+        
+        return null;
     }
 
     public VariableInfo getVariableInfo(String moduleInstanceId, String variable) {

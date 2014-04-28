@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.Highlighter;
@@ -26,6 +27,7 @@ public class Debugger extends javax.swing.JInternalFrame {
     SimulationCanvas simulationCanvas;
     SimulationScope simulationScope;
     JXTreeTable table;
+
     /**
      * Creates new form Debugger
      */
@@ -33,31 +35,42 @@ public class Debugger extends javax.swing.JInternalFrame {
         initComponents();
         simulationCanvas = simWin;
         simulationScope = simWin.simulationScope;
-        
+
         table = new JXTreeTable(simWin.debuggerModel);
         Highlighter highligher = HighlighterFactory.createSimpleStriping(HighlighterFactory.LEDGER);
-    	table.setHighlighters(highligher);
+        table.setHighlighters(highligher);
+        table.setAutoResizeMode(JXTreeTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         table.setShowGrid(true);
         table.setShowsRootHandles(true);
         configureCommonTableProperties(table);
         table.setTreeCellRenderer(new TreeTableCellRenderer());
-        
+
         table.setVisible(true);
         scroll.getViewport().add(table);
         setVisible(true);
     }
-    
+
     public void refresh() {
         if (table != null) {
-            ((CustomTreeModel)(table.getTreeTableModel())).refresh();
+            ((CustomTreeModel) (table.getTreeTableModel())).refresh();
+
             table.updateUI();
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode)simulationCanvas.debuggerModel.getRoot();
+            DefaultMutableTreeNode currentNode = root.getNextNode();
+            if (currentNode != null) {
+                do {
+                    if (currentNode.getLevel() == 1) {
+                        table.expandPath(new TreePath(currentNode.getPath()));
+                    }
+                    currentNode = currentNode.getNextNode();
+                } while (currentNode != null);
+            }            
         }
     }
-    
-    private void  configureCommonTableProperties(JXTable table) {
+
+    private void configureCommonTableProperties(JXTable table) {
         table.setColumnControlVisible(true);
         StringValue toString = new StringValue() {
-
             @Override
             public String getString(Object value) {
                 if (value instanceof Point) {
@@ -67,13 +80,12 @@ public class Debugger extends javax.swing.JInternalFrame {
                     Dimension dim = (Dimension) value;
                     return createString(dim.width, dim.height);
                 }
-               return "";
+                return "";
             }
 
             private String createString(int width, int height) {
                 return "(" + width + ", " + height + ")";
             }
-            
         };
         TableCellRenderer renderer = new DefaultTableRenderer(toString);
         table.setDefaultRenderer(Point.class, renderer);
@@ -124,10 +136,9 @@ public class Debugger extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void deleteAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteAllActionPerformed
-        ((CustomTreeModel)(table.getTreeTableModel())).clear();
+        ((CustomTreeModel) (table.getTreeTableModel())).clear();
         table.updateUI();
     }//GEN-LAST:event_deleteAllActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton deleteAll;
     private javax.swing.JScrollPane scroll;
