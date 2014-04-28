@@ -5,6 +5,7 @@
 package GUI.NestedWatcher;
 
 import GUI.Watcher.WatchModelEntry;
+import Simulation.Elements.ModuleChip;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.math.BigInteger;
@@ -33,25 +34,26 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     }
     
     public final DefaultMutableTreeNode generateRoot() {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(null, null, null), true);
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(null, null, null, null), true);
         ArrayList<WatchModelEntry> toDelete = new ArrayList<WatchModelEntry>();
         
         for (WatchModelEntry watchModelEntry : variables) {
             String moduleId = watchModelEntry.moduleInstanceId;
             String variableName = watchModelEntry.variableName;
+            ModuleChip chip = watchModelEntry.chip;
             VariableInfo info = scope.getVariableInfo(moduleId, variableName);
             if (info == null)
                 toDelete.add(watchModelEntry);
             else
                 if (info.isArray) {
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(null, variableName, moduleId));
+                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(null, variableName, moduleId, chip));
                     Object[] values = (Object[]) scope.getVariableValue(moduleId, variableName).value;
                     for (int i = 0; i < values.length; i++) {
-                        node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i), false));
+                        node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i, chip), false));
                     }
                     rootNode.add(node);
                 } else {
-                    rootNode.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId)));
+                    rootNode.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, chip)));
                 }
         }
         for (WatchModelEntry watchModelEntry : toDelete) {

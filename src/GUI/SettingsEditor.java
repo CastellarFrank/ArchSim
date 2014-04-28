@@ -33,6 +33,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         
         this.compileOnSaveCB.setSelected(Configuration.COMPILE_ON_SAVE);
         this.debugModeCB.setSelected(Configuration.DEBUG_MODE);
+        this.shModName.setSelected(Configuration.USE_CUSTOM_MODULE_NAME);
         this.asNumbersCB.setSelected(Configuration.LOGIC_VALUES_AS_NUMBER);
         this.strongConCB.setSelected(Configuration.KEEP_CONNECTED_ON_DRAG);
         
@@ -76,6 +77,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
             parent.needsRefresh = true;
         }
         
+        Configuration.USE_CUSTOM_MODULE_NAME = shModName.isSelected();
         Configuration.COMPILE_ON_SAVE = compileOnSaveCB.isSelected();
         Configuration.DEBUG_MODE = debugModeCB.isSelected();
         Configuration.LOGIC_VALUES_AS_NUMBER = asNumbersCB.isSelected();
@@ -144,6 +146,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         strongConCB = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
         themeCB = new javax.swing.JComboBox();
+        shModName = new javax.swing.JCheckBox();
         saveButton = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         status = new javax.swing.JLabel();
@@ -211,6 +214,8 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
 
         themeCB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Default", "Dark", "Visual Studio", "Eclipse", "Idea" }));
 
+        shModName.setText("Show Custom Module Name ");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -242,13 +247,15 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGap(28, 28, 28)
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(debugModeCB)
+                                            .addComponent(compileOnSaveCB)
+                                            .addComponent(debugModeCB))
+                                        .addGap(18, 18, 18)
+                                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                                .addComponent(compileOnSaveCB)
-                                                .addGap(18, 18, 18)
                                                 .addComponent(strongConCB)
                                                 .addGap(23, 23, 23)
-                                                .addComponent(asNumbersCB)))))
+                                                .addComponent(asNumbersCB))
+                                            .addComponent(shModName))))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGap(46, 46, 46)
@@ -289,7 +296,9 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addComponent(asNumbersCB)
                     .addComponent(strongConCB))
                 .addGap(5, 5, 5)
-                .addComponent(debugModeCB)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(debugModeCB)
+                    .addComponent(shModName))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(35, 35, 35)
@@ -302,7 +311,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(themeCB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabs.addTab("General Settings", jPanel1);
@@ -346,12 +355,10 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(saveButton)
                         .addComponent(applyBtn))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(13, 13, 13)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
                 .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
         pack();
@@ -410,6 +417,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
     private javax.swing.JTextField modulesDirectoryTF;
     private javax.swing.JTextField modulesMetaDirectoryTF;
     private javax.swing.JButton saveButton;
+    private javax.swing.JCheckBox shModName;
     private javax.swing.JLabel status;
     private javax.swing.JCheckBox strongConCB;
     private javax.swing.JTabbedPane tabs;

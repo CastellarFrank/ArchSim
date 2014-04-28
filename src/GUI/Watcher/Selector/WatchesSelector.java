@@ -7,6 +7,7 @@ package GUI.Watcher.Selector;
 import GUI.MainWindow;
 import GUI.NestedWatcher.Debugger;
 import GUI.Watcher.WatchesTableModel;
+import Simulation.Elements.ModuleChip;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.SimulationScope;
 import java.util.Set;
@@ -22,13 +23,14 @@ public class WatchesSelector extends javax.swing.JDialog {
     WatchesTableModel watches;
     Debugger debugger;
     MainWindow realParent;
+    ModuleChip chip;
     
     /**
      * Creates new form WatchesSelector
      */
     public WatchesSelector(MainWindow realParent, Debugger debugger,
             WatchesTableModel watches, SimulationScope simulationScope, 
-            String moduleInstanceId, java.awt.Frame parent, boolean modal) {
+            String moduleInstanceId, java.awt.Frame parent, boolean modal, ModuleChip chip) {
         super(parent, modal);
         initComponents();
         
@@ -37,6 +39,7 @@ public class WatchesSelector extends javax.swing.JDialog {
         this.moduleInstanceId = moduleInstanceId;
         this.watches = watches;
         this.realParent = realParent;
+        this.chip = chip;
         
         InstanceModuleScope modScope = simulationScope.getScope(moduleInstanceId);
         Set<String> names = modScope.getVariableNames();
@@ -112,7 +115,7 @@ public class WatchesSelector extends javax.swing.JDialog {
         WatchesSelectorTableModel model = (WatchesSelectorTableModel) variables.getModel();
         for (WatchesSelectorModelEntry entry : model.data) {
             if (entry.beingWatched)
-                watches.addWatch(entry.variableName, moduleInstanceId);
+                watches.addWatch(entry.variableName, moduleInstanceId, chip);
             else 
                 watches.removeWatch(entry.variableName, moduleInstanceId);
         }

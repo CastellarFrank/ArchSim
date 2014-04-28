@@ -54,14 +54,11 @@
                       <Component id="saveButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="applyBtn" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
-                      <EmptySpace min="13" pref="13" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="jSeparator1" alignment="0" min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="9" max="32767" attributes="0"/>
               <Component id="status" min="-2" pref="14" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="15" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -114,14 +111,17 @@
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="debugModeCB" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="compileOnSaveCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="debugModeCB" alignment="0" min="-2" max="-2" attributes="0"/>
+                                              </Group>
+                                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                                              <Group type="103" groupAlignment="0" attributes="0">
                                                   <Group type="102" attributes="0">
-                                                      <Component id="compileOnSaveCB" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
                                                       <Component id="strongConCB" min="-2" max="-2" attributes="0"/>
                                                       <EmptySpace min="-2" pref="23" max="-2" attributes="0"/>
                                                       <Component id="asNumbersCB" min="-2" max="-2" attributes="0"/>
                                                   </Group>
+                                                  <Component id="shModName" min="-2" max="-2" attributes="0"/>
                                               </Group>
                                           </Group>
                                       </Group>
@@ -178,7 +178,10 @@
                           <Component id="strongConCB" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
-                      <Component id="debugModeCB" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="debugModeCB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="shModName" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="jSeparator3" min="-2" pref="10" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
@@ -193,7 +196,7 @@
                           <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="themeCB" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="19" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -290,6 +293,11 @@
                     <StringItem index="4" value="Idea"/>
                   </StringArray>
                 </Property>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="shModName">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Show Custom Module Name "/>
               </Properties>
             </Component>
           </SubComponents>

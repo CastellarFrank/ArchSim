@@ -305,8 +305,15 @@ public class ModuleChip extends BaseElement {
 
         Font newFont = new Font("SansSerif", Font.BOLD, 11 * csize);
         g2d.setFont(newFont);
-        g2d.drawString(moduleName, textX, textY);
+        if (Configuration.USE_CUSTOM_MODULE_NAME)
+            g2d.drawString(userReference, textX, textY);
+        else
+            g2d.drawString(moduleName, textX, textY);
         g2d.setColor(old);
+    }
+    
+    public void reset() {
+        isInitialized = false;
     }
 
     @Override
@@ -378,6 +385,10 @@ public class ModuleChip extends BaseElement {
         if (n == 0) {
             userReference = editInfo.value;
         }
+    }
+    
+    public String getUserReference() {
+        return userReference;
     }
 
     @Override

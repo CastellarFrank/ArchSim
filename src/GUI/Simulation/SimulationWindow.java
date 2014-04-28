@@ -7,6 +7,7 @@ package GUI.Simulation;
 import GUI.Design.DesignWindow;
 import GUI.MainWindow;
 import GUI.MenuInfo;
+import Simulation.Elements.BaseElement;
 import Simulation.Elements.Gates.AndGate;
 import Simulation.Elements.Gates.NandGate;
 import Simulation.Elements.Gates.NorGate;
@@ -492,6 +493,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             canvas.pause();
             pauseContinueMenu.setText("Continue");
         }
+        repaint();
     }//GEN-LAST:event_pauseContinueMenuActionPerformed
 
     private void inverterMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inverterMenuActionPerformed
@@ -512,7 +514,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     }//GEN-LAST:event_multiBitsOutputMenuActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        canvas.reset();
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -224,7 +224,11 @@ public class ContainerPanel extends JCanvas {
     @Override
     protected void paintComponent(Graphics g) {
         Color old = g.getColor();
-        g.setColor(Configuration.BACKGROUND_COLOR);
+        
+        if (isPaused)
+            g.setColor(Configuration.BACKGROUND_COLOR);
+        else
+            g.setColor(Color.WHITE);
         //super.paintComponent(g);        
         
         g.fillRect(-this.getX(), -this.getY(), getWidth() * 2, getHeight() * 2);
@@ -257,6 +261,8 @@ public class ContainerPanel extends JCanvas {
             g2d.drawImage(background, x, y, this);
             g2d.dispose();
         }
+        
+        g.setColor(Color.RED.darker());
         
         g.setColor(old);
         updatePreview(g);
@@ -876,7 +882,14 @@ public class ContainerPanel extends JCanvas {
      */
     public void reset() {
         totalTime = 0;
-        isPaused = false;
+        isPaused = true;
+        
+        for (BaseElement element : elements) {
+            if (element instanceof ModuleChip) {
+                ((ModuleChip)element).reset();
+            }
+        }
+        
         repaint();
     }
 

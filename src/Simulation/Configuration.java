@@ -34,6 +34,7 @@ public class Configuration {
     public static String THEME = "themes/default-alt.xml";
     public static Boolean COMPILE_ON_SAVE = true;
     public static Boolean DRAW_DOTTED_BG = true;
+    public static Boolean USE_CUSTOM_MODULE_NAME = true;
     
     public static Double LOGIC_1_VOLTAGE = 2.5;
     public static Double LOGIC_0_VOLTAGE = 0.0;
@@ -108,6 +109,10 @@ public class Configuration {
             root.appendChild(createElement(document, "DEBUG_MODE", 
                     DEBUG_MODE.toString(), 
                     DEBUG_MODE.getClass().getSimpleName()));
+            
+            root.appendChild(createElement(document, "USE_CUSTOM_MODULE_NAME", 
+                    USE_CUSTOM_MODULE_NAME.toString(), 
+                    USE_CUSTOM_MODULE_NAME.getClass().getSimpleName()));
             
             root.appendChild(createElement(document, "LOGIC_VALUES_AS_NUMBER", 
                     LOGIC_VALUES_AS_NUMBER.toString(), 

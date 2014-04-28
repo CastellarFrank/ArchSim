@@ -4,6 +4,7 @@
  */
 package GUI.NestedWatcher;
 
+import Simulation.Elements.ModuleChip;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 
@@ -18,10 +19,12 @@ public class TableRowData {
     private int index = -1;
     private String moduleInstanceId;
     private boolean isRoot;
+    ModuleChip chip;
 
-    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId) {
+    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, ModuleChip chip) {
         this.variableName = variableName;
         this.moduleInstanceId = moduleInstanceId;
+        this.chip = chip;
         if (scope == null) {
             this.isRoot = true;
             this.value = "[...]";
@@ -38,10 +41,11 @@ public class TableRowData {
         }
     }
 
-    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, int index) {
+    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, int index, ModuleChip chip) {
         this.variableName = variableName;
         this.moduleInstanceId = moduleInstanceId;
         this.index = index;
+        this.chip = chip;
         if (scope == null) {
             this.isRoot = true;
             this.value = "[...]";
@@ -79,7 +83,7 @@ public class TableRowData {
 
     public String getVariableName() {
         if (index == -1) {
-            return variableName;
+            return (chip != null ? chip.getUserReference() + "." : "") + variableName;
         } else {
             return "[" + index + "]";
         }

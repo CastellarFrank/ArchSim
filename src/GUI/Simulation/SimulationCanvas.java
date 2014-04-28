@@ -68,7 +68,8 @@ public class SimulationCanvas extends ContainerPanel implements
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     String modId = ((ModuleChip) mouseComponent).getModuleInstanceId();
-                    WatchesSelector selector = new WatchesSelector(parent, debugger, watchesTableModel, simulationScope, modId, parent, true);
+                    WatchesSelector selector = new WatchesSelector(parent, debugger, watchesTableModel, 
+                            simulationScope, modId, parent, true, (ModuleChip) mouseComponent);
                     selector.setVisible(true);
                 }
             });

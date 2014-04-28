@@ -4,6 +4,7 @@
  */
 package GUI.Watcher;
 
+import Simulation.Elements.ModuleChip;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.VariableInfo;
@@ -54,11 +55,11 @@ public class WatchesTableModel implements TableModel {
      * @param variableName name of the variable to be watched.
      * @param moduleInstanceId module instance that contains the <code>variable</code> variable.
      */
-    public void addWatch(String variableName, String moduleInstanceId) {
+    public void addWatch(String variableName, String moduleInstanceId, ModuleChip chip) {
         if (contains(variableName, moduleInstanceId))
             return;
         
-        modelData.add(new WatchModelEntry(variableName, moduleInstanceId));
+        modelData.add(new WatchModelEntry(variableName, moduleInstanceId, chip));
         updateValues();        
     }
     

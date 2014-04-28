@@ -103,6 +103,14 @@ public class Loader {
         ModuleRepository.getInstance().clear();
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
+        
+        if (!directory.exists()) {
+            Configuration.MODULES_DIRECTORY_PATH = "modules/";
+            directory = new File(Configuration.MODULES_DIRECTORY_PATH);
+            if (!directory.exists())
+                directory.mkdir();
+        }
+        
         //List<File> modules = (List<File>) FileUtils.listFiles(directory, null, false);
 
         File[] modules = directory.listFiles();
@@ -231,6 +239,14 @@ public class Loader {
      * @return <code>ModuleInfo</code> instance
      */
     public ModuleInfo getModuleInfo(String xmlFileName) {
+        File dir = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH);
+        if (!dir.exists()) {
+            Configuration.MODULE_METADATA_DIRECTORY_PATH = "modulesMetadata";
+            dir = new File("modulesMetadata");
+            if (!dir.exists())
+                dir.mkdir();
+        }
+        
         File moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
                 + "/" + xmlFileName);
 

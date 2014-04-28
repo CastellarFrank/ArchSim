@@ -37,7 +37,7 @@ public class Debugger extends javax.swing.JInternalFrame {
         table = new JXTreeTable(simWin.debuggerModel);
         Highlighter highligher = HighlighterFactory.createSimpleStriping(HighlighterFactory.LEDGER);
     	table.setHighlighters(highligher);
-        table.setShowGrid(false);
+        table.setShowGrid(true);
         table.setShowsRootHandles(true);
         configureCommonTableProperties(table);
         table.setTreeCellRenderer(new TreeTableCellRenderer());

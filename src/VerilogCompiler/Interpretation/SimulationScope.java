@@ -74,6 +74,9 @@ public class SimulationScope {
     }
 
     public String padWithZeros(Object val, int size) {
+        if (val.toString().length() > size) {
+            return val.toString().substring(val.toString().length() - size);
+        }
         if (val instanceof Integer || val instanceof BigInteger) {
             if (size == 0) {
                 return val.toString();
