@@ -313,7 +313,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
 
     public void showErrorPanel(String errorLog) {
         this.errors.addLog(errorLog);
-        this.tabs.setSelectedIndex(2);
+        //this.tabs.setSelectedIndex(2);
     }
     
     public void showClickableErrors(ArrayList<String> errors) {
@@ -338,7 +338,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             return module;
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
-            showErrorPanel(ErrorHandler.getInstance().getErrors());
+            showClickableErrors(ErrorHandler.getInstance().getErrorList());
             return null;
         }
     }

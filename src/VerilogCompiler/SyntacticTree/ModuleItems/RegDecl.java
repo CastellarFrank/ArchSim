@@ -100,7 +100,11 @@ public class RegDecl extends ModuleItem {
 
     @Override
     public VNode getCopy() {
-        Range newRange = (Range)range.getCopy();
+        
+        Range newRange = null;
+        if (range != null) {
+            newRange = (Range)range.getCopy();
+        }
         ArrayList<RegVariable> newRgs = new ArrayList<RegVariable>();
         for (RegVariable regVariable : regVariableList) {
             newRgs.add((RegVariable)regVariable.getCopy());

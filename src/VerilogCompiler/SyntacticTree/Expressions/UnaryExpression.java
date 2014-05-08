@@ -56,6 +56,10 @@ public class UnaryExpression extends Expression {
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
+        if(value.value == null && (value.xValue || value.zValue)) {
+            return new ExpressionValue();
+        }
+        
         Integer intValue = Integer.parseInt(value.value.toString());
         
         switch (expressionOperator) {

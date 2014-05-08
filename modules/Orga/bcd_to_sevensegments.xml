@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="bcd_to_sevensegments" textX="87" textY="86" type="GUI.Design.ChipRectangule" x="56" x2="249" y="40" y2="73"><param>bcd_to_sevensegments</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="BCD" position="0"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="seven_segments" position="0"/></element></elements><behaviour>module bcd_to_sevensegments(input reg [0:3] BCD, output reg [0:6] seven_segments) ;
+
+	always@(BCD)
+	begin
+		case(BCD)
+			4'B0000: seven_segments=7'B0001000;
+			4'B0001: seven_segments=7'B0100100;
+			4'B0010: seven_segments=7'B00100101;
+			4'B0011: seven_segments=7'B0101010;
+			4'B0100: seven_segments=7'B1010010;
+			4'B0101: seven_segments=7'B0101110;
+			4'B0110: seven_segments=7'B0001000;
+			4'B0111: seven_segments=7'B0111011;
+			4'B1000: seven_segments=7'B0001000;
+			4'B1001: seven_segments=7'B1011110;
+			4'B1010: seven_segments=7'B1111100;
+			4'B1011: seven_segments=7'B0101001;
+			4'B1100: seven_segments=7'B0101110;
+			4'B1101: seven_segments=7'B0101010;
+			4'B1110: seven_segments=7'B0101000;
+			4'B1111: seven_segments=7'B1001101;
+		endcase
+	end
+endmodule	</behaviour></module>

@@ -43,16 +43,17 @@ public class DrilldownWindow extends javax.swing.JInternalFrame {
         this.moduleInfo = ModuleRepository.getInstance().getModuleInfo(moduleName);
         initComponents();
         
-        if (moduleInfo.isLeaf()) {
+        //if (moduleInfo.isLeaf()) {
             program = new VerilogPanel();
             program.setProgram(moduleInfo.getSource());
             program.setVisible(true);
             program.setReadOnly(true);
             setContentPane(program);
-        } else {
-            canvas = new DrilldownPanel(moduleInfo);
-            setContentPane(canvas);
-        }
+        //} else {
+        //    //attempt for drilldown...
+        //    canvas = new DrilldownPanel(moduleInfo);
+        //    setContentPane(canvas);
+        //}
         pack();
         
         setVisible(true);
