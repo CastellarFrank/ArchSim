@@ -74,7 +74,7 @@ public class MultiBitsOutput extends BaseElement {
     @Override
     public Element getXmlElement(Document document) {
         Element element = super.getXmlElement(document);
-        element.setAttribute("type", NamedWire.class.getName());
+        element.setAttribute("type", MultiBitsOutput.class.getName());
         
         Element extraParam0 = document.createElement("param");
         extraParam0.setTextContent(binaryValues[0]);

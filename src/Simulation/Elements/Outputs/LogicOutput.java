@@ -55,14 +55,30 @@ public class LogicOutput extends BaseElement {
         Font f = new Font("SansSerif", Font.BOLD, 20);
         g.setFont(f);
         g.setColor(needsHighlight() ? selectedColor : defaultColor);
-        String s = (voltages[0] < Configuration.LOGIC_1_VOLTAGE) ? "L" : "H";
-        if (Configuration.LOGIC_VALUES_AS_NUMBER) {
-            s = (voltages[0] < Configuration.LOGIC_1_VOLTAGE) ? "0" : "1";
+        String s = "z";
+        if (binaryValues != null && binaryValues[0] != null) {
+            if (!binaryValues[0].contains("z") && !binaryValues[0].contains("x")) {
+                try  {
+                    int x = Integer.parseInt(binaryValues[0]);
+                    if (x != 0)
+                        s = "H";
+                    else
+                        s = "L";
+                } catch (Exception x){}
+            }
         }
-        //value = s;
+        if (Configuration.LOGIC_VALUES_AS_NUMBER) {
+            s = s.equals("H") ? "1" : "0";
+        }
+        
         setBbox(point1, lead1, 0);
         drawCenteredText(g, s, x2, y2, true);
-        setVoltageColor(g, voltages[0]);
+        
+        if (s.equals("0") || s.equals("L"))
+            g.setColor(BaseElement.lowSignalColor);
+        else if (s.equals("1") || s.equals("H"))
+            g.setColor(BaseElement.highSignalColor);
+        
         drawThickLine(g, point1, lead1);
         drawPosts(g);
     }

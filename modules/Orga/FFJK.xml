@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="FFJK" textX="77" textY="118" type="GUI.Design.ChipRectangule" x="56" x2="121" y="40" y2="105"><param>FFJK</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="J" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="K" position="2"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="clk" position="4"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="Q" position="0"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="NQ" position="2"/></element></elements><behaviour>module FFJK(input reg J, input reg K, input reg clk,
+		  output reg Q, output reg NQ); 
+
+	reg tmp;
+	assign Q = tmp;
+	assign NQ = !tmp;
+
+	always@(posedge clk)
+	begin
+		if (J == 0 &amp;&amp; K == 1)
+		  tmp = 0;
+		if (J == 1 &amp;&amp; K == 0)
+		  tmp = 1;
+		if (J == 1 &amp;&amp; K == 1)
+		  tmp = !tmp;
+	end
+	
+endmodule</behaviour></module>
