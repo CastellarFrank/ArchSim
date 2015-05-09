@@ -156,7 +156,8 @@ public class Loader {
         String source = getSourceCode(file);
         ModuleDecl parsed = getModuleLogic(source);
         if (parsed != null) {
-            ModuleInfo moduleInfo = getModuleInfo(file.getName());
+            String moduleName = getModuleName(file);
+            ModuleInfo moduleInfo = getModuleInfo(file.getName(), moduleName);
             if (moduleInfo == null) {
                 return null;
             }
@@ -236,9 +237,10 @@ public class Loader {
      *
      * @param xmlFileName name (extension included) of the XML file of a module
      * definition.
+     * @param moduleStringName name of the module at the XML file at modules folder
      * @return <code>ModuleInfo</code> instance
      */
-    public ModuleInfo getModuleInfo(String xmlFileName) {
+    public ModuleInfo getModuleInfo(String xmlFileName, String moduleStringName) {
         File dir = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH);
         if (!dir.exists()) {
             Configuration.MODULE_METADATA_DIRECTORY_PATH = "modulesMetadata";
@@ -251,6 +253,7 @@ public class Loader {
                 + "/" + xmlFileName);
 
         if (!moduleInfoFile.exists()) {
+            System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The metadata file: [" +  xmlFileName+ "] doesn't exist.");
             return null;
         }
 
@@ -264,12 +267,12 @@ public class Loader {
 
             NodeList names = doc.getElementsByTagName("name");
             if (names.getLength() == 0) {
-                /*ERROR*/
+                System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The metadata file: [" + fileName + "] doesn't contain the needed 'name' element.");
                 return null;
             }
             Element name = (Element) names.item(0);
-            if (!name.getTextContent().equals(fileName)) {
-                /*ERROR!*/
+            if (moduleStringName == null || !name.getTextContent().equals(moduleStringName)) {
+                System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The module name: ["+ name.getTextContent() +"] doesn't math the metadata name: [" + moduleStringName + "].");
             } else {
                 ModuleInfo info = new ModuleInfo();
                 info.setModuleName(fileName);
@@ -291,6 +294,7 @@ public class Loader {
             }
             return null;
         } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
         /*Parseo del XML*/
         /*si el parseo sale bien retornar el objecto sino null*/
@@ -305,6 +309,29 @@ public class Loader {
      */
     public static Loader getInstance() {
         return LoaderHolder.INSTANCE;
+    }
+
+    private String getModuleName(File moduleFile) {
+       if (!moduleFile.exists()) {
+            return null;
+        }
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(moduleFile);
+
+            doc.normalize();
+
+            NodeList elements = doc.getElementsByTagName("element");
+            if (elements.getLength() == 0) {
+                /*ERROR*/
+                return null;
+            }
+            return ((Element) elements.item(0)).getAttribute("moduleName");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return null;
     }
 
     private static class LoaderHolder {
