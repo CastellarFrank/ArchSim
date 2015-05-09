@@ -295,6 +295,15 @@ public class ModuleChip extends BaseElement {
 
         for (int i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
+            if (p.isOutput) {
+                if (binaryValues != null && binaryValues[i] != null 
+                        && !binaryValues[i].contains("z")
+                        && !binaryValues[i].contains("x")
+                        && !binaryValues[i].replaceAll("0", "").isEmpty())
+                    voltages[i] = Configuration.LOGIC_1_VOLTAGE;
+                else
+                    voltages[i] = Configuration.LOGIC_0_VOLTAGE;
+            }
             p.voltage = voltages[i];
             p.draw(g2d, joints[i]);
         }
@@ -354,6 +363,7 @@ public class ModuleChip extends BaseElement {
                         .getFormattedValue(moduleInstanceId, ports[i].portName);
                 binaryValues[i] = value == null ? "z" : value;
                 ports[i].previousValue = binaryValues[i];
+                
             }
         }
     }
@@ -439,15 +449,11 @@ public class ModuleChip extends BaseElement {
             post = new Point(xa + dax * cspc * 4, ya + day * cspc * 4);
             stub = new Point(xa + dax * cspc, ya + day * cspc);
             textPosition = new Point(xa, ya);
-
-            /*if (!isVertical)
-             setBbox(post.x, post.y - 3, stub.x, post.y + 3);
-             else
-             setBbox(post.x - 3, post.y, post.x + 3, stub.y);*/
         }
 
         public void draw(Graphics g, int jointIndex) {
             Color old = g.getColor();
+            
             setVoltageColor(g, voltage);
             drawThickLine(g, post, stub);
             g.setColor(old);
