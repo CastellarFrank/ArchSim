@@ -6,6 +6,7 @@ package DataStructures;
 
 import GUI.MenuInfo;
 import Simulation.Configuration;
+import Utils.TextUtils;
 import VerilogCompiler.CompilationHelper;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import VerilogCompiler.SyntacticTree.PortDirection;
@@ -114,13 +115,6 @@ public class Loader {
         //List<File> modules = (List<File>) FileUtils.listFiles(directory, null, false);
 
         File[] modules = directory.listFiles();
-        
-        for (File file : modules) {
-            ModuleInfo moduleInfo = new ModuleInfo();
-            moduleInfo.valid = false;
-            ModuleRepository.getInstance().registerModule(file.getName().replace(".xml", ""), moduleInfo);
-        }
-
         ArrayList<MenuInfo> menus = new ArrayList<MenuInfo>();
 
         for (File file : modules) {
@@ -157,7 +151,7 @@ public class Loader {
         ModuleDecl parsed = getModuleLogic(source);
         if (parsed != null) {
             String moduleName = getModuleName(file);
-            ModuleInfo moduleInfo = getModuleInfo(file.getName(), moduleName);
+            ModuleInfo moduleInfo = getModuleInfo(moduleName);
             if (moduleInfo == null) {
                 return null;
             }
@@ -167,17 +161,14 @@ public class Loader {
                 moduleInfo.setIsLeaf(true);
             }
 
-            if (moduleInfo != null) {
-                ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
-                ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
-                ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
-                ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
+            ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
+            ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
+            ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
+            ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
 
-                MenuInfo info = new MenuInfo(moduleInfo.getModuleName(), true);
-                return info;
-            } else {
-                System.out.println("Module Info is null");
-            }
+            MenuInfo info = new MenuInfo(moduleInfo.getModuleName(), true);
+            return info;
+            
         } else {
             System.out.println("ModuleDecl (" + file.getName() + ") is null. Possibly parse error");
         }
@@ -240,24 +231,28 @@ public class Loader {
      * @param moduleStringName name of the module at the XML file at modules folder
      * @return <code>ModuleInfo</code> instance
      */
-    public ModuleInfo getModuleInfo(String xmlFileName, String moduleStringName) {
+    public ModuleInfo getModuleInfo(String moduleStringName) {
         File dir = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH);
         if (!dir.exists()) {
-            Configuration.MODULE_METADATA_DIRECTORY_PATH = "modulesMetadata";
-            dir = new File("modulesMetadata");
+            Configuration.MODULE_METADATA_DIRECTORY_PATH = "modulesMetadata/";
+            dir = new File("modulesMetadata/");
             if (!dir.exists())
                 dir.mkdir();
         }
         
         File moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
-                + "/" + xmlFileName);
-
-        if (!moduleInfoFile.exists()) {
-            System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The metadata file: [" +  xmlFileName+ "] doesn't exist.");
-            return null;
+                + "/" + TextUtils.AddMetadataTypeFileExtension(moduleStringName));
+        
+        if(!moduleInfoFile.exists()){
+            moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
+                    + "/" + moduleStringName);
+            
+            if (!moduleInfoFile.exists()) {
+                System.out.println("Couldn't load the module: [ " + moduleStringName + " ] The metadata file doesn't exist.");
+                return null;
+            }
         }
 
-        String fileName = xmlFileName.replaceFirst(".xml", "");
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -267,15 +262,15 @@ public class Loader {
 
             NodeList names = doc.getElementsByTagName("name");
             if (names.getLength() == 0) {
-                System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The metadata file: [" + fileName + "] doesn't contain the needed 'name' element.");
+                System.out.println("Couldn't load the Metadata Module File: [ " + moduleInfoFile.getName() + " ] The file doesn't contain the needed 'name' element.");
                 return null;
             }
             Element name = (Element) names.item(0);
             if (moduleStringName == null || !name.getTextContent().equals(moduleStringName)) {
-                System.out.println("Couldn't load the module: [ " + xmlFileName + " ] The module name: ["+ name.getTextContent() +"] doesn't math the metadata name: [" + moduleStringName + "].");
+                System.out.println("Couldn't load the Metadata Module File: [ " + moduleInfoFile.getName() + " ] The module name: ["+ name.getTextContent() +"] doesn't math with the Metadata module name: [" + moduleStringName + "].");
             } else {
                 ModuleInfo info = new ModuleInfo();
-                info.setModuleName(fileName);
+                info.setModuleName(moduleStringName);
 
                 ArrayList<PortInfo> portInfos = new ArrayList<PortInfo>();
                 NodeList ports = doc.getElementsByTagName("port");
