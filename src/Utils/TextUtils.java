@@ -49,10 +49,16 @@ public class TextUtils {
     }
     
     public static String AddExtensionToFileName(String fileName, String extension){
-        String tempExtension = "." + extension;
-        if(fileName.lastIndexOf(extension) == -1){
-            return GetFileNameWithoutExtension(fileName) + tempExtension;
+        String fileExtension = GetFileExtensionWithDot(fileName);
+        String newExtension = "." + extension;
+        if(fileExtension.equals("")){
+            return fileName + newExtension;
         }
-        return fileName;
+        
+        if(fileExtension.equals(newExtension)){
+            return fileName;
+        }
+        
+        return GetFileNameWithoutExtension(fileName) + newExtension;
     }
 }
