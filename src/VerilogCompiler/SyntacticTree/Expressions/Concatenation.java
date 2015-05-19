@@ -12,6 +12,7 @@ import VerilogCompiler.Interpretation.MathHelper;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
+import VerilogCompiler.SemanticCheck.VariableInfo;
 import VerilogCompiler.SyntacticTree.VNode;
 import VerilogCompiler.Utils.StringUtils;
 import java.math.BigInteger;
@@ -69,19 +70,24 @@ public class Concatenation extends LValue {
             BigInteger s2 = new BigInteger(tmp.toString(), 2);
             intValue = s2.longValue();
         }
-        int currentPos = 31;
+        int currentPos = 0;
+        int maxQuantityToConsume = 64;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
-            if (currentPos < 0) break;
+            if (currentPos + 1> maxQuantityToConsume) break;
             IdentifierExpression expression = (IdentifierExpression) expressionList.get(i);
             if (expression == null)
                 throw new UnsuportedFeature("concatenation members can only be identifiers");
+            VariableInfo varInfo = simulationScope.getVariableInfo(moduleName, expression.getIdentifier());
             ExpressionValue loc = simulationScope.getVariableValue(moduleName, expression.getIdentifier());
-            long min = currentPos - loc.bits + 1;
-            if (min < 0) min = 0;
-            long portion = MathHelper.getBitSelection(intValue, min, currentPos);
+            
+            int quantity = currentPos + 1 + varInfo.signalSize > maxQuantityToConsume
+                           ? maxQuantityToConsume - (currentPos + 1)
+                           :varInfo.signalSize;
+            
+            long portion = MathHelper.getBitSelection(intValue, currentPos, quantity);
             loc.value = new BigInteger(Long.toBinaryString(portion));
             
-            currentPos -= min - 1;
+            currentPos += varInfo.signalSize;
         }
     }
 
@@ -99,20 +105,25 @@ public class Concatenation extends LValue {
         String binaryRep = Integer.toBinaryString((Integer)value.value);
         if (Configuration.DEBUG_MODE)
             System.out.println("binary number " + binaryRep);
-        int intValue = (Integer) value.value;
-        int currentPos = 31;
+        long intValue = (Integer) value.value;
+        
+        int currentPos = 0;
+        int maxQuantityToConsume = 64;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
             if (currentPos < 0) break;
             IdentifierExpression expression = (IdentifierExpression) expressionList.get(i);
             if (expression == null)
                 throw new UnsuportedFeature("concatenation members can only be identifiers");
             ExpressionValue loc = scope.getVariableValue(expression.getIdentifier());
-            long min = currentPos - loc.bits + 1;
-            if (min < 0) min = 0;
-            long portion = MathHelper.getBitSelection(intValue, min, currentPos);
-            loc.value = new Long(portion);
+            VariableInfo varInfo = scope.getVariableInfo(expression.getIdentifier());
             
-            currentPos -= min - 1;
+            int quantity = currentPos + 1 + varInfo.signalSize > maxQuantityToConsume
+                           ? maxQuantityToConsume - (currentPos + 1)
+                           :varInfo.signalSize;
+            
+            long portion = MathHelper.getBitSelection(intValue, currentPos, quantity);
+            loc.value = portion;
+            currentPos += varInfo.signalSize;
         }
     }
     

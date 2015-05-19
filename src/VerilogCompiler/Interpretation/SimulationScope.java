@@ -66,7 +66,7 @@ public class SimulationScope {
             }
             Object val = info.value.value;
             if (val instanceof Integer || val instanceof BigInteger) {
-                return padWithZeros(val, Math.abs(info.MSB - info.LSB) + 1);
+                return padWithZeros(val, info.signalSize);
             } else if (val instanceof Object[])
                 return "z";
             return val != null ? val.toString() : null;
