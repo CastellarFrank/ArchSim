@@ -4,7 +4,6 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
-import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ExpressionType;
 import VerilogCompiler.SyntacticTree.Base;
@@ -18,11 +17,18 @@ import VerilogCompiler.Utils.StringUtils;
 public class SizedNumberExpression extends NumberExpression {
     long size;
     Base base;
-    long value;
+    String value;
 
-    public SizedNumberExpression(long size, Base base, long value, int line, int column) {
+    public SizedNumberExpression(long size, Base base, String value, int line, int column) {
         super(line, column);
         this.size = size;
+        this.base = base;
+        this.value = value;
+    }
+    
+    public SizedNumberExpression(String size, Base base, String value, int line, int column) {
+        super(line, column);
+        this.size = new Long(size);
         this.base = base;
         this.value = value;
     }
@@ -43,11 +49,11 @@ public class SizedNumberExpression extends NumberExpression {
         this.base = base;
     }
 
-    public long getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
@@ -65,8 +71,7 @@ public class SizedNumberExpression extends NumberExpression {
     @Override
     public ExpressionValue evaluate(VerilogCompiler.Interpretation.SimulationScope simulationScope, 
     String moduleName) {
-        Long longValue = Long.parseLong(value + "", Convert.baseToRadix(base));
-        ExpressionValue val = new ExpressionValue(Long.toBinaryString(longValue), size);
+        ExpressionValue val = new ExpressionValue(value, size);
         return val;
     }
 
