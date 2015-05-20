@@ -69,6 +69,8 @@ public class Concatenation extends LValue {
             BigInteger tmp = (BigInteger) value;
             BigInteger s2 = new BigInteger(tmp.toString(), 2);
             intValue = s2.longValue();
+        }else if(value instanceof String){
+            intValue = new BigInteger(value.toString(), 2).longValue();
         }
         int currentPos = 0;
         int maxQuantityToConsume = 64;
