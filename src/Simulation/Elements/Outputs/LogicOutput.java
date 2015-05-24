@@ -9,6 +9,7 @@ import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.math.BigInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,7 +60,7 @@ public class LogicOutput extends BaseElement {
         if (binaryValues != null && binaryValues[0] != null) {
             if (!binaryValues[0].contains("z") && !binaryValues[0].contains("x")) {
                 try  {
-                    int x = Integer.parseInt(binaryValues[0]);
+                    long x = new BigInteger(binaryValues[0], 2).longValue();
                     if (x != 0)
                         s = "H";
                     else

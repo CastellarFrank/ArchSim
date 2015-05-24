@@ -140,6 +140,7 @@ public class SimulationCanvas extends ContainerPanel implements
             //} else {
                 if (mouseComponent.getEditInfo(0) != null) {
                     EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
+                    dialog.setSimulationCanvasElement(this);
                     dialog.setVisible(true);
                 }
             //}

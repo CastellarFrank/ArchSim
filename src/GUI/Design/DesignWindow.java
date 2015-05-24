@@ -208,9 +208,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         FileUtils.DeleteFile(newTarget);
         
         try {
-            if (!compiled){
+            if(newSource.hasBeenModified || !compiled)
                 compileLogic(module);
-            }
             
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();

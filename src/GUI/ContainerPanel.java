@@ -796,7 +796,15 @@ public class ContainerPanel extends JCanvas {
                     }
                 }
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
-
+                
+                if (!isPaused 
+                        && (!circuitNonLinear 
+                            || (!(converged && iteration > 0) 
+                                 && lu_factor(temporalVoltageMatrix, matrixSize, circuitPermute)))) {
+                    //joining the values of the components in case there is new inputs values to be joined
+                    setJoinValues();
+                }
+                
                 for (BaseElement baseElement : elements) {
                     baseElement.doStep();
                 }
@@ -813,37 +821,11 @@ public class ContainerPanel extends JCanvas {
                         return;
                     }
                 }
-                lu_solve(temporalVoltageMatrix, matrixSize, circuitPermute,
-                        temporalRightSideVoltages);
-                for (int rowIndex = 0; rowIndex < matrixFullSize; rowIndex++) {
-                    RowInfo rowInfo = rowsInfo.get(rowIndex);
-                    double newVoltage;
-                    String multibits;
-                    if (rowInfo.type == RowType.CONSTANT) {
-                        newVoltage = rowInfo.voltage;
-                        multibits = rowInfo.multiBitsValue;
-                    } else {
-                        newVoltage = rightSideVoltages[rowInfo.mappedColumn];
-                        multibits = rightSideMultibitsValues[rowInfo.mappedColumn];
-                    }
-
-                    if (Double.isNaN(newVoltage)) {
-                        converged = false;
-                        break;
-                    }
-                    if (rowIndex < joints.size() - 1) {
-                        Joint joint = joints.elementAt(rowIndex + 1);
-                        for (JointReference jointRef : joint.references) {
-                            jointRef.element.setVoltage(jointRef.postNumber, newVoltage);
-                            jointRef.element.setMultiBitsValue(jointRef.postNumber, multibits);
-                        }
-                    } else {
-                        int newIndex = rowIndex - (joints.size() - 1);
-                        //voltageSourceElements[newIndex].setCurrent(newVoltage);
-                    }
-                }
+                // The Values of the matrix has to be refreshed with the new values before joining.
+                analyze();
+                setJoinValues();
+                
                 //</editor-fold>   
-
                 if (!circuitNonLinear) {
                     break;
                 }
@@ -861,6 +843,39 @@ public class ContainerPanel extends JCanvas {
             }
         }
         lastIterationTime = temporalLastIterationTime;
+    }
+
+    private void setJoinValues() {
+        lu_solve(temporalVoltageMatrix, matrixSize, circuitPermute,
+                temporalRightSideVoltages);
+        for (int rowIndex = 0; rowIndex < matrixFullSize; rowIndex++) {
+            RowInfo rowInfo = rowsInfo.get(rowIndex);
+            double newVoltage;
+            String multibits;
+            if (rowInfo.type == RowType.CONSTANT) {
+                newVoltage = rowInfo.voltage;
+                multibits = rowInfo.multiBitsValue;
+            } else {
+                newVoltage = rightSideVoltages[rowInfo.mappedColumn];
+                multibits = rightSideMultibitsValues[rowInfo.mappedColumn];
+            }
+            
+            if (Double.isNaN(newVoltage)) {
+                converged = false;
+                break;
+            }
+            if (rowIndex < joints.size() - 1) {
+                Joint joint = joints.elementAt(rowIndex + 1);
+                for (JointReference jointRef : joint.references) {
+                    jointRef.element.setVoltage(jointRef.postNumber, newVoltage);
+                    jointRef.element.setMultiBitsValue(jointRef.postNumber, multibits);
+                }
+            }
+            // else {
+            //int newIndex = rowIndex - (joints.size() - 1);
+            //voltageSourceElements[newIndex].setCurrent(newVoltage);
+            //}
+        } 
     }
 
     /**
@@ -913,7 +928,7 @@ public class ContainerPanel extends JCanvas {
      * @param g graphics used to paint.
      */
     public void updatePreview(Graphics g) {
-        if (needsAnalysis || true /*TODO: remove true*/) {
+        if (needsAnalysis) {
             analyze();
             needsAnalysis = false;
         }
@@ -984,17 +999,17 @@ public class ContainerPanel extends JCanvas {
 
         frames++;
 
-        if (!isPaused && temporalVoltageMatrix != null) {
-            long delay = 1000 / 50 - (System.currentTimeMillis() - lastFrameTimeStamp);
-            if (delay > 0) {
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                }
-            }
-            repaint(0);
-        }
-        lastFrameTimeStamp = lastTimeStamp;
+//        if (!isPaused && temporalVoltageMatrix != null) {
+//            long delay = 1000 / 50 - (System.currentTimeMillis() - lastFrameTimeStamp);
+//            if (delay > 0) {
+//                try {
+//                    Thread.sleep(delay);
+//                } catch (InterruptedException e) {
+//                }
+//            }
+//            repaint(0);
+//        }
+//        lastFrameTimeStamp = lastTimeStamp;
     }
 
     /**
@@ -1136,7 +1151,6 @@ public class ContainerPanel extends JCanvas {
         }
         mouseComponent.movePoint(draggingPost, dx, dy);
         prepareForAnalysis();
-        repaint();
     }
 
     /**

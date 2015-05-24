@@ -4,6 +4,9 @@
  */
 package GUI.Edit;
 
+import GUI.ContainerPanel;
+import GUI.Simulation.SimulationCanvas;
+import java.awt.Container;
 import java.awt.Frame;
 import java.util.Vector;
 import javax.swing.JComponent;
@@ -17,6 +20,11 @@ public class EditionDialog extends javax.swing.JDialog {
 
     Editable editableElement;
     Vector<EditInfo> editInfos;
+    SimulationCanvas simulationCanvasElement;
+
+    public void setSimulationCanvasElement(SimulationCanvas simulationCanvasElement) {
+        this.simulationCanvasElement = simulationCanvasElement;
+    }
     /**
      * Creates new form EditionDialog
      */
@@ -173,7 +181,12 @@ public class EditionDialog extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         if (saveLogic()) {
-            getParent().repaint();
+            Container parent = getParent();
+            if(this.simulationCanvasElement != null)
+                this.simulationCanvasElement.prepareForReanalysis();
+            else{
+                parent.repaint();
+            }
             dispose();
         }
     }//GEN-LAST:event_jButton1ActionPerformed
