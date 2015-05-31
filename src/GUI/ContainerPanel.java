@@ -1146,8 +1146,19 @@ public class ContainerPanel extends JCanvas {
         }
         int dx = x - dragX;
         int dy = y - dragY;
-        if (dx == 0 && dy == 0) {
+        
+        if(dx == 0 && dy == 0)
             return;
+        
+        int symbol = draggingPost == 0 ? 1 : -1;
+        
+        
+        if(mouseComponent.x + dx * symbol == mouseComponent.x2 
+                && mouseComponent.y + dy * symbol == mouseComponent.y2){
+            if(dx != 0)
+                dx += BaseElement.sign(dx) * (gridMask * BaseElement.sign(gridMask));
+            if(dy != 0)
+                dy += BaseElement.sign(dy) * (gridMask * BaseElement.sign(gridMask));
         }
         mouseComponent.movePoint(draggingPost, dx, dy);
         prepareForAnalysis();

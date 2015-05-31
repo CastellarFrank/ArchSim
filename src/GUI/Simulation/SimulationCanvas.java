@@ -298,7 +298,7 @@ public class SimulationCanvas extends ContainerPanel implements
         for (int i = 0; i < elements.size(); i++) {
             BaseElement baseElement = getElement(i);
 
-            if (baseElement.boundingBox.contains(x, y)) {
+            if (baseElement.collidesWith(x, y)) {
                 if (Configuration.DEBUG_MODE) {
                     //System.out.println("Mouse collides with box: " + baseElement.boundingBox);
                 }

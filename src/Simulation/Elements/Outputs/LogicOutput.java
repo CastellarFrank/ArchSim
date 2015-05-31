@@ -75,10 +75,7 @@ public class LogicOutput extends BaseElement {
         setBbox(point1, lead1, 0);
         drawCenteredText(g, s, x2, y2, true);
         
-        if (s.equals("0") || s.equals("L"))
-            g.setColor(BaseElement.lowSignalColor);
-        else if (s.equals("1") || s.equals("H"))
-            g.setColor(BaseElement.highSignalColor);
+        setVoltageColor(g, voltages[0]);
         
         drawThickLine(g, point1, lead1);
         drawPosts(g);
