@@ -1,25 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<module>
-	<elements>
-		<element id="0" moduleName="ALU" textX="109" textY="116" 
-				 type="GUI.Design.ChipRectangule" 
-				 x="56" x2="185" y="40" y2="105">
-			<param>ALU</param>
-			<port id="0" isOutput="false" isVertical="false" leftOrBottom="true" 
-				  portName="operand1" position="0"/>
-			<port id="0" isOutput="false" isVertical="false" leftOrBottom="true" 
-				  portName="operand2" position="2"/>
-			<port id="0" isOutput="false" isVertical="false" leftOrBottom="true" 
-				  portName="ALU_Control" position="4"/>
-			<port id="0" isOutput="true" isVertical="false" leftOrBottom="false" 
-				  portName="result" position="0"/>
-			<port id="0" isOutput="true" isVertical="false" leftOrBottom="false" 
-				  portName="zero" position="2"/>
-			<port id="0" isOutput="true" isVertical="false" leftOrBottom="false" 
-				  portName="overflow" position="4"/>
-		</element>
-	</elements>
-	<behaviour>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="TestingALU" textX="90" textY="118" type="GUI.Design.ChipRectangule" x="56" x2="185" y="40" y2="105"><param>TestingALU</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="operand1" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="operand2" position="2"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="ALU_Control" position="4"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="result" position="0"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="zero" position="2"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="overflow" position="4"/></element></elements><behaviour>
 	//////////////////////////////////////////////////////////////////////////////////
 	// Company: 
 	// Engineer: 
@@ -39,7 +18,7 @@
 	// Additional Comments: 
 	//
 	//////////////////////////////////////////////////////////////////////////////////
-	module ALU(
+	module TestingALU(
 		input [15:0] operand1,
 		input [15:0] operand2,
 		input [2:0] ALU_Control,
@@ -47,12 +26,17 @@
 		output reg zero,
 		output reg overflow
 		);
+		integer test;
+		initial
+		begin
+			test = 5'b00000 + 2;
+		end
 		 
 		 always @ (operand1 or operand2 or ALU_Control)
 		 begin
 			case(ALU_Control)
 				3'b000:
-					{overflow,result} = operand1 + operand2;
+					{overflow,result} = 25'b1001001100111011111101001;
 				
 				3'b001:
 					{overflow,result} = operand1 - operand2;
@@ -80,7 +64,4 @@
 
 
 	endmodule
-	</behaviour>
-</module>
-
-
+	</behaviour></module>

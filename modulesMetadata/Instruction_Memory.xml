@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><moduleInfo><name>Instruction_Memory</name><ports><port index="0" name="Read_Addr" type="INPUT"/><port index="0" name="Instruction" type="OUTPUT"/></ports></moduleInfo>

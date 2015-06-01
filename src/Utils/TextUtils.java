@@ -61,4 +61,28 @@ public class TextUtils {
         
         return GetFileNameWithoutExtension(fileName) + newExtension;
     }
+    
+    public static String LeftEmptyPadding(String original, int quantity){
+        return Padding(original, " ", quantity, true);
+    }
+    
+    public static String Padding(String original, String text, int quantity, boolean isLeft){
+        String leftPadding = "";
+        String rightPadding = "";
+        StringBuilder padding = new StringBuilder();
+        
+        int iterations = quantity - original.length();
+        if(iterations <= 0)
+            return original;
+        
+        for(int i = 0; i< iterations;i ++)
+            padding.append(text);
+        
+        if(isLeft)
+            leftPadding = padding.toString();
+        else
+            rightPadding = padding.toString();
+        
+        return leftPadding +  original + rightPadding;
+    }
 }

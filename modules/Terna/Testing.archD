@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><module><elements><element id="0" moduleName="Sum" textX="109" textY="118" type="GUI.Design.ChipRectangule" x="56" x2="185" y="40" y2="105"><param>Sum</param><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="number" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="quantity" position="2"/><port id="0" isOutput="true" isVertical="false" leftOrBottom="false" portName="result" position="0"/><port id="0" isOutput="false" isVertical="false" leftOrBottom="true" portName="type" position="4"/></element></elements><behaviour>module Sum(input[31:0] number, input[31:0] quantity, output[31:0] result, input[2:0] type); 
+	integer counter;
+	
+	always@(number or quantity or type)
+	begin
+		if(quantity &gt; 0)
+		begin
+			result = 3'b000;
+			counter = 0;
+			if(type == 3'b000)
+			begin
+				for(counter = 0; counter &lt; quantity; counter = counter +1)
+				begin
+					result = result + number;
+				end
+			end
+			else if(type == 3'b001)
+			begin
+				while(counter &lt; quantity)
+				begin 
+					result = result + number;
+					counter = counter + 1;
+				end
+			end
+			else if(type == 3'b010)
+			begin
+				repeat(quantity[31:0])
+				begin
+					result = result + number;
+				end
+			end
+		end
+	end
+endmodule</behaviour></module>

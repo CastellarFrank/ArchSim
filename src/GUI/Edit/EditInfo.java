@@ -19,9 +19,15 @@ public class EditInfo {
     public String value;
     public double minval, maxval;
     public boolean validate;
-    
-    ArrayList<JComponent> components;
+    public ArrayList<JComponent> components;
+    private InputTypeHandler inputTypeHandler;
     //</editor-fold>
+    
+    public EditInfo(String name, InputTypeHandler inputTypeHandler){
+        this.name = name;
+        this.inputTypeHandler =  inputTypeHandler;
+        this.components = inputTypeHandler.getComponents();
+    }
     
     public EditInfo(String name, double currentValue, double minValue, double maxValue, boolean validate) {
 	this.name = name;
@@ -48,6 +54,10 @@ public class EditInfo {
         this.maxval = maxValue;
         components = new ArrayList<JComponent>();
     }
+
+    public InputTypeHandler getInputTypeHandler() {
+        return inputTypeHandler;
+    }
     
     public EditInfo addComponent(JComponent component) {
         components.add(component);
@@ -64,7 +74,7 @@ public class EditInfo {
         return this;
     }
     
-    public boolean accepts(String newValue) {
+    public boolean accepts(String newValue) {    
         if (!validate) return true;
         try {
             Integer result = new BigInteger(newValue).intValue();
