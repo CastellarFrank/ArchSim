@@ -16,7 +16,6 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.lang.reflect.Array;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,6 +32,8 @@ public abstract class BaseElement implements Editable {
     public static Color textColor;
     public static Font font;    
     public static final double pi = 3.14159265358979323846;
+    public static final int pointRadious = 7;
+    public static final int selectionSeparationMargin = 4;
     
     //</editor-fold>
     
@@ -229,7 +230,11 @@ public abstract class BaseElement implements Editable {
     }
 
     public boolean collidesWith(int x, int y) {
-        Rectangle rect = new Rectangle(boundingBox.x + 1, boundingBox.y + 1, boundingBox.width - 2, boundingBox.height - 2);
+        
+        Rectangle rect = new Rectangle(boundingBox.x - selectionSeparationMargin, 
+                                       boundingBox.y - selectionSeparationMargin, 
+                                       boundingBox.width + selectionSeparationMargin * 2, 
+                                       boundingBox.height + selectionSeparationMargin * 2);
         return rect.contains(x, y);
     }
 
@@ -249,7 +254,7 @@ public abstract class BaseElement implements Editable {
         return x < 0 ? -x : x;
     }
 
-    static int sign(int x) {
+    public static int sign(int x) {
         return (x < 0) ? -1 : (x == 0) ? 0 : 1;
     }
 
@@ -297,7 +302,11 @@ public abstract class BaseElement implements Editable {
     }
 
     public void selectRect(Rectangle r) {
-        selected = r.intersects(boundingBox);
+        Rectangle rect = new Rectangle(boundingBox.x - selectionSeparationMargin, 
+                                       boundingBox.y - selectionSeparationMargin, 
+                                       boundingBox.width + selectionSeparationMargin * 2, 
+                                       boundingBox.height + selectionSeparationMargin * 2);
+        selected = r.intersects(rect);
     }
 
     public void drag(int newX, int newY) {
@@ -461,7 +470,7 @@ public abstract class BaseElement implements Editable {
     public void drawPost(Graphics g, int x0, int y0, int n) {
         if (containerPanel.newElementBeenDrawn == null && !needsHighlight()
                 && containerPanel.getJoint(n) != null
-                && containerPanel.getJoint(n).references.size() == 2) {
+                && containerPanel.getJoint(n).references.size() >= 2) {
             return;
         }
         /*if (containerPanel.currentMouseMode == MouseMode.SELECT_DRAG
@@ -472,9 +481,10 @@ public abstract class BaseElement implements Editable {
     }
 
     public void drawPost(Graphics g, int x0, int y0) {
+        int pointMargin = pointRadious / 2;
         Color old = g.getColor();
         g.setColor(BaseElement.postColor);
-        g.fillOval(x0 - 3, y0 - 3, 7, 7);
+        g.fillOval(x0 - pointMargin, y0 - pointMargin, pointRadious, pointRadious);
         g.setColor(old);
     }
 
@@ -592,7 +602,7 @@ public abstract class BaseElement implements Editable {
         y1 = min(boundingBox.y, y1);
         x2 = max(boundingBox.x + boundingBox.width - 1, x2);
         y2 = max(boundingBox.y + boundingBox.height - 1, y2);
-        boundingBox.setBounds(x1, y1, x2 - x1, y2 - y1);
+        boundingBox.setBounds(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
     }
 
     public void adjustBbox(Point p1, Point p2) {
@@ -605,20 +615,12 @@ public abstract class BaseElement implements Editable {
 
     public void drawText(Graphics g, String text) {
         FontMetrics fm = g.getFontMetrics();
-        
         if (text == null) return;
-        int w = fm.stringWidth(text);
-        int textX = x2, oldTextX = x2;
-
-        if (x < x2) {
-            //textX += w;
-        } else {
-            textX -= w;
+        int textReduction = 0;
+        if(x > x2){
+            textReduction = fm.stringWidth(text);
         }
-
-        g.drawString(text, textX, (int) (y2 + fm.getAscent() / 2.0));
-        adjustBbox(textX, y - fm.getAscent() / 2, 
-                oldTextX, y + fm.getAscent() / 2 + fm.getDescent());
+        g.drawString(text, x2 - textReduction, (int) (y2 + fm.getAscent() / 2.0));
     }
 
     public void drawCenteredText(Graphics g, String s, int x, int y, boolean cx) {
@@ -628,8 +630,6 @@ public abstract class BaseElement implements Editable {
             x -= w / 2;
         }
         g.drawString(s, x, y + fm.getAscent() / 2);
-        adjustBbox(x, y - fm.getAscent() / 2,
-                x + w, y + fm.getAscent() / 2 + fm.getDescent());
     }
 
     public static void drawThickLine(Graphics g, int x, int y, int x2, int y2) {

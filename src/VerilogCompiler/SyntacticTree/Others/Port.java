@@ -149,6 +149,7 @@ public class Port extends VNode {
         } else {
             signalSize = 1;
         }
+        info.signalSize = signalSize;
         SemanticCheck.getInstance().registerVariable(identifier, info);
         return null;
     }

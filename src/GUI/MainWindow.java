@@ -48,6 +48,7 @@ public class MainWindow extends javax.swing.JFrame {
         Loader.getInstance().setup();
         
         prepareModuleMenu();
+        this.setExtendedState(MAXIMIZED_BOTH);
     }
     
     public void refreshModules() {
@@ -118,7 +119,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         fileMenu.add(jMenuItem1);
 
-        simWindow.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.SHIFT_MASK));
+        simWindow.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         simWindow.setText("New Simulation Window");
         simWindow.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -233,7 +234,7 @@ public class MainWindow extends javax.swing.JFrame {
             if (program.getLength() == 0) {
                 openSimulationFile(doc, target.getName());
             } else {
-                openDesignFile(doc, target.getName());
+                openDesignFile(doc, target);
             }
         } catch (Exception ex) {
             System.err.println(ex.getMessage());
@@ -264,10 +265,11 @@ public class MainWindow extends javax.swing.JFrame {
         simulationWindow.setVisible(true);
     }
     
-    private void openDesignFile(Document document, String fileName) {
+    private void openDesignFile(Document document, File file) {
         DesignWindow designWindow = new DesignWindow(this);
         designWindow.loadFromDocument(document);
-        designWindow.addFilenameToTitle(fileName);
+        designWindow.setFilePath(file.getAbsolutePath());
+        designWindow.addFilenameToTitle(file.getName());
         
         this.desktopPane.add(designWindow);
         designWindow.setVisible(true);

@@ -41,7 +41,7 @@ public class MathHelper {
         return (value >> position) & 1;
     }
     /*   010 1010 000000 */
-    public static long getBitSelection(long value, long left, long right) {
-        return (value << left) >> (31 - right + left);
+    public static long getBitSelection(long value, int offset, int quantity) {
+        return (value >>> offset) & ((1L << quantity) - 1L);
     }
 }

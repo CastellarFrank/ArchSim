@@ -35,6 +35,9 @@ public class Configuration {
     public static Boolean COMPILE_ON_SAVE = true;
     public static Boolean DRAW_DOTTED_BG = true;
     public static Boolean USE_CUSTOM_MODULE_NAME = true;
+    public static String DESIGN_FILE_EXTENSION = "archD";
+    public static String SIMULATION_FILE_EXTENSION = "archS";
+    public static String METADATA_FILE_EXTENSION = "archM";
     
     public static Double LOGIC_1_VOLTAGE = 2.5;
     public static Double LOGIC_0_VOLTAGE = 0.0;

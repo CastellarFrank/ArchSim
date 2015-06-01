@@ -9,6 +9,7 @@ import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.math.BigInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,7 +60,7 @@ public class LogicOutput extends BaseElement {
         if (binaryValues != null && binaryValues[0] != null) {
             if (!binaryValues[0].contains("z") && !binaryValues[0].contains("x")) {
                 try  {
-                    int x = Integer.parseInt(binaryValues[0]);
+                    long x = new BigInteger(binaryValues[0], 2).longValue();
                     if (x != 0)
                         s = "H";
                     else
@@ -74,10 +75,7 @@ public class LogicOutput extends BaseElement {
         setBbox(point1, lead1, 0);
         drawCenteredText(g, s, x2, y2, true);
         
-        if (s.equals("0") || s.equals("L"))
-            g.setColor(BaseElement.lowSignalColor);
-        else if (s.equals("1") || s.equals("H"))
-            g.setColor(BaseElement.highSignalColor);
+        setVoltageColor(g, voltages[0]);
         
         drawThickLine(g, point1, lead1);
         drawPosts(g);

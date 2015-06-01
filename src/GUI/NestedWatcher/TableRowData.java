@@ -64,7 +64,7 @@ public class TableRowData {
             if (isRoot) {                
                 Object val = ((Object[]) scope.getVariableValue(moduleInstanceId, variableName).value)[index];
                 if (val != null)
-                    val = scope.padWithZeros(val, info.MSB - info.LSB);
+                    val = scope.padWithZeros(val, info.signalSize);
                 this.value = val == null ? "z" : val.toString();
             } else {
                 this.value = scope.getFormattedValue(moduleInstanceId, variableName);

@@ -5,11 +5,14 @@
 package GUI.Design;
 
 import DataStructures.CircuitGenerator;
+import DataStructures.ModuleRepository;
 import Exceptions.ModuleDesignNotFoundException;
 import GUI.ErrorPanel;
 import GUI.MainWindow;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
+import Utils.FileUtils;
+import Utils.TextUtils;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.SemanticCheck;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
@@ -52,6 +55,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     SourcePanel newSource;
     ErrorPanel errors;
     String fileName = "";
+    String filePath = "";
     boolean modified = false, compiled = false;
 
     /**
@@ -126,6 +130,10 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         String sTitle = "Component Design Window";
         setTitle(sTitle + " - " + fileName);
     }
+    
+    public void setFilePath(String absolutePath) {
+        this.filePath = absolutePath;
+    }
 
     private void setCustomTitle() {
         String sTitle = "Component Design Window";
@@ -172,19 +180,37 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         
         if (choose != JFileChooser.APPROVE_OPTION)
             return;
+        
         File target = fileChooser.getSelectedFile();
         
-        String tempFilename = target.getName().replaceFirst(".xml", "");
-        removeModuleInfo(tempFilename);
+        String pureFileName = TextUtils.GetFileNameWithoutExtension(target.getName());
+        File newTarget = new File(target.getParent() + File.separator + TextUtils.AddDesignTypeFileExtension(pureFileName));
         
-        if (target.exists())
-            target.delete();
+        boolean saveMetadataFile = true;
+        ModuleDecl module = compileWithoutSemantics();
+        if(module != null){
+            File currentFile = new File(this.filePath);
+            boolean isSameFile = currentFile.compareTo(target) == 0 || currentFile.compareTo(newTarget) == 0;
+            if(!isSameFile){
+                File moduleDirectoryFile = new File(Configuration.MODULES_DIRECTORY_PATH);
+                if(FileUtils.CheckIfPathIsChild(moduleDirectoryFile, newTarget)){
+                    if(ModuleRepository.getInstance().getModuleNames().contains(module.getModuleName())){
+                        JOptionPane.showMessageDialog(this, "Can't save the File, already exists a module named: [" + module.getModuleName() + "].", "Duplicated Module", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                }else{
+                    saveMetadataFile = false;
+                }
+            }
+        }
+        
+        FileUtils.DeleteFile(target);
+        FileUtils.DeleteFile(newTarget);
         
         try {
-            if (!compiled){
-                ModuleDecl module = compileWithoutSemantics();
+            if(newSource.hasBeenModified || !compiled)
                 compileLogic(module);
-            }
+            
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document document = docBuilder.newDocument();
@@ -201,7 +227,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource domSource = new DOMSource(document);
-            StreamResult result = new StreamResult(target);
+            StreamResult result = new StreamResult(newTarget);
 
             transformer.transform(domSource, result);
         } catch (ParserConfigurationException ex) {
@@ -210,29 +236,25 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             tfe.printStackTrace();
         }
         newSource.hasBeenModified = false;
-        addFilenameToTitle(tempFilename);
+        addFilenameToTitle(newTarget.getName());
         modified = false;
-        if (Configuration.COMPILE_ON_SAVE) 
-            saveModuleMetadata(target.getName());
+        
+        if (!Configuration.COMPILE_ON_SAVE || !saveMetadataFile)
+            return;
+        
+        saveModuleMetadata(module);
     }
     
-    public void removeModuleInfo(String fileName) {
-        File file = new File(fileName);
-        if (file.exists())
-            file.delete();
-    }
-    
-    public void saveModuleMetadata(String fileName) {
-        ModuleDecl module = compileWithoutSemantics();
+    public void saveModuleMetadata(ModuleDecl module) {
         if (module == null)
             return;
         
-        File target = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH +
-                "/" + fileName);
+        File newTarget = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH +
+                "/" + TextUtils.AddMetadataTypeFileExtension(module.getModuleName()));
         
-        try {
-            //compileLogic(module);
-            
+        FileUtils.DeleteFile(newTarget);
+        
+        try {            
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document document = docBuilder.newDocument();
@@ -257,17 +279,15 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource domSource = new DOMSource(document);
-            StreamResult result = new StreamResult(target);
+            StreamResult result = new StreamResult(newTarget);
 
             transformer.transform(domSource, result);
-            
             parent.needsRefresh = true;
         } catch (ParserConfigurationException ex) {
             Logger.getLogger(DesignWindow.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
-        
     }
 
     public void destroyFrame() {
@@ -527,4 +547,5 @@ public class DesignWindow extends javax.swing.JInternalFrame {
     private javax.swing.JMenuItem saveOption;
     private javax.swing.JTabbedPane tabs;
     // End of variables declaration//GEN-END:variables
+
 }

@@ -55,7 +55,7 @@ public class RepeatStatement extends Statement {
     @Override
     public void execute(SimulationScope simulationScope, String moduleName) {
         ExpressionValue value = condition.evaluate(simulationScope, moduleName);
-        Integer intValue = Integer.parseInt(value.value.toString());
+        Integer intValue = Integer.parseInt(value.value.toString(), 2);
         
         for (int i = 0; i < intValue; i++) {
             body.execute(simulationScope, moduleName);

@@ -6,14 +6,18 @@ package Simulation.Elements.Inputs;
 
 import Exceptions.ArchException;
 import GUI.Edit.EditInfo;
+import GUI.Edit.InputTypeHandler;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
-import Simulation.Elements.NamedWire;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.math.BigInteger;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,7 +26,7 @@ import org.w3c.dom.Element;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class MultiBitsInput extends BaseElement {
-
+    int textSpace = 10;
     public MultiBitsInput(int x, int y) {
         super(x, y);
         binaryValues = new String[1];
@@ -38,7 +42,8 @@ public class MultiBitsInput extends BaseElement {
     @Override
     public void setPoints() {
         super.setPoints();        
-        lead1 = interpolatePoint(point1, point2, 1 - 12 / dn);
+        lead1 = point2;
+        lead1.x -= (textSpace * sign(dx));
     }
     
     @Override
@@ -79,9 +84,10 @@ public class MultiBitsInput extends BaseElement {
     
     private void calculateVoltageValue() {
         if (binaryValues[0].matches("[0-9]*")) {
-            if (Integer.parseInt(binaryValues[0], 2) == 1)
+            long longValue = new BigInteger(binaryValues[0], 2).longValue();
+            if (longValue == 1)
                 voltages[0] = Configuration.LOGIC_1_VOLTAGE * 2;
-            else if (Integer.parseInt(binaryValues[0], 2) == 0)
+            else if (longValue == 0)
                 voltages[0] = Configuration.LOGIC_0_VOLTAGE;
         } else 
             voltages[0] = Configuration.LOGIC_0_VOLTAGE;
@@ -96,18 +102,19 @@ public class MultiBitsInput extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("value", 0.0, Long.MIN_VALUE, Long.MAX_VALUE).
-                    addComponent(new JLabel("Value: ")).
-                    addComponent(new JTextField(binaryValues[0], 10));
+            return new EditInfo("value",new InputTypeHandler(binaryValues[0]));
+        
         return null;
     }
     
     @Override
     public void setEditValue(int n, EditInfo editInfo) {
         if (n == 0) {
-            if (!editInfo.value.matches("[0-1xzXZ]*"))
+            InputTypeHandler input = editInfo.getInputTypeHandler();
+            String value = input == null ? editInfo.value : input.getCurrentAsBinary();
+            if (!value.matches("[0-1xzXZ]*"))
                 return;
-            setBinaryValue(0, editInfo.value);    
+            setBinaryValue(0, value);    
             calculateVoltageValue();
         }
     }
@@ -123,5 +130,63 @@ public class MultiBitsInput extends BaseElement {
         element.appendChild(extraParam0);
         
         return element;
+    }
+    
+    @Override
+    public boolean collidesWith(int x, int y) {
+        Point minorX = new Point(point1.x > lead1.x ? lead1 : point1);
+        Point minorY = new Point(lead1.y > point1.y ? point1 : lead1);
+        
+        if(sign(dx) == 1)
+            minorX.x -= selectionSeparationMargin;
+        
+        int heightPointReduction;
+        if(sign(dy) == 1){
+            heightPointReduction = (pointRadious / 2);
+            minorY.y += heightPointReduction;
+        }else{
+            heightPointReduction = (selectionSeparationMargin + (pointRadious / 2));
+        }
+        
+        Rectangle horizontalRect = new Rectangle(minorX.x, 
+                                                 lead1.y - selectionSeparationMargin, 
+                                                 boundingBox.width + selectionSeparationMargin,
+                                                 selectionSeparationMargin * 2 + 1);
+        
+        Rectangle verticalRect = new Rectangle(point1.x - selectionSeparationMargin,
+                                               minorY.y, 
+                                               selectionSeparationMargin * 2 + 1,
+                                               boundingBox.height + selectionSeparationMargin - heightPointReduction);
+        
+        return verticalRect.contains(x, y) || horizontalRect.contains(x, y);
+    }
+    
+    @Override
+    public void selectRect(Rectangle r) {
+        Point minorX = new Point(point1.x > lead1.x ? lead1 : point1);
+        Point minorY = new Point(lead1.y > point1.y ? point1 : lead1);
+        
+        if(sign(dx) == 1)
+            minorX.x -= selectionSeparationMargin;
+        
+        int heightPointReduction;
+        if(sign(dy) == 1){
+            heightPointReduction = (pointRadious / 2);
+            minorY.y += heightPointReduction;
+        }else{
+            heightPointReduction = (selectionSeparationMargin + (pointRadious / 2));
+        }
+        
+        Rectangle horizontalRect = new Rectangle(minorX.x, 
+                                                 lead1.y - selectionSeparationMargin, 
+                                                 boundingBox.width + selectionSeparationMargin,
+                                                 selectionSeparationMargin * 2 + 1);
+        
+        Rectangle verticalRect = new Rectangle(point1.x - selectionSeparationMargin,
+                                               minorY.y, 
+                                               selectionSeparationMargin * 2 + 1,
+                                               boundingBox.height + selectionSeparationMargin - heightPointReduction);
+        
+        selected = verticalRect.intersects(r) || horizontalRect.intersects(r);
     }
 }

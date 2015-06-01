@@ -79,7 +79,8 @@ public class RegDecl extends ModuleItem {
                 varInfo.isVector = isVector;
                 varInfo.isArray = regVariable.isArray();
                 varInfo.LSB = 0;
-                varInfo.MSB = size;
+                varInfo.MSB = size - 1;
+                varInfo.signalSize = size;
                 varInfo.isBigEndian = true;
                 if (isVector) {
                     Object[] values = new Object[size];

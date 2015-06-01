@@ -140,6 +140,7 @@ public class SimulationCanvas extends ContainerPanel implements
             //} else {
                 if (mouseComponent.getEditInfo(0) != null) {
                     EditionDialog dialog = new EditionDialog(mouseComponent, parent, true);
+                    dialog.setSimulationCanvasElement(this);
                     dialog.setVisible(true);
                 }
             //}
@@ -297,7 +298,7 @@ public class SimulationCanvas extends ContainerPanel implements
         for (int i = 0; i < elements.size(); i++) {
             BaseElement baseElement = getElement(i);
 
-            if (baseElement.boundingBox.contains(x, y)) {
+            if (baseElement.collidesWith(x, y)) {
                 if (Configuration.DEBUG_MODE) {
                     //System.out.println("Mouse collides with box: " + baseElement.boundingBox);
                 }

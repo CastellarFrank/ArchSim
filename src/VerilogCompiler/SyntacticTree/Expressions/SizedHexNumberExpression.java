@@ -4,7 +4,6 @@
  */
 package VerilogCompiler.SyntacticTree.Expressions;
 
-import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.ErrorHandler;
 import VerilogCompiler.SemanticCheck.ExpressionType;
@@ -26,6 +25,13 @@ public class SizedHexNumberExpression extends NumberExpression {
     public SizedHexNumberExpression(long size, Base base, String hexNumber, int line, int column) {
         super(line, column);
         this.size = size;
+        this.base = base;
+        this.hexNumber = hexNumber;
+    }
+    
+    public SizedHexNumberExpression(String size, Base base, String hexNumber, int line, int column) {
+        super(line, column);
+        this.size = new Long(size);
         this.base = base;
         this.hexNumber = hexNumber;
     }

@@ -20,6 +20,11 @@ public class SimpleNumberExpression extends NumberExpression {
         super(line, column);
         this.unsignedNumber = unsignedNumber;
     }
+    
+    public SimpleNumberExpression(String unsignedNumber, int line, int column) {
+        super(line, column);
+        this.unsignedNumber = new Long(unsignedNumber);
+    }
 
     public long getUnsignedNumber() {
         return unsignedNumber;

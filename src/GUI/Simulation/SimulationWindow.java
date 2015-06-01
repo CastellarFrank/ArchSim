@@ -21,6 +21,8 @@ import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Outputs.LogicOutput;
 import Simulation.Elements.Outputs.MultiBitsOutput;
 import Simulation.Elements.Wire;
+import Utils.FileUtils;
+import Utils.TextUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -164,7 +166,8 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         if (choose != JFileChooser.APPROVE_OPTION)
             return;
         File target = fileChooser.getSelectedFile();
-        
+        File newTarget = new File(target.getParent() + File.separator + TextUtils.AddSimulationTypeFileExtension(target.getName()));
+        FileUtils.DeleteFile(target);
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -178,7 +181,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource domSource = new DOMSource(document);
-            StreamResult result = new StreamResult(target);
+            StreamResult result = new StreamResult(newTarget);
 
             transformer.transform(domSource, result);
         } catch (ParserConfigurationException ex) {

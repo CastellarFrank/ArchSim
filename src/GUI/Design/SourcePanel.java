@@ -99,7 +99,7 @@ public class SourcePanel extends javax.swing.JPanel {
         
         mainRegion.setLayout(new BorderLayout());
         mainRegion.add(main);
-        
+        this.addChangeListener();
     }
     
     public String getProgram() {
@@ -151,10 +151,12 @@ public class SourcePanel extends javax.swing.JPanel {
         textArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
+                hasBeenModified = true;
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
+                hasBeenModified = true;
             }
 
             @Override

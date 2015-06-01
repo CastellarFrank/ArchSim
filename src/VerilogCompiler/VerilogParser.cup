@@ -99,7 +99,7 @@ terminal            L_BRACKET, R_BRACKET;
 terminal            L_PARENTHESIS, R_PARENTHESIS;
 
 terminal            DECIMAL_BASE, OCTAL_BASE, BINARY_BASE, HEX_BASE;
-terminal Long       UNSIGNED_NUMBER;
+terminal String       UNSIGNED_NUMBER;
 
 terminal            QUESTION_MARK;
 terminal            AT_SIGN;

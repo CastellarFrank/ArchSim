@@ -21,6 +21,7 @@ public class VariableInfo {
     public DataType type;
     public ArrayList<DataType> acceptedTypes = new ArrayList<DataType>();
     public ExpressionValue value;
+    public int signalSize;
 
     public VariableInfo() {
         value = new ExpressionValue();
@@ -36,6 +37,7 @@ public class VariableInfo {
     public void setLimits(int LSB, int MSB) {
         this.LSB = LSB;
         this.MSB = MSB;
+        this.signalSize = Math.abs(LSB - MSB) + 1;
         if (LSB < MSB)
             isBigEndian = true;
     }
@@ -55,6 +57,7 @@ public class VariableInfo {
         copy.isModuleInstance = isModuleInstance;
         copy.isBigEndian = isBigEndian;
         copy.acceptedTypes = acceptedTypes;
+        copy.signalSize = signalSize;
         copy.value = value.getCopy();
         
         return copy;

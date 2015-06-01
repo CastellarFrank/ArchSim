@@ -4,6 +4,9 @@
  */
 package GUI.Edit;
 
+import GUI.ContainerPanel;
+import GUI.Simulation.SimulationCanvas;
+import java.awt.Container;
 import java.awt.Frame;
 import java.util.Vector;
 import javax.swing.JComponent;
@@ -17,6 +20,11 @@ public class EditionDialog extends javax.swing.JDialog {
 
     Editable editableElement;
     Vector<EditInfo> editInfos;
+    SimulationCanvas simulationCanvasElement;
+
+    public void setSimulationCanvasElement(SimulationCanvas simulationCanvasElement) {
+        this.simulationCanvasElement = simulationCanvasElement;
+    }
     /**
      * Creates new form EditionDialog
      */
@@ -62,20 +70,28 @@ public class EditionDialog extends javax.swing.JDialog {
         boolean accept = true;
         for (int i = 0; i < editInfos.size(); i++) {
             EditInfo info = editInfos.elementAt(i);
+            InputTypeHandler input = info.getInputTypeHandler();
             boolean valid = true;
-            for (JComponent component : info.components) {
-                if (component instanceof JTextField) {
-                    info.value = ((JTextField)component).getText();
-                    if (!info.accepts(info.value))
-                        valid = false;
-                    break;
+            if(input != null)
+                valid = input.isCurrentValueValid;
+            else if(input == null){
+                for (JComponent component : info.components) {
+                    if (component instanceof JTextField) {
+                        info.value = ((JTextField)component).getText();
+                        if (!info.accepts(info.value))
+                            valid = false;
+                        break;
+                    }
                 }
             }
             if (valid) {
                 editableElement.setEditValue(i, info);                 
             } else {
-                errormsg.setText("not valid values");
-                errormsg.setSize(100, errormsg.getHeight());
+                String error = "not valid values";
+                if(input != null)
+                    error = input.getErrorMessage();;
+                                    
+                errormsg.setText(error);
                 accept = false;
                 break;
             }
@@ -99,7 +115,6 @@ public class EditionDialog extends javax.swing.JDialog {
         errormsg = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setMaximumSize(new java.awt.Dimension(274, 212));
         setMinimumSize(new java.awt.Dimension(274, 212));
         setResizable(false);
 
@@ -138,15 +153,13 @@ public class EditionDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(mainPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(errormsg, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(errormsg)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -173,7 +186,12 @@ public class EditionDialog extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         if (saveLogic()) {
-            getParent().repaint();
+            Container parent = getParent();
+            if(this.simulationCanvasElement != null)
+                this.simulationCanvasElement.prepareForReanalysis();
+            else{
+                parent.repaint();
+            }
             dispose();
         }
     }//GEN-LAST:event_jButton1ActionPerformed

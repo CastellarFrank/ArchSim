@@ -8,6 +8,7 @@ import Exceptions.ArchException;
 import GUI.Edit.EditInfo;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import org.w3c.dom.Document;
@@ -49,7 +50,7 @@ public class Wire extends BaseElement {
         Point extra1 = new Point(point1.x, point2.y);
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, point2);
-        setBbox(point1, point2, 3);
+        setBbox(point1, point2, 0);
         drawPosts(g);
         //System.out.println("volt1 " + binaryValues[0]);
         //System.out.println("volt2 " + binaryValues[1]);
@@ -64,6 +65,12 @@ public class Wire extends BaseElement {
             if (using == null || using.contains("z") || using .contains("x")) {
                 if (binaryValues[0] != null)
                     index = 0;
+            }
+            
+            using = binaryValues[index];
+            if (using == null || using.contains("z") || using .contains("x")) {
+                containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0, select);
+                return;
             }
             
             int size = to - from + 1;
@@ -144,5 +151,105 @@ public class Wire extends BaseElement {
     @Override
     boolean isWire() {
         return true;
+    }
+    
+    @Override
+    public boolean collidesWith(int x, int y) {
+        Point minorX = new Point(point1.x > point2.x ? point2 : point1);
+        Point minorY = new Point(point2.y > point1.y ? point1 : point2);
+        
+        int widthPointReduction;
+        if(dy == 0){
+            // Removing selection of points
+            widthPointReduction = ((pointRadious / 2) * 2) + selectionSeparationMargin;
+            minorX.x += (pointRadious / 2);
+        }else if(sign(dx) == 1){
+            //corner is draw
+            widthPointReduction = (pointRadious / 2);
+            minorX.x -= selectionSeparationMargin;
+        }else{
+            //point is draw
+            widthPointReduction = (pointRadious / 2);
+            minorX.x += widthPointReduction;
+        }
+        
+        int heightPointReduction;
+        if(dx == 0){
+            // Removing selection of points
+            heightPointReduction = ((pointRadious / 2) * 2) + selectionSeparationMargin;
+            minorY.y += (pointRadious / 2);
+        }else if(sign(dy) == 1){
+            //point is drew
+            heightPointReduction = (pointRadious / 2);
+            minorY.y += heightPointReduction;
+        }else{
+            //point is drew
+            heightPointReduction = (pointRadious / 2);
+            minorY.y -= selectionSeparationMargin;
+        }
+        Rectangle horizontalRect = null, verticalRect = null;
+        if(dx != 0)
+            horizontalRect = new Rectangle(minorX.x, 
+                                                point2.y - selectionSeparationMargin, 
+                                                boundingBox.width + selectionSeparationMargin - widthPointReduction,
+                                                selectionSeparationMargin * 2 + 1);
+        
+        if(dy != 0)
+            verticalRect = new Rectangle(point1.x - selectionSeparationMargin,
+                                            minorY.y, 
+                                            selectionSeparationMargin * 2 + 1,
+                                            boundingBox.height + selectionSeparationMargin - heightPointReduction);
+        
+        return (verticalRect != null && verticalRect.contains(x, y)) || (horizontalRect!= null && horizontalRect.contains(x, y));
+    }
+    
+    @Override
+    public void selectRect(Rectangle r) {
+        Point minorX = new Point(point1.x > point2.x ? point2 : point1);
+        Point minorY = new Point(point2.y > point1.y ? point1 : point2);
+        
+        int widthPointReduction;
+        if(dy == 0){
+            // Removing selection of points
+            widthPointReduction = ((pointRadious / 2) * 2) + selectionSeparationMargin;
+            minorX.x += (pointRadious / 2);
+        }else if(sign(dx) == 1){
+            //corner is draw
+            widthPointReduction = (pointRadious / 2);
+            minorX.x -= selectionSeparationMargin;
+        }else{
+            //point is draw
+            widthPointReduction = (pointRadious / 2);
+            minorX.x += widthPointReduction;
+        }
+        
+        int heightPointReduction;
+        if(dx == 0){
+            // Removing selection of points
+            heightPointReduction = ((pointRadious / 2) * 2) + selectionSeparationMargin;
+            minorY.y += (pointRadious / 2);
+        }else if(sign(dy) == 1){
+            //point is drew
+            heightPointReduction = (pointRadious / 2);
+            minorY.y += heightPointReduction;
+        }else{
+            //point is drew
+            heightPointReduction = (pointRadious / 2);
+            minorY.y -= selectionSeparationMargin;
+        }
+        Rectangle horizontalRect = null, verticalRect = null;
+        if(dx != 0)
+            horizontalRect = new Rectangle(minorX.x, 
+                                                point2.y - selectionSeparationMargin, 
+                                                boundingBox.width + selectionSeparationMargin - widthPointReduction,
+                                                selectionSeparationMargin * 2 + 1);
+        
+        if(dy != 0)
+            verticalRect = new Rectangle(point1.x - selectionSeparationMargin,
+                                            minorY.y, 
+                                            selectionSeparationMargin * 2 + 1,
+                                            boundingBox.height + selectionSeparationMargin - heightPointReduction);
+        
+        selected = (verticalRect != null && verticalRect.intersects(r)) || (horizontalRect!= null && horizontalRect.intersects(r));
     }
 }

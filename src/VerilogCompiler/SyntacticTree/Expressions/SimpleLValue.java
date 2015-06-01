@@ -67,7 +67,7 @@ public class SimpleLValue extends LValue {
     public void setValue(SimulationScope simulationScope, String instanceModuleId, Object value) {
         ExpressionValue address = simulationScope.getVariableValue(instanceModuleId, identifier);
         VariableInfo info = simulationScope.getVariableInfo(instanceModuleId, identifier);
-        int size = Math.abs(info.MSB - info.LSB) + 1;
+        int size = info.signalSize;
         String format = "%0" + size + "d";
         if (value != null) {
             try {  

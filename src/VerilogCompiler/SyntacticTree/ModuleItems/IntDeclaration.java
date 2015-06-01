@@ -40,8 +40,9 @@ public class IntDeclaration extends ModuleItem {
             } else {
                 VariableInfo varInfo = new VariableInfo();
                 varInfo.isNumeric = true;
-                varInfo.MSB = 32;
+                varInfo.MSB = 31;
                 varInfo.LSB = 0;
+                varInfo.signalSize = 32;
                 SemanticCheck.getInstance().registerVariable(variable.getIdentifier(), varInfo);
             }
             variable.validateSemantics();
