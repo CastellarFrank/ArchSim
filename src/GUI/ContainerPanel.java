@@ -769,17 +769,17 @@ public class ContainerPanel extends JCanvas {
         long stepRate = (long) (160 * iterationRate);
         long temporalLastTimeStamp = System.currentTimeMillis();
         long temporalLastIterationTime = lastIterationTime;
-        int iter;
+        
         if (1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)) {
             return;
         }
 
-        int iteration;
-
-        for (iter = 1; iter < 10; iter++) {
-            int maxSubIteration = 5000;
+        int iteration = 0;
+        int iter;
+        for (iter = 1; iter < 2; iter++) {
+            int maxSubIteration = 1;
             steps++;
-            for (iteration = 0; iteration < maxSubIteration; iteration++) {
+            for (; iteration < maxSubIteration; iteration++) {
                 subIterations = iteration;
                 converged = true;
 
@@ -937,13 +937,11 @@ public class ContainerPanel extends JCanvas {
 
         if (!isPaused) {
             runStep();
-            analyze();
+            //analyze();
             if (watchesTableModel != null) {
                 watchesTableModel.updateValues();
             }
-        }
-
-        if (!isPaused) {
+            
             long sysTime = System.currentTimeMillis();
             if (sysTime - secTime >= 1000) {
                 frames = 0;

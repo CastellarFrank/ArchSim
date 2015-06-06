@@ -58,37 +58,35 @@ public class Wire extends BaseElement {
 
     @Override
     public void stampVoltages() {
-        String select = "z";
-        if (binaryValues != null && binaryValues[1] != null) {
-            String using = binaryValues[1];
-            int index = 1;
-            if (using == null || using.contains("z") || using .contains("x")) {
-                if (binaryValues[0] != null)
-                    index = 0;
+        String select = "z";        
+        if (binaryValues != null && binaryValues[0] != null) {
+            String using = binaryValues[0];
+            int index = 0;
+            if (using == null || using.contains("z") || using.contains("x")){
+                index = 1;
+                using = binaryValues[index];
+                if (using == null || using.contains("z") || using .contains("x")) {
+                    containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0, select);
+                    return;
+                }
             }
-            
-            using = binaryValues[index];
-            if (using == null || using.contains("z") || using .contains("x")) {
-                containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0, select);
-                return;
-            }
-            
-            int size = to - from + 1;
-            if (size > binaryValues[index].length()) {
+            int textLength = binaryValues[index].length();
+            int size = Math.max(to, from) + 1;
+            if (size > textLength) {
                 String extra = new String(new char[size - binaryValues[index].length()])
                         .replace('\0', '0');
                 binaryValues[index] = extra + binaryValues[index];
+                textLength = binaryValues[index].length();
             }
-            int min = from;
-            int max = to;
-            if (max < min) {
-                min = binaryValues[index].length() - min - 1;
-                max = binaryValues[index].length() - max - 1;
-                if (min < 0 || max < 0 || min > binaryValues[index].length()){
-                    min = max = 0;
-                }
+            
+            int min = textLength - 1 - to;
+            int max = textLength - 1 - from;
+            
+            if(min > max){   
+                select = new StringBuilder(binaryValues[index].substring(max, min + 1)).reverse().toString();
+            }else{
+                select = binaryValues[index].substring(min, max + 1);
             }
-            select = binaryValues[index].substring(min, max + 1);
         }
         containerPanel.stampVoltageSource(joints[0], joints[1], 
                 voltageSourceReference, 0, select);
@@ -102,6 +100,11 @@ public class Wire extends BaseElement {
     @Override
     public void doStep() {
         
+    }
+    
+    @Override
+    public boolean thereIsConnectionBetween(int elementA, int elementB) {
+        return false;
     }
     
     @Override
