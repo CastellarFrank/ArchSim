@@ -101,6 +101,11 @@ public class LogicInput extends BasicSwitch {
         
         return element;
     }
+
+    @Override
+    public boolean isPostOutput(int index) {
+        return index == 0;
+    }
     
     @Override
     public boolean collidesWith(int x, int y) {
@@ -157,6 +162,7 @@ public class LogicInput extends BasicSwitch {
                                                selectionSeparationMargin * 2 + 1,
                                                boundingBox.height + selectionSeparationMargin - heightPointReduction);
         
-        selected = verticalRect.intersects(r) || horizontalRect.intersects(r);
+        boolean tempSelected = verticalRect.intersects(r) || horizontalRect.intersects(r);
+        this.setSelected(tempSelected);
     }
 }

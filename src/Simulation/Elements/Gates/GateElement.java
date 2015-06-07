@@ -135,6 +135,11 @@ public abstract class GateElement extends BaseElement {
     }
 
     @Override
+    public boolean isPostOutput(int index) {
+        return index == inputCount;
+    }    
+
+    @Override
     public void setPoints() {
         super.setPoints();
         /*if (dn > 150 && this == containerPanel.newElementBeenDrawn) {

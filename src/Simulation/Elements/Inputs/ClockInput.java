@@ -40,5 +40,9 @@ public class ClockInput extends BaseElement {
     public void doStep() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
+    @Override
+    public boolean isPostOutput(int index) {
+      return index == 0;   
+    }
 }

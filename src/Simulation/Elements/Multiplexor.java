@@ -285,7 +285,11 @@ public class Multiplexor extends BaseElement {
             setInputCount(Integer.parseInt(editInfo.value));
         }
     }
-    
+
+    @Override
+    public boolean isPostOutput(int index) {
+        return index == inputCount + controlSignalCount;
+    }
 
     @Override
     public void doStep() {

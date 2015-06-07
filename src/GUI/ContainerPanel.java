@@ -286,12 +286,11 @@ public class ContainerPanel extends JCanvas {
      * size</li> </ul>
      */
     protected void analyze() {
+        joints.clear();
         if (elements.isEmpty() || !runnable) {
             return;
         }
-
-        joints.clear();
-
+        
         Joint globalGround = new Joint(-1, -1);
         joints.add(globalGround);
 
@@ -313,17 +312,21 @@ public class ContainerPanel extends JCanvas {
                     }
                 }
                 int outOfRange = joints.size();
+                boolean isPostOutput = baseElement.isPostOutput(postIndex);
                 JointReference jointRef = new JointReference(baseElement, postIndex);
                 if (jointIndex == outOfRange) {
                     /*Add new joint*/
                     Joint newJoint = new Joint(post.x, post.y);
+                    if(isPostOutput)
+                        newJoint.increaseOutputQuantity();
                     newJoint.references.add(jointRef);
-
                     baseElement.setJointIndex(postIndex, jointIndex);
                     joints.add(newJoint);
                 } else {
                     /*Add joint reference to existing joint*/
                     Joint joint = getJoint(jointIndex);
+                    if(isPostOutput)
+                        joint.increaseOutputQuantity();
                     joint.references.add(jointRef);
 
                     baseElement.setJointIndex(postIndex, jointIndex);
@@ -960,25 +963,25 @@ public class ContainerPanel extends JCanvas {
             baseElement.draw(g);
         }
 
-        //<editor-fold defaultstate="collapsed" desc="Color bad connections">
+        //<editor-fold defaultstate="collapsed" desc="Color bad or good connections">
         for (int jointIndex = 0; jointIndex < joints.size(); jointIndex++) {
             Joint joint = joints.elementAt(jointIndex);
-            if (joint.references.size() == 1) {
-                boolean collidesWith = false;
+            if(this.currentMouseMode != MouseMode.SELECT_DRAG && joint.isSelected())
+                continue;
+            
+            if(joint.getOutputQuantity() > 1){
+                this.drawPostWithMargin(g, joint.coordX, joint.coordY, BaseElement.invalidPostColor);
+            }else if (joint.references.size() == 1) {
                 JointReference reference = joint.references.elementAt(0);
                 for (BaseElement baseElement : elements) {
                     if (baseElement != reference.element
                             && baseElement.collidesWith(joint.coordX, joint.coordY)) {
-                        collidesWith = true;
+                        this.drawPostWithMargin(g, joint.coordX, joint.coordY, BaseElement.collidePostColor);
+                        break;
                     }
                 }
-
-                if (collidesWith) {
-                    Color old = g.getColor();
-                    g.setColor(Color.RED);
-                    g.fillOval(joint.coordX - 3, joint.coordY - 3, 7, 7);
-                    g.setColor(old);
-                }
+            }else if(joint.references.size() >= 2){
+                this.drawPostWithMargin(g, joint.coordX, joint.coordY, BaseElement.connectedPostColor);
             }
         }
         //</editor-fold>   
@@ -1008,6 +1011,19 @@ public class ContainerPanel extends JCanvas {
 //            repaint(0);
 //        }
 //        lastFrameTimeStamp = lastTimeStamp;
+    }
+    
+    public void drawPostWithMargin(Graphics g, int x0, int y0, Color pointColor) {
+        int tempPointRadious = BaseElement.pointRadious - 1;
+        int pointMargin = tempPointRadious / 2;
+        Color old = g.getColor();
+        g.setColor(BaseElement.postColor);
+        
+        g.fillOval(x0 - pointMargin - 1, y0 - pointMargin - 1, tempPointRadious + 2, tempPointRadious + 2);
+        g.setColor(pointColor);
+        
+        g.fillOval(x0 - pointMargin, y0 - pointMargin, tempPointRadious, tempPointRadious);
+        g.setColor(old);
     }
 
     /**

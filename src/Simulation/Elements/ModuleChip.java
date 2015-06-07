@@ -218,6 +218,11 @@ public class ModuleChip extends BaseElement {
     }
 
     @Override
+    public boolean isPostOutput(int index) {
+        return ports[index].isOutput;
+    }
+    
+    @Override
     public boolean thereIsConnectionBetween(int elementA, int elementB) {
         return false;
     }    

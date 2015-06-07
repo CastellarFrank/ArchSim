@@ -253,6 +253,7 @@ public class Wire extends BaseElement {
                                             selectionSeparationMargin * 2 + 1,
                                             boundingBox.height + selectionSeparationMargin - heightPointReduction);
         
-        selected = (verticalRect != null && verticalRect.intersects(r)) || (horizontalRect!= null && horizontalRect.intersects(r));
+        boolean tempSelected = (verticalRect != null && verticalRect.intersects(r)) || (horizontalRect!= null && horizontalRect.intersects(r));
+        this.setSelected(tempSelected);
     }
 }

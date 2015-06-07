@@ -244,7 +244,7 @@ public class SimulationCanvas extends ContainerPanel implements
         boolean success = true;
         switch (currentMouseMode) {
             case SELECT:
-                if (mouseComponent == null) {
+                if (mouseComponent == null && newElementBeenDrawn == null) {
                     selectElementsOnArea(e.getX(), e.getY());
                 } else if (newElementBeenDrawn == null){
                     currentMouseMode = MouseMode.SELECT_DRAG;

@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 public abstract class BaseElement implements Editable {
 
     //<editor-fold defaultstate="collapsed" desc="Static Members">
-    public static Color selectedColor, whiteColor, defaultColor, postColor = Color.DARK_GRAY;
+    public static Color selectedColor, whiteColor, defaultColor, postColor = Color.DARK_GRAY, connectedPostColor = Color.GREEN, collidePostColor = new Color(255, 200, 0), invalidPostColor = Color.RED;
     public static Color highSignalColor, lowSignalColor,
             unknownSignalColor, highImpedanceSignalColor;
     public static Color textColor;
@@ -52,6 +52,7 @@ public abstract class BaseElement implements Editable {
     private String id;
     public double voltages[];
     public String binaryValues[];
+    public boolean jointsSelected = false;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -121,6 +122,10 @@ public abstract class BaseElement implements Editable {
 
     public int getInternalNodeCount() {
         return 0;
+    }
+    
+    public boolean isPostOutput(int index){
+      return false;  
     }
 
     public void calcLeads(int len) {
@@ -290,7 +295,9 @@ public abstract class BaseElement implements Editable {
         if (containerPanel == null) {
             return false;
         }
-        return containerPanel.mouseComponent == this || selected;
+        boolean answer =  containerPanel.mouseComponent == this || selected;
+        this.setJointsSelectedState(answer);
+        return answer;
     }
 
     public boolean isSelected() {
@@ -299,6 +306,18 @@ public abstract class BaseElement implements Editable {
 
     public void setSelected(boolean x) {
         selected = x;
+        setJointsSelectedState(x);
+    }
+
+    private void setJointsSelectedState(boolean value) {
+        if(this.jointsSelected == value)
+            return;
+        
+        this.jointsSelected = value;
+        //Update joints
+        for (int jointIndex : joints) {
+            this.containerPanel.getJoint(jointIndex).setSelected(value);
+        }
     }
 
     public void selectRect(Rectangle r) {
@@ -306,7 +325,8 @@ public abstract class BaseElement implements Editable {
                                        boundingBox.y - selectionSeparationMargin, 
                                        boundingBox.width + selectionSeparationMargin * 2, 
                                        boundingBox.height + selectionSeparationMargin * 2);
-        selected = r.intersects(rect);
+        boolean tempSelected = r.intersects(rect);
+        this.setSelected(tempSelected);
     }
 
     public void drag(int newX, int newY) {
@@ -468,18 +488,9 @@ public abstract class BaseElement implements Editable {
     }
 
     public void drawPost(Graphics g, int x0, int y0, int n) {
-        if (containerPanel.newElementBeenDrawn == null && !needsHighlight()
-                && containerPanel.getJoint(n) != null
-                && containerPanel.getJoint(n).references.size() >= 2) {
-            return;
-        }
-        /*if (containerPanel.currentMouseMode == MouseMode.SELECT_DRAG
-                || containerPanel.currentMouseMode == MouseMode.MOVE_ALL) {
-            return;
-        }*/
         drawPost(g, x0, y0);
     }
-
+    
     public void drawPost(Graphics g, int x0, int y0) {
         int pointMargin = pointRadious / 2;
         Color old = g.getColor();
@@ -487,7 +498,7 @@ public abstract class BaseElement implements Editable {
         g.fillOval(x0 - pointMargin, y0 - pointMargin, pointRadious, pointRadious);
         g.setColor(old);
     }
-
+    
     public void drawPosts(Graphics g) {
         int i;
         for (i = 0; i != getPostCount(); i++) {
@@ -612,7 +623,7 @@ public abstract class BaseElement implements Editable {
     public boolean isCenteredText() {
         return false;
     }
-
+    
     public void drawText(Graphics g, String text) {
         FontMetrics fm = g.getFontMetrics();
         if (text == null) return;

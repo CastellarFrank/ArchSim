@@ -55,6 +55,11 @@ public class MultiBitsInput extends BaseElement {
     }
 
     @Override
+    public boolean isPostOutput(int index) {
+        return index == 0;
+    }    
+    
+    @Override
     public void draw(Graphics g) {
         Font f = new Font("SansSerif", Font.BOLD, 16);
         g.setFont(f);
@@ -187,6 +192,7 @@ public class MultiBitsInput extends BaseElement {
                                                selectionSeparationMargin * 2 + 1,
                                                boundingBox.height + selectionSeparationMargin - heightPointReduction);
         
-        selected = verticalRect.intersects(r) || horizontalRect.intersects(r);
+        boolean tempSelected = verticalRect.intersects(r) || horizontalRect.intersects(r);
+        this.setSelected(tempSelected);
     }
 }

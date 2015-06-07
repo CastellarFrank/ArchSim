@@ -84,6 +84,11 @@ public class NotGate extends BaseElement {
     public boolean hasGroundConnection(int index) {
         return (index == 1);
     }
+
+    @Override
+    public boolean isPostOutput(int index) {
+        return index == 1;
+    }
     
     @Override
     public boolean thereIsConnectionBetween(int elementA, int elementB) {
