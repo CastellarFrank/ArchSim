@@ -23,6 +23,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -285,6 +287,7 @@ public class ContainerPanel extends JCanvas {
      * to analyze</li> <li>delete unused elements</li> <li>reduces matrix
      * size</li> </ul>
      */
+    
     protected void analyze() {
         joints.clear();
         if (elements.isEmpty() || !runnable) {
@@ -312,21 +315,16 @@ public class ContainerPanel extends JCanvas {
                     }
                 }
                 int outOfRange = joints.size();
-                boolean isPostOutput = baseElement.isPostOutput(postIndex);
                 JointReference jointRef = new JointReference(baseElement, postIndex);
                 if (jointIndex == outOfRange) {
                     /*Add new joint*/
                     Joint newJoint = new Joint(post.x, post.y);
-                    if(isPostOutput)
-                        newJoint.increaseOutputQuantity();
                     newJoint.references.add(jointRef);
                     baseElement.setJointIndex(postIndex, jointIndex);
                     joints.add(newJoint);
                 } else {
                     /*Add joint reference to existing joint*/
                     Joint joint = getJoint(jointIndex);
-                    if(isPostOutput)
-                        joint.increaseOutputQuantity();
                     joint.references.add(jointRef);
 
                     baseElement.setJointIndex(postIndex, jointIndex);
@@ -474,6 +472,7 @@ public class ContainerPanel extends JCanvas {
             if (innerIndex == rowCount) {
                 if (quantityP == -1) {
                     System.err.println("Error!");
+                    this.errorOcurredOnRow(index);
                     return;
                 }
                 RowInfo secondRowInfo = rowsInfo.elementAt(quantityP);
@@ -503,6 +502,7 @@ public class ContainerPanel extends JCanvas {
                         secondRowInfo = rowsInfo.elementAt(quantityP);
                         if (secondRowInfo.type != RowType.NORMAL) {
                             System.out.println("swap failed");
+                            this.errorOcurredOnRow(index);
                             continue;
                         }
                     }
@@ -969,7 +969,7 @@ public class ContainerPanel extends JCanvas {
             if(this.currentMouseMode != MouseMode.SELECT_DRAG && joint.isSelected())
                 continue;
             
-            if(joint.getOutputQuantity() > 1){
+            if(joint.isError()){
                 this.drawPostWithMargin(g, joint.coordX, joint.coordY, BaseElement.invalidPostColor);
             }else if (joint.references.size() == 1) {
                 JointReference reference = joint.references.elementAt(0);
@@ -1482,4 +1482,28 @@ public class ContainerPanel extends JCanvas {
         setRowInfoMultibitsChange(voltageIndex, multibits);
     }
     //</editor-fold>
+
+    private void errorOcurredOnRow(int index) {
+        int voltageSourceIndex = index - joints.size() + 1;
+        if(voltageSourceIndex < 0 || voltageSourceIndex >= voltageSourceElements.length)
+            return;
+        
+        BaseElement voltageElement = this.voltageSourceElements[voltageSourceIndex];
+        List<Integer> iteratedJointIndex = new ArrayList<Integer>();
+        
+        this.setJointsAsError(voltageElement.joints, iteratedJointIndex);
+    }
+
+    private void setJointsAsError(int[] joints, List<Integer> iteratedJointIndex) {
+        for(int jointIndex : joints){
+            if(iteratedJointIndex.contains(jointIndex))
+                continue;
+            iteratedJointIndex.add(jointIndex);
+            Joint joint = this.getJoint(jointIndex);
+            joint.setAsErrorState();
+            for(JointReference reference : joint.references){
+                this.setJointsAsError(reference.element.joints, iteratedJointIndex);
+            }
+        }
+    }
 }

@@ -13,8 +13,8 @@ import java.util.Vector;
 public class Joint {
     public int coordX, coordY;
     public Vector<JointReference> references;
-    private int outputQuantity = 0;
     private boolean isSelected;
+    private boolean isError;
 
     public Joint() {
         references = new Vector<JointReference>();
@@ -26,19 +26,19 @@ public class Joint {
         this.coordY = coordY;
     }   
 
-    public int getOutputQuantity() {
-        return outputQuantity;
-    }
-    
-    public void increaseOutputQuantity(){
-        this.outputQuantity ++;
-    }
-
     public boolean isSelected() {
         return isSelected;
     }
 
     public void setSelected(boolean value) {
         this.isSelected = value;
+    }
+    
+    public boolean isError(){
+        return  this.isError;
+    }
+    
+    public void setAsErrorState(){
+        this.isError = true;
     }
 }
