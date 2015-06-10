@@ -13,5 +13,6 @@ public abstract class EventExpression extends Expression{
     public EventExpression(int line, int column) {
         super(line, column);
     }
-    
+
+    public abstract void clearEvent();    
 }

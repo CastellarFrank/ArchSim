@@ -53,6 +53,9 @@ import org.w3c.dom.NodeList;
 public class SimulationWindow extends javax.swing.JInternalFrame implements ActionListener {
     SimulationCanvas canvas;
     String[] extraParams2 = new String[] { "2" };    
+    public final String startExecutionText = "Start Execution";
+    public final String continueExecutionText = "Continue";
+    public final String pauseExecutionText = "Pause";
     
     /**
      * Creates new form SimulationWindow
@@ -93,7 +96,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
                 (parent.getHeight() - getHeight()) / 2);
         
         if (canvas.isPaused) {
-            pauseContinueMenu.setText("Start Execution");
+            pauseContinueMenu.setText(this.startExecutionText);
         }
     }
     
@@ -491,12 +494,12 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private void pauseContinueMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pauseContinueMenuActionPerformed
         if (canvas.isPaused) {
             canvas.resume();
-            pauseContinueMenu.setText("Pause");
+            pauseContinueMenu.setText(this.pauseExecutionText);
         } else {
             canvas.pause();
-            pauseContinueMenu.setText("Continue");
+            pauseContinueMenu.setText(this.continueExecutionText);
         }
-        repaint();
+        canvas.prepareForReanalysis();
     }//GEN-LAST:event_pauseContinueMenuActionPerformed
 
     private void inverterMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inverterMenuActionPerformed
@@ -518,6 +521,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         canvas.reset();
+        pauseContinueMenu.setText(this.startExecutionText);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

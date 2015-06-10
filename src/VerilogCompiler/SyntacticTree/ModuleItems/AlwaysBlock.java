@@ -60,6 +60,7 @@ public class AlwaysBlock extends ModuleItem {
     @Override
     public void initModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
         super.executeModuleItem(simulationScope, moduleInstanceId);
+        this.sensitiveList.clearState();
         /*TODO*/
         execute(simulationScope, moduleInstanceId);
     }

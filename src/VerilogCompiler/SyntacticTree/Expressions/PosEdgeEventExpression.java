@@ -69,5 +69,11 @@ public class PosEdgeEventExpression extends EventExpression {
         copy.type = type;
         return copy;
     }
+
+    @Override
+    public void clearEvent() {
+        previousValue = new ExpressionValue(1, 1);
+        prevCondition = 0;
+    }
     
 }

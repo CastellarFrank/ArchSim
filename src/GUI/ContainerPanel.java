@@ -907,8 +907,7 @@ public class ContainerPanel extends JCanvas {
                 ((ModuleChip)element).reset();
             }
         }
-        
-        repaint();
+        this.prepareForAnalysis();
     }
 
     /**
@@ -931,6 +930,7 @@ public class ContainerPanel extends JCanvas {
      * @param g graphics used to paint.
      */
     public void updatePreview(Graphics g) {
+        boolean currentState = needsAnalysis;
         if (needsAnalysis) {
             analyze();
             needsAnalysis = false;
@@ -938,7 +938,7 @@ public class ContainerPanel extends JCanvas {
 
         printThings();
 
-        if (!isPaused) {
+        if (!isPaused && currentState) {
             runStep();
             //analyze();
             if (watchesTableModel != null) {

@@ -62,6 +62,8 @@ public class InitialBlock extends ModuleItem {
 
     @Override
     public void initModuleItem(SimulationScope simulationScope, String moduleInstanceId) {
+        if(sensitiveList != null)
+            sensitiveList.clearState();
         if (sensitiveList == null || Convert.getBoolean(sensitiveList.evaluate(simulationScope, moduleInstanceId))) {
             statement.execute(simulationScope, moduleInstanceId);
         } else {

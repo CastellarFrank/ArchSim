@@ -10,6 +10,7 @@ import Exceptions.ModuleDesignNotFoundException;
 import GUI.ContainerPanel;
 import GUI.Edit.EditInfo;
 import Simulation.Configuration;
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.ModuleInstanceIdGenerator;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
@@ -328,6 +329,7 @@ public class ModuleChip extends BaseElement {
     
     public void reset() {
         isInitialized = false;
+        containerPanel.simulationScope.resetVariableValues(this.moduleInstanceId);   
     }
 
     @Override
@@ -344,9 +346,9 @@ public class ModuleChip extends BaseElement {
             String portName = ports[i].portName;
             String multibitsValue = binaryValues[i];
             if (multibitsValue == null || multibitsValue.contains("z")) {
-                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).zValue = true;
+                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).setToZValue();
             } else if (multibitsValue.contains("x")) {
-                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).xValue = true;
+                containerPanel.simulationScope.getVariableValue(moduleInstanceId, portName).setToXValue();
             }else {
                 BigInteger converted = new BigInteger(multibitsValue);
                 containerPanel.simulationScope

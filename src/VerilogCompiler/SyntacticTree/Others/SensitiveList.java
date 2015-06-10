@@ -104,5 +104,13 @@ public class SensitiveList extends Expression {
         }
         return new SensitiveList(acceptAll, events, line, column);
     }
+
+    public void clearState() {
+        if(!acceptAll){
+            for(EventExpression event : this.items){
+                event.clearEvent();
+            }
+        }
+    }
     
 }

@@ -88,7 +88,7 @@ public class BinaryExpression extends Expression {
         ExpressionValue l = left.evaluate(simulationScope, moduleName);
         ExpressionValue r = right.evaluate(simulationScope, moduleName);
 
-        if (l.value == null || r.value == null) {
+        if (l.value == null || r.value == null || l.xValue || r.xValue || l.zValue || r.zValue) {
             if (l.xValue && r.xValue || l.zValue && r.zValue) {
                 return new ExpressionValue(l.zValue && r.zValue, l.xValue && r.xValue);
             }

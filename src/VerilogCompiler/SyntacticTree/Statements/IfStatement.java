@@ -71,9 +71,12 @@ public class IfStatement extends Statement {
         ExpressionValue value = condition.evaluate(simulationScope, moduleName);
         Integer intValue = 0;
         
-        if (value != null && value.value != null)
-            intValue = Integer.parseInt(value.value.toString());
-        
+        if (value != null){
+            if(value.xValue || value.zValue)
+                return;
+            if(value.value != null)
+                intValue = Integer.parseInt(value.value.toString());
+        }
         if (intValue == 1)
             trueBlock.execute(simulationScope, moduleName);
         else if (falseBlock != null)

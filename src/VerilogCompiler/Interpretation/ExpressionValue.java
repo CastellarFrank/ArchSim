@@ -80,6 +80,22 @@ public class ExpressionValue {
         }
     }
     
+    public void setToZValue(){
+        this.value = "z";
+        this.bits = 1;
+        this.base = Base.BINARY;
+        this.xValue = false;
+        this.zValue = true;
+    }
+    
+    public void setToXValue(){
+        this.value = "x";
+        this.bits = 1;
+        this.base = Base.BINARY;
+        this.xValue = true;
+        this.zValue = false;
+    }
+    
     public ExpressionValue getCopy() {
         ExpressionValue copy = new ExpressionValue();
         copy.bits = this.bits;

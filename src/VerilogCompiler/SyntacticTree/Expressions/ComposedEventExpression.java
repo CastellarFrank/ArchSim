@@ -86,5 +86,12 @@ public class ComposedEventExpression extends EventExpression{
         return new ComposedEventExpression((EventExpression)left.getCopy(), 
                 (EventExpression)right.getCopy(), line, column);
     }
-    
+
+    @Override
+    public void clearEvent() {
+        if(left instanceof EventExpression)
+            ((EventExpression)left).clearEvent();
+        if(right instanceof EventExpression)
+            ((EventExpression)right).clearEvent();
+    }
 }

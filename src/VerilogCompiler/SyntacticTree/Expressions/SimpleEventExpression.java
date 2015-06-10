@@ -62,5 +62,10 @@ public class SimpleEventExpression extends EventExpression {
     public VNode getCopy() {
         return new SimpleEventExpression((Expression)expression.getCopy(), line, column);
     }
+
+    @Override
+    public void clearEvent() {
+        previousValue = Integer.MIN_VALUE;
+    }
     
 }

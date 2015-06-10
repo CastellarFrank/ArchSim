@@ -68,5 +68,10 @@ public class NegEdgeEventExpression extends EventExpression {
     public VNode getCopy() {
         return new NegEdgeEventExpression((Expression)expression.getCopy(), line, column);
     }
-    
+
+    @Override
+    public void clearEvent() {
+        previousValue = new ExpressionValue(0, 1);
+        prevCondition = 0;
+    }
 }

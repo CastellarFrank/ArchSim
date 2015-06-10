@@ -8,7 +8,9 @@ import Simulation.Configuration;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -111,6 +113,13 @@ public class SimulationScope {
         Set<String> keys = scopes.keySet();
         for (String key : keys) {
             scopes.get(key).runStep(this, key);
+        }
+    }
+
+    public void resetVariableValues(String moduleInstanceId) {
+        Map<String, VariableInfo> variables = this.getScope(moduleInstanceId).getVariables();
+        for(Entry<String, VariableInfo> variable : variables.entrySet()){
+            variable.getValue().getExpressionValue().setToZValue();
         }
     }
 }
