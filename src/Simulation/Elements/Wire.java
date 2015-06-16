@@ -6,6 +6,7 @@ package Simulation.Elements;
 
 import Exceptions.ArchException;
 import GUI.Edit.EditInfo;
+import Simulation.Joint;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -21,6 +22,7 @@ import org.w3c.dom.Element;
 public class Wire extends BaseElement {
 
     int from, to;
+    int jointInput = -1;
     
     public Wire(int x, int y) {
         super(x, y);
@@ -57,19 +59,31 @@ public class Wire extends BaseElement {
     }
 
     @Override
+    public boolean isPostOutput(int index) {
+        if(jointInput == -1)
+            return false;
+        
+        return this.jointInput != joints[index];
+    }
+
+    @Override
     public void stampVoltages() {
         String select = "z";        
-        if (binaryValues != null && binaryValues[0] != null) {
-            String using = binaryValues[0];
-            int index = 0;
-            if (using == null || using.contains("z") || using.contains("x")){
+        int index = 0;
+        if (binaryValues != null && this.jointInput != -1) {
+            String using = binaryValues[index];
+            if(jointInput == joints[1]){
                 index = 1;
                 using = binaryValues[index];
-                if (using == null || using.contains("z") || using .contains("x")) {
-                    containerPanel.stampVoltageSource(joints[0], joints[1], voltageSourceReference, 0, select);
-                    return;
-                }
             }
+            
+            if (using == null || using.contains("z") || using .contains("x")) {
+                int otherPoint = index == 1 ? 0 : 1;
+                containerPanel.stampVoltageSource(joints[index], joints[otherPoint], voltageSourceReference, 0, select);
+                this.jointInput = -1;
+                return;
+            }
+            
             int textLength = binaryValues[index].length();
             int size = Math.max(to, from) + 1;
             if (size > textLength) {
@@ -88,8 +102,10 @@ public class Wire extends BaseElement {
                 select = binaryValues[index].substring(min, max + 1);
             }
         }
-        containerPanel.stampVoltageSource(joints[0], joints[1], 
+        int otherPoint = index == 1 ? 0 : 1;
+        containerPanel.stampVoltageSource(joints[index], joints[otherPoint], 
                 voltageSourceReference, 0, select);
+        this.jointInput = -1;
     }
     
     @Override
@@ -152,7 +168,7 @@ public class Wire extends BaseElement {
     }
 
     @Override
-    boolean isWire() {
+    public boolean isWire() {
         return true;
     }
     
@@ -255,5 +271,18 @@ public class Wire extends BaseElement {
         
         boolean tempSelected = (verticalRect != null && verticalRect.intersects(r)) || (horizontalRect!= null && horizontalRect.intersects(r));
         this.setSelected(tempSelected);
+    }
+    
+    public void setJointInput(int inputIndex){
+        if(inputIndex == -1 || this.jointInput != -1)
+            return;
+        this.jointInput = inputIndex;
+        
+        /* Update the other joints connected to this cable*/
+        int otherJointPoint = this.jointInput == joints[0] ? joints[1] : joints[0];
+        Joint joint = this.containerPanel.getJoint(otherJointPoint);
+        if(joint == null)
+            return;
+        joint.setAsHasInput();
     }
 }

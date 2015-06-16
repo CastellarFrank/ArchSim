@@ -189,6 +189,7 @@ public abstract class BaseElement implements Editable {
     }
 
     public void setVoltageColor(Graphics g, double voltage) {
+        voltage = Math.abs(voltage);
         if (needsHighlight()) {
             g.setColor(BaseElement.selectedColor);
         } else {
@@ -407,7 +408,7 @@ public abstract class BaseElement implements Editable {
         return a;
     }
 
-    boolean isWire() {
+    public boolean isWire() {
         return false;
     }
     //</editor-fold>

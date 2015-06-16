@@ -16,6 +16,7 @@ import Simulation.JointReference;
 import Simulation.RowInfo;
 import Simulation.RowType;
 import Simulation.SimulationFactory;
+import Utils.MatrixUtils;
 import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -289,329 +290,8 @@ public class ContainerPanel extends JCanvas {
      */
     
     protected void analyze() {
-        joints.clear();
-        if (elements.isEmpty() || !runnable) {
-            return;
-        }
-        
-        Joint globalGround = new Joint(-1, -1);
-        joints.add(globalGround);
-
-        int elementIndex, postIndex, jointIndex;
-        int totalVoltageSourceCount = 0;
-        for (elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
-            BaseElement baseElement = getElement(elementIndex);
-            int postCount = baseElement.getPostCount();
-            int elementVoltageSourceCount = baseElement.getVoltageSourceCount();
-
-            //<editor-fold defaultstate="collapsed" desc="Update joints">
-            for (postIndex = 0; postIndex < postCount; postIndex++) {
-                Point post = baseElement.getPost(postIndex);
-
-                for (jointIndex = 0; jointIndex < joints.size(); jointIndex++) {
-                    Joint joint = getJoint(jointIndex);
-                    if (post.x == joint.coordX && post.y == joint.coordY) {
-                        break;
-                    }
-                }
-                int outOfRange = joints.size();
-                JointReference jointRef = new JointReference(baseElement, postIndex);
-                if (jointIndex == outOfRange) {
-                    /*Add new joint*/
-                    Joint newJoint = new Joint(post.x, post.y);
-                    newJoint.references.add(jointRef);
-                    baseElement.setJointIndex(postIndex, jointIndex);
-                    joints.add(newJoint);
-                } else {
-                    /*Add joint reference to existing joint*/
-                    Joint joint = getJoint(jointIndex);
-                    joint.references.add(jointRef);
-
-                    baseElement.setJointIndex(postIndex, jointIndex);
-                    if (jointIndex == 0) {
-                        baseElement.setVoltage(postIndex, 0.0);
-                        baseElement.setMultiBitsValue(postIndex, "z");
-                    }
-                }
-            }
-            //</editor-fold>
-
-            totalVoltageSourceCount += elementVoltageSourceCount;
-        }
-
-        voltageSourceElements = new BaseElement[totalVoltageSourceCount];
-        circuitNonLinear = false;
-
-        totalVoltageSourceCount = 0;
-
-        //<editor-fold defaultstate="collapsed" desc="Set voltage source references">
-        int ivs;
-        for (BaseElement baseElement : elements) {
-            ivs = baseElement.getVoltageSourceCount();
-            for (int i = 0; i < ivs; i++) {
-                voltageSourceElements[totalVoltageSourceCount] = baseElement;
-                baseElement.setVoltageSourceReference(i, totalVoltageSourceCount++);
-            }
-        }
-
-        //voltageSourceCount = totalVoltageSourceCount;
-
-        int rowCount = joints.size() + totalVoltageSourceCount - 1;
-        initializeRows(rowCount);
-
-        temporalRightSideVoltages = new double[rowCount];
-        temporalRightSideMultibits = new String[rowCount];
-        initializeArray(temporalRightSideMultibits, "z");
-
-        rightSideVoltages = new double[rowCount];
-        rightSideMultibitsValues = new String[rowCount];
-        initializeArray(rightSideMultibitsValues, "z");
-
-        matrixSize = matrixFullSize = rowCount;
-        temporalVoltageMatrix = new double[rowCount][rowCount];
-        voltageMatrix = new double[rowCount][rowCount];
-        mutibitsMatrix = new String[rowCount][rowCount];
-        for (int i = 0; i < rowCount; i++) {
-            initializeArray(mutibitsMatrix[i], "z");
-        }
-        temporalMultibitsMatrix = new String[rowCount][rowCount];
-        for (int i = 0; i < rowCount; i++) {
-            initializeArray(temporalMultibitsMatrix[i], "z");
-        }
-        circuitPermute = new int[matrixSize];
-        mapForStamp = false;
-
-        for (BaseElement baseElement : elements) {
-            baseElement.stampVoltages();
-        }
-
-        //<editor-fold defaultstate="collapsed" desc="Closures">
-        boolean closure[] = new boolean[joints.size()];
-        boolean changed = true;
-        closure[0] = true;
-        while (changed) {
-            //DEBUG("changed");
-            changed = false;
-            for (int i = 0; i < elements.size(); i++) {
-                //DEBUG("for " + i);
-                BaseElement baseElement = getElement(i);
-
-                for (int j = 0; j < baseElement.getPostCount(); j++) {
-                    //DEBUG("for post " + j);
-                    if (!closure[baseElement.joints[j]]) {
-                        //DEBUG("!closure[ce.getNode(j)]" + j);
-                        if (baseElement.hasGroundConnection(j)) {
-                            //DEBUG("has gc " + j);
-                            closure[baseElement.joints[j]] = changed = true;
-                        }
-                        continue;
-                    }
-                    int k;
-                    for (k = 0; k != baseElement.getPostCount(); k++) {
-                        //DEBUG("for k " + k);
-                        if (j == k) {
-                            continue;
-                        }
-                        int nodeK = baseElement.joints[k];
-                        if (baseElement.thereIsConnectionBetween(j, k)
-                                && !closure[nodeK]) {
-                            //DEBUG("getConnection kn" + nodeK);
-                            closure[nodeK] = true;
-                            changed = true;
-                        }
-                    }
-                }
-            }
-            if (changed) {
-                continue;
-            }
-
-            for (int i = 0; i != joints.size(); i++) {
-                if (!closure[i]) {
-                    //DEBUG("node " + i + " unconnected");
-                    stampResistor(0, i, 1e8);
-                    closure[i] = true;
-                    changed = true;
-                    break;
-                }
-            }
-        }
-        //</editor-fold>
-
-        //<editor-fold defaultstate="collapsed" desc="Matrix reduction">
-        int index, innerIndex;
-        for (index = 0; index < rowCount; index++) {
-            int quantityM = -1, quantityP = -1;
-            double value = 0, rightSideSum = 0;
-
-            RowInfo rowInfo = rowsInfo.elementAt(index);
-            if (rowInfo.leftSideChanges || rowInfo.notUsedInMatrix || rowInfo.rightSideChanges) {
-                continue;
-            }
-
-            for (innerIndex = 0; innerIndex < rowCount; innerIndex++) {
-                double q = temporalVoltageMatrix[index][innerIndex];
-                if (rowsInfo.elementAt(innerIndex).type == RowType.CONSTANT) {
-                    rightSideSum -= rowsInfo.elementAt(innerIndex).voltage * q;
-                    continue;
-                }
-                if (q == 0) {
-                    continue;
-                }
-                if (quantityP == -1) {
-                    quantityP = innerIndex;
-                    value = q;
-                    continue;
-                }
-                if (quantityM == -1 && q == -value) {
-                    quantityM = innerIndex;
-                    continue;
-                }
-                break;
-            }
-            if (innerIndex == rowCount) {
-                if (quantityP == -1) {
-                    System.err.println("Error!");
-                    this.errorOcurredOnRow(index);
-                    return;
-                }
-                RowInfo secondRowInfo = rowsInfo.elementAt(quantityP);
-                if (quantityM == -1) {
-                    int k;
-                    for (k = 0; secondRowInfo.type == RowType.EQUALS_TO_ANOTHER && k < 100; k++) {
-                        quantityP = secondRowInfo.rowEqualsToReference;
-                        secondRowInfo = rowsInfo.elementAt(quantityP);
-                    }
-                    if (secondRowInfo.type == RowType.EQUALS_TO_ANOTHER) {
-                        secondRowInfo.type = RowType.NORMAL;
-                        continue;
-                    }
-                    if (secondRowInfo.type != RowType.NORMAL) {
-                        continue;
-                    }
-                    secondRowInfo.type = RowType.CONSTANT;
-                    rowInfo.notUsedInMatrix = true;
-                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / value;
-                    secondRowInfo.multiBitsValue = temporalRightSideMultibits[index];
-                    index = -1;
-                } else if (rightSideSum + temporalRightSideVoltages[index] == 0) {
-                    if (secondRowInfo.type != RowType.NORMAL) {
-                        int qq = quantityM;
-                        quantityM = quantityP;
-                        quantityP = qq;
-                        secondRowInfo = rowsInfo.elementAt(quantityP);
-                        if (secondRowInfo.type != RowType.NORMAL) {
-                            System.out.println("swap failed");
-                            this.errorOcurredOnRow(index);
-                            continue;
-                        }
-                    }
-                    secondRowInfo.type = RowType.EQUALS_TO_ANOTHER;
-                    secondRowInfo.rowEqualsToReference = quantityM;
-                    rowInfo.notUsedInMatrix = true;
-                }
-            }
-        }
-
-
-        //</editor-fold>
-
-        //<editor-fold defaultstate="collapsed" desc="Delete useless rows">
-        int newCol = 0;
-        for (index = 0; index < matrixSize; index++) {
-            RowInfo rowInfo = rowsInfo.elementAt(index);
-            switch (rowInfo.type) {
-                case NORMAL:
-                    rowInfo.mappedColumn = newCol++;
-                    continue;
-                case CONSTANT:
-                    rowInfo.mappedColumn = -1;
-                    break;
-                case EQUALS_TO_ANOTHER:
-                    RowInfo pivot;
-                    for (innerIndex = 0; innerIndex != 100; innerIndex++) {
-                        pivot = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
-                        if (pivot.type != RowType.EQUALS_TO_ANOTHER) {
-                            break;
-                        }
-                        if (index == pivot.rowEqualsToReference) {
-                            break;
-                        }
-                        rowInfo.rowEqualsToReference = pivot.rowEqualsToReference;
-                    }
-                    break;
-            }
-        }
-
-        for (index = 0; index != rowCount; index++) {
-            RowInfo rowInfo = rowsInfo.elementAt(index);
-            if (rowInfo.type == RowType.EQUALS_TO_ANOTHER) {
-                RowInfo secondRowInfo = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
-                if (secondRowInfo.type == RowType.CONSTANT) {
-                    rowInfo.type = secondRowInfo.type;
-                    rowInfo.voltage = secondRowInfo.voltage;
-                    rowInfo.multiBitsValue = secondRowInfo.multiBitsValue;
-                    rowInfo.mappedColumn = -1;
-                } else {
-                    rowInfo.mappedColumn = secondRowInfo.mappedColumn;
-                }
-            }
-        }
-
-        double newMatrix[][] = new double[newCol][newCol];
-        String newMultibistMatrix[][] = new String[newCol][newCol];
-        double newRightSides[] = new double[newCol];
-        String newMultibits[] = new String[newCol];
-
-        int newIndex = 0;
-        for (index = 0; index < matrixSize; index++) {
-            RowInfo rowInfo = rowsInfo.elementAt(index);
-            if (rowInfo.notUsedInMatrix) {
-                rowInfo.mappedRow = -1;
-                continue;
-            }
-            newRightSides[newIndex] = temporalRightSideVoltages[index];
-            newMultibits[newIndex] = temporalRightSideMultibits[index];
-            rowInfo.mappedRow = newIndex;
-
-            for (innerIndex = 0; innerIndex < matrixSize; innerIndex++) {
-                RowInfo rowInfoJ = rowsInfo.elementAt(innerIndex);
-                if (rowInfoJ.type == RowType.CONSTANT) {
-                    newRightSides[newIndex] -= rowInfoJ.voltage * temporalVoltageMatrix[index][innerIndex];
-                    newMultibits[newIndex] = rowInfoJ.multiBitsValue;
-                } else {
-                    newMultibistMatrix[newIndex][rowInfoJ.mappedColumn] = temporalMultibitsMatrix[index][innerIndex];
-                    newMatrix[newIndex][rowInfoJ.mappedColumn] += temporalVoltageMatrix[index][innerIndex];
-                }
-            }
-            newIndex++;
-        }
-
-        temporalRightSideVoltages = newRightSides;
-        temporalVoltageMatrix = newMatrix;
-        temporalMultibitsMatrix = newMultibistMatrix;
-        temporalRightSideMultibits = newMultibits;
-        rowCount = matrixSize = newCol;
-
-        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
-                rowCount);
-
-        System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0, rowCount);
-
-        for (int i = 0; i < rowCount; i++) {
-            System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, rowCount);
-            System.arraycopy(temporalMultibitsMatrix[i], 0, mutibitsMatrix[i], 0, rowCount);
-        }
-
-        //</editor-fold>
-        //</editor-fold>       
-
-        mapForStamp = true;
-
-
-        if (!circuitNonLinear && !lu_factor(temporalVoltageMatrix, matrixSize, circuitPermute)) {
-            System.out.println("Singular matrix!");
-        }
+        this.setJointsAndVoltageSourcesReferences();
+        this.prepareAndCalculateMatrixValues();
     }
 
     //<editor-fold defaultstate="collapsed" desc="LU">
@@ -792,18 +472,9 @@ public class ContainerPanel extends JCanvas {
                 System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0,
                         temporalRightSideMultibits.length);
 
-                if (circuitNonLinear) {
-                    for (int i = 0; i < matrixSize; i++) {
-                        System.arraycopy(temporalVoltageMatrix[i], 0, voltageMatrix[i], 0, matrixSize);
-                        System.arraycopy(temporalMultibitsMatrix[i], 0, mutibitsMatrix, 0, matrixSize);
-                    }
-                }
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
                 
-                if (!isPaused 
-                        && (!circuitNonLinear 
-                            || (!(converged && iteration > 0) 
-                                 && lu_factor(temporalVoltageMatrix, matrixSize, circuitPermute)))) {
+                if (!isPaused) {
                     //joining the values of the components in case there is new inputs values to be joined
                     setJoinValues();
                 }
@@ -814,16 +485,7 @@ public class ContainerPanel extends JCanvas {
                 if (isPaused) {
                     return;
                 }
-                if (circuitNonLinear) {
-                    if (converged && iteration > 0) {
-                        break;
-                    }
-                    if (!lu_factor(temporalVoltageMatrix, matrixSize,
-                            circuitPermute)) {
-                        System.out.println("Singular matrix!");
-                        return;
-                    }
-                }
+                
                 // The Values of the matrix has to be refreshed with the new values before joining.
                 analyze();
                 setJoinValues();
@@ -932,7 +594,7 @@ public class ContainerPanel extends JCanvas {
     public void updatePreview(Graphics g) {
         boolean currentState = needsAnalysis;
         if (needsAnalysis) {
-            analyze();
+            this.analyze();
             needsAnalysis = false;
         }
 
@@ -1485,13 +1147,17 @@ public class ContainerPanel extends JCanvas {
 
     private void errorOcurredOnRow(int index) {
         int voltageSourceIndex = index - joints.size() + 1;
-        if(voltageSourceIndex < 0 || voltageSourceIndex >= voltageSourceElements.length)
-            return;
+        int tempJoints[];
+        if(voltageSourceIndex >= 0 && voltageSourceIndex < voltageSourceElements.length){
+            BaseElement voltageElement = this.voltageSourceElements[voltageSourceIndex];
+            tempJoints = voltageElement.joints;
+        }else{
+            tempJoints = new int[1];
+            tempJoints[0] = index + 1;
+        }
         
-        BaseElement voltageElement = this.voltageSourceElements[voltageSourceIndex];
         List<Integer> iteratedJointIndex = new ArrayList<Integer>();
-        
-        this.setJointsAsError(voltageElement.joints, iteratedJointIndex);
+        this.setJointsAsError(tempJoints, iteratedJointIndex);
     }
 
     private void setJointsAsError(int[] joints, List<Integer> iteratedJointIndex) {
@@ -1505,5 +1171,319 @@ public class ContainerPanel extends JCanvas {
                 this.setJointsAsError(reference.element.joints, iteratedJointIndex);
             }
         }
+    }
+
+    private void setJointsAndVoltageSourcesReferences() {
+        joints.clear();
+        if (elements.isEmpty() || !runnable) {
+            return;
+        }
+        
+        Joint globalGround = new Joint(-1, -1, 0);
+        joints.add(globalGround);
+
+        int elementIndex, postIndex, jointIndex;
+        int totalVoltageSourceCount = 0;
+        for (elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
+            BaseElement baseElement = getElement(elementIndex);
+            int postCount = baseElement.getPostCount();
+            int elementVoltageSourceCount = baseElement.getVoltageSourceCount();
+
+            //<editor-fold defaultstate="collapsed" desc="Update joints">
+            for (postIndex = 0; postIndex < postCount; postIndex++) {
+                Point post = baseElement.getPost(postIndex);
+
+                for (jointIndex = 0; jointIndex < joints.size(); jointIndex++) {
+                    Joint joint = getJoint(jointIndex);
+                    if (post.x == joint.coordX && post.y == joint.coordY) {
+                        break;
+                    }
+                }
+                int outOfRange = joints.size();
+                JointReference jointRef = new JointReference(baseElement, postIndex);
+                if (jointIndex == outOfRange) {
+                    /*Add new joint*/
+                    Joint newJoint = new Joint(post.x, post.y, jointIndex);
+                    if(baseElement.isPostOutput(postIndex))
+                        newJoint.setAsHasInput();
+                    newJoint.addReference(jointRef);
+                    baseElement.setJointIndex(postIndex, jointIndex);
+                    joints.add(newJoint);
+                } else {
+                    /*Add joint reference to existing joint*/
+                    Joint joint = getJoint(jointIndex);
+                    if(baseElement.isPostOutput(postIndex))
+                        joint.setAsHasInput();
+                    joint.addReference(jointRef);
+                    baseElement.setJointIndex(postIndex, jointIndex);
+                    if (jointIndex == 0) {
+                        baseElement.setVoltage(postIndex, 0.0);
+                        baseElement.setMultiBitsValue(postIndex, "z");
+                    }
+                }
+            }
+            //</editor-fold>
+
+            totalVoltageSourceCount += elementVoltageSourceCount;
+        }
+        
+        voltageSourceElements = new BaseElement[totalVoltageSourceCount];
+        circuitNonLinear = false;
+
+        totalVoltageSourceCount = 0;
+        int ivs;
+        for (BaseElement baseElement : elements) {
+            ivs = baseElement.getVoltageSourceCount();
+            for (int i = 0; i < ivs; i++) {
+                voltageSourceElements[totalVoltageSourceCount] = baseElement;
+                baseElement.setVoltageSourceReference(i, totalVoltageSourceCount++);
+            }
+        }
+    }
+
+    private void prepareAndCalculateMatrixValues() {
+        if (elements.isEmpty() || !runnable) {
+            return;
+        }
+        int rowCount = joints.size() + voltageSourceElements.length - 1;
+        initializeRows(rowCount);
+
+        temporalRightSideVoltages = new double[rowCount];
+        temporalRightSideMultibits = new String[rowCount];
+        initializeArray(temporalRightSideMultibits, "z");
+
+        rightSideVoltages = new double[rowCount];
+        rightSideMultibitsValues = new String[rowCount];
+        initializeArray(rightSideMultibitsValues, "z");
+
+        matrixSize = matrixFullSize = rowCount;
+        temporalVoltageMatrix = new double[rowCount][rowCount];
+        voltageMatrix = new double[rowCount][rowCount];
+        mutibitsMatrix = new String[rowCount][rowCount];
+        for (int i = 0; i < rowCount; i++) {
+            initializeArray(mutibitsMatrix[i], "z");
+        }
+        temporalMultibitsMatrix = new String[rowCount][rowCount];
+        for (int i = 0; i < rowCount; i++) {
+            initializeArray(temporalMultibitsMatrix[i], "z");
+        }
+        circuitPermute = new int[matrixSize];
+        mapForStamp = false;
+
+        for (BaseElement baseElement : elements) {
+            baseElement.stampVoltages();
+            System.out.println("After Stamp: " + baseElement.getClass().toString());
+            MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
+            
+        }
+        
+        //<editor-fold defaultstate="collapsed" desc="Closures">
+        boolean closure[] = new boolean[joints.size()];
+        boolean changed = true;
+        closure[0] = true;
+        while (changed) {
+            //DEBUG("changed");
+            changed = false;
+            for (int i = 0; i < elements.size(); i++) {
+                //DEBUG("for " + i);
+                BaseElement baseElement = getElement(i);
+
+                for (int j = 0; j < baseElement.getPostCount(); j++) {
+                    //DEBUG("for post " + j);
+                    if (!closure[baseElement.joints[j]]) {
+                        //DEBUG("!closure[ce.getNode(j)]" + j);
+                        if (baseElement.hasGroundConnection(j)) {
+                            //DEBUG("has gc " + j);
+                            closure[baseElement.joints[j]] = changed = true;
+                        }
+                        continue;
+                    }
+                    int k;
+                    for (k = 0; k != baseElement.getPostCount(); k++) {
+                        //DEBUG("for k " + k);
+                        if (j == k) {
+                            continue;
+                        }
+                        int nodeK = baseElement.joints[k];
+                        if (baseElement.thereIsConnectionBetween(j, k)
+                                && !closure[nodeK]) {
+                            //DEBUG("getConnection kn" + nodeK);
+                            closure[nodeK] = true;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if (changed) {
+                continue;
+            }
+
+            for (int i = 0; i != joints.size(); i++) {
+                if (!closure[i]) {
+                    //DEBUG("node " + i + " unconnected");
+                    stampResistor(0, i, 1e8);
+                    closure[i] = true;
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        
+        System.out.println("After Clousures");
+        MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
+        
+        //</editor-fold>
+
+        //<editor-fold defaultstate="collapsed" desc="Matrix reduction">
+        int index, innerIndex;
+        for (index = 0; index < rowCount; index++) {
+            int quantityM = -1, quantityP = -1;
+            double valueP = 0, rightSideSum = 0;
+            boolean isJoint = index < (joints.size() - 1);
+            int voltageEntries = 0;
+
+            RowInfo rowInfo = rowsInfo.elementAt(index);
+            if (rowInfo.leftSideChanges || rowInfo.notUsedInMatrix || rowInfo.rightSideChanges) {
+                continue;
+            }
+
+            for (innerIndex = 0; innerIndex < rowCount; innerIndex++) {
+                double q = temporalVoltageMatrix[index][innerIndex];
+                if (rowsInfo.elementAt(innerIndex).type == RowType.CONSTANT) {
+                    rightSideSum -= rowsInfo.elementAt(innerIndex).voltage * q;
+                    if(q != 1 && q!= -1 )
+                        continue;
+                }
+                if (q == 0) {
+                    continue;
+                }
+                if(q == -1){
+                    voltageEntries ++;
+                }
+                if(voltageEntries > 1){
+                    System.err.println("Error!");
+                    this.errorOcurredOnRow(index);
+                    return;
+                }
+                if (quantityP == -1) {
+                    quantityP = innerIndex;
+                    valueP = q;
+                    continue;
+                }
+                if(q == -valueP || q == valueP){
+                    if(quantityM == -1)
+                        quantityM = innerIndex;
+                    continue;
+                }
+                break;
+            }
+            if (innerIndex == rowCount) {
+                if (quantityP == -1) {
+                    System.err.println("Error!");
+                    this.errorOcurredOnRow(index);
+                    return;
+                }
+                RowInfo secondRowInfo;
+                if (quantityM == -1) {
+                    if(valueP == -1)
+                        continue; //if the value is -1 it means that the current row value is going to be set.
+                    secondRowInfo = rowsInfo.elementAt(quantityP);
+                    if (secondRowInfo.type == RowType.EQUALS_TO_ANOTHER) {
+                        if(secondRowInfo.rowEqualsToReference != index){
+                            //Is an error because I'm trying of setting a value into a row which already has or is going to have an assignment from other row.
+                            System.err.println("Error at voltage sources!");
+                            this.errorOcurredOnRow(index);
+                            return;
+                        }
+                    }
+                    
+                    secondRowInfo.type = RowType.CONSTANT;
+                    rowInfo.notUsedInMatrix = true;
+                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / valueP;
+                    secondRowInfo.multiBitsValue = temporalRightSideMultibits[index];
+                    index = -1;
+                } else {
+                    boolean isAnyConstant = false;
+                    int newQuantityM = quantityM;
+                    for(; newQuantityM < rowCount ; newQuantityM++){
+                        double valueQ = temporalVoltageMatrix[index][newQuantityM];
+                        if(valueQ == 0)
+                            continue;
+                        if(valueQ == 1){
+                            //I need to switch the reference
+                            secondRowInfo = rowsInfo.elementAt(newQuantityM);
+                        }else{
+                            secondRowInfo = rowsInfo.elementAt(quantityP);
+                        }
+                        
+                        if(rowInfo.type == RowType.CONSTANT){
+                            rowInfo.notUsedInMatrix = true;
+                            isAnyConstant = true;
+                            secondRowInfo.type = RowType.CONSTANT;
+                            secondRowInfo.voltage = isJoint 
+                                                    ? rowInfo.voltage
+                                                    : (temporalRightSideVoltages[index] + rightSideSum) / valueP;
+                            secondRowInfo.multiBitsValue = isJoint 
+                                                           ? rowInfo.multiBitsValue
+                                                           :temporalRightSideMultibits[index];
+                        }else{
+                            /*this reference is going to be solved in other iteration.*/
+                        }
+                    }
+                    if(isAnyConstant)
+                        index = -1;
+                }
+            }
+        }
+
+
+        //</editor-fold>
+
+        //<editor-fold defaultstate="collapsed" desc="Delete useless rows">
+        int newCol = 0;
+        for (index = 0; index < matrixSize; index++) {
+            RowInfo rowInfo = rowsInfo.elementAt(index);
+            switch (rowInfo.type) {
+                case NORMAL:
+                    rowInfo.mappedColumn = newCol++;
+                    continue;
+                case CONSTANT:
+                    rowInfo.mappedColumn = -1;
+                    break;
+                case EQUALS_TO_ANOTHER:
+                    RowInfo pivot;
+                    for (innerIndex = 0; innerIndex != 100; innerIndex++) {
+                        pivot = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
+                        if (pivot.type != RowType.EQUALS_TO_ANOTHER) {
+                            break;
+                        }
+                        if (index == pivot.rowEqualsToReference) {
+                            break;
+                        }
+                        rowInfo.rowEqualsToReference = pivot.rowEqualsToReference;
+                    }
+                    break;
+            }
+        }
+
+        for (index = 0; index != rowCount; index++) {
+            RowInfo rowInfo = rowsInfo.elementAt(index);
+            if (rowInfo.type == RowType.EQUALS_TO_ANOTHER) {
+                RowInfo secondRowInfo = rowsInfo.elementAt(rowInfo.rowEqualsToReference);
+                if (secondRowInfo.type == RowType.CONSTANT) {
+                    rowInfo.type = secondRowInfo.type;
+                    rowInfo.voltage = secondRowInfo.voltage;
+                    rowInfo.multiBitsValue = secondRowInfo.multiBitsValue;
+                    rowInfo.mappedColumn = -1;
+                } else {
+                    rowInfo.mappedColumn = secondRowInfo.mappedColumn;
+                }
+            }
+        }
+        //</editor-fold>  
+        
+        System.out.println("\n----------------------------------------");
+
+        mapForStamp = true;
     }
 }
