@@ -189,7 +189,7 @@ public abstract class GateElement extends BaseElement {
     @Override
     public void stampVoltages() {
         ContainerPanel.DEBUG("stamping in gate element " + joints[inputCount]);
-        containerPanel.stampVoltageSource(0, joints[inputCount], voltageSourceReference);
+        containerPanel.stampVoltageSource(0, joints[inputCount], voltageSourceReference, voltages[inputCount] ,binaryValues[inputCount]);
     }
 
     @Override
@@ -199,16 +199,22 @@ public abstract class GateElement extends BaseElement {
     
     @Override
     public void doStep() {
+        if(!this.validValuesAtInputPost()){
+            this.voltages[inputCount] = 0.0;
+            this.binaryValues[inputCount] = "z"; 
+            return;
+        }
+        
         boolean f = calcFunction();
         if (isInverting()) {
             f = !f;
         }
         lastOutput = f;
         double output = f ? Configuration.LOGIC_1_VOLTAGE : Configuration.LOGIC_0_VOLTAGE;
+        this.voltages[inputCount] = output;
         String bit;
         bit = f ? "1" : "0";
-        //ContainerPanel.DEBUG("output " + output);
-        containerPanel.updateVoltageSource(voltageSourceReference, output, bit);
+        binaryValues[inputCount] = bit; 
     }
 
     @Override
@@ -228,6 +234,11 @@ public abstract class GateElement extends BaseElement {
     }
 
     @Override
+    public boolean needsPropagation() {
+        return true;
+    }    
+
+    @Override
     public void movePoint(int n, int dx, int dy) {
         if (n == 0) {
             x += dx;
@@ -237,6 +248,15 @@ public abstract class GateElement extends BaseElement {
             y2 += dy;
         }
         setPoints();   
+    }
+
+    private boolean validValuesAtInputPost() {
+        for (int i = 0; i < inputCount; i++) {
+            if(this.binaryValues[i].matches("[zZxX]")){
+                return false;
+            }
+        }
+        return true;
     }
     
 }

@@ -294,6 +294,11 @@ public class ModuleChip extends BaseElement {
         otherDraw(g);
     }
 
+    @Override
+    public boolean needsPropagation() {
+        return true;
+    }
+    
     public void otherDraw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         Font f = new Font("SansSerif", 0, 10 * csize);

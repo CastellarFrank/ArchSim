@@ -90,7 +90,7 @@ public class MultiBitsInput extends BaseElement {
     private void calculateVoltageValue() {
         if (binaryValues[0].matches("[0-9]*")) {
             long longValue = new BigInteger(binaryValues[0], 2).longValue();
-            if (longValue == 1)
+            if (longValue >= 1)
                 voltages[0] = Configuration.LOGIC_1_VOLTAGE * 2;
             else
                 voltages[0] = Configuration.LOGIC_0_VOLTAGE;

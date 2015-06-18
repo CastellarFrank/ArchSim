@@ -77,7 +77,7 @@ public class NotGate extends BaseElement {
     @Override
     public void stampVoltages() {
         System.out.println("NotGate source ref: " + voltageSourceReference);
-        containerPanel.stampVoltageSource(0, joints[1], voltageSourceReference);
+        containerPanel.stampVoltageSource(0, joints[1], voltageSourceReference, voltages[1], binaryValues[1]);
     }
     
     @Override
@@ -97,13 +97,24 @@ public class NotGate extends BaseElement {
 
     @Override
     public void doStep() {
+        if(binaryValues[0].matches("[zZxX]")){
+            this.binaryValues[1] = "z";
+            this.voltages[1] = 0.0;
+            return;
+        }
         double output;
         if (voltages[0] >= Configuration.LOGIC_1_VOLTAGE)
             output = Configuration.LOGIC_0_VOLTAGE;
         else
             output = Configuration.LOGIC_1_VOLTAGE * 2;
+        voltages[1] = output;
         String bit = voltages[0] >= Configuration.LOGIC_1_VOLTAGE ? "0" : "1";
-        containerPanel.updateVoltageSource(voltageSourceReference, output, bit);
+        binaryValues[1] = bit;
+    }
+
+    @Override
+    public boolean needsPropagation() {
+        return true;
     }
 
     @Override

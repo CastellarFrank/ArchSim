@@ -261,6 +261,7 @@ public class SimulationCanvas extends ContainerPanel implements
                 break;
             case MOVE_ALL:
                 moveAll(snapGrid(e.getX()), snapGrid(e.getY()));
+                this.needsJointsAnalyze = true;
                 break;
         }
 

@@ -57,6 +57,8 @@ public class ContainerPanel extends JCanvas {
      * <code>SimulationCanvas</code>*
      */
     public SimulationScope simulationScope;
+    
+    public int highestPropagationLevel;
     /**
      * <
      * code>WatchesTableModel</code> used to feed a
@@ -71,8 +73,8 @@ public class ContainerPanel extends JCanvas {
     protected boolean dragging = false, mapForStamp = false;
     protected int dragX, dragY, initDragX, initDragY, matrixSize, matrixFullSize;
     protected int gridSize, gridMask, gridRound;
-    protected double voltageMatrix[][], temporalVoltageMatrix[][], speed = 172.0;
-    protected String mutibitsMatrix[][], temporalMultibitsMatrix[][];
+    protected double temporalVoltageMatrix[][], speed = 172.0;
+    protected String temporalMultibitsMatrix[][];
     protected double stepTime, totalTime = 0;
     protected int circuitPermute[];
     protected double temporalRightSideVoltages[], rightSideVoltages[];
@@ -81,7 +83,7 @@ public class ContainerPanel extends JCanvas {
     protected Rectangle selectedArea = null;
     protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
     protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
-    protected boolean needsAnalysis = false;
+    protected boolean needsAnalysis = false, needsJointsAnalyze = false;
     protected boolean runnable = true, circuitNonLinear, converged;
     //</editor-fold>
 
@@ -475,20 +477,27 @@ public class ContainerPanel extends JCanvas {
                 //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
                 
                 if (!isPaused) {
-                    //joining the values of the components in case there is new inputs values to be joined
-                    setJoinValues();
+                    for (int i = 0; i < this.highestPropagationLevel; i++) {
+                        if(i == 0)
+                            this.setJoinValues();
+                        //joining the values of the components in case there is new inputs values to be joined
+                        this.prepareAndCalculateMatrixValues();
+                        setJoinValues();
+                    }                    
                 }
                 
                 for (BaseElement baseElement : elements) {
                     baseElement.doStep();
+                    if(baseElement.needsPropagation()){
+                        for (int i = 0; i < this.highestPropagationLevel + 1; i++) {
+                            this.prepareAndCalculateMatrixValues();
+                            setJoinValues();
+                        }
+                    }
                 }
                 if (isPaused) {
                     return;
-                }
-                
-                // The Values of the matrix has to be refreshed with the new values before joining.
-                analyze();
-                setJoinValues();
+                }  
                 
                 //</editor-fold>   
                 if (!circuitNonLinear) {
@@ -593,11 +602,12 @@ public class ContainerPanel extends JCanvas {
      */
     public void updatePreview(Graphics g) {
         boolean currentState = needsAnalysis;
-        if (needsAnalysis) {
+        if (needsAnalysis || needsJointsAnalyze) {
             this.analyze();
             needsAnalysis = false;
+            needsJointsAnalyze = false;
         }
-
+        
         printThings();
 
         if (!isPaused && currentState) {
@@ -1179,47 +1189,40 @@ public class ContainerPanel extends JCanvas {
             return;
         }
         
+        this.prepareElementsForAnalysis();
+        
         Joint globalGround = new Joint(-1, -1, 0);
         joints.add(globalGround);
-
         int elementIndex, postIndex, jointIndex;
         int totalVoltageSourceCount = 0;
         for (elementIndex = 0; elementIndex < elements.size(); elementIndex++) {
-            BaseElement baseElement = getElement(elementIndex);
+            BaseElement baseElement = getElement(elementIndex);            
             int postCount = baseElement.getPostCount();
             int elementVoltageSourceCount = baseElement.getVoltageSourceCount();
-
+            
             //<editor-fold defaultstate="collapsed" desc="Update joints">
             for (postIndex = 0; postIndex < postCount; postIndex++) {
                 Point post = baseElement.getPost(postIndex);
-
                 for (jointIndex = 0; jointIndex < joints.size(); jointIndex++) {
                     Joint joint = getJoint(jointIndex);
                     if (post.x == joint.coordX && post.y == joint.coordY) {
                         break;
                     }
                 }
+                
                 int outOfRange = joints.size();
                 JointReference jointRef = new JointReference(baseElement, postIndex);
                 if (jointIndex == outOfRange) {
                     /*Add new joint*/
                     Joint newJoint = new Joint(post.x, post.y, jointIndex);
-                    if(baseElement.isPostOutput(postIndex))
-                        newJoint.setAsHasInput();
                     newJoint.addReference(jointRef);
                     baseElement.setJointIndex(postIndex, jointIndex);
                     joints.add(newJoint);
                 } else {
                     /*Add joint reference to existing joint*/
                     Joint joint = getJoint(jointIndex);
-                    if(baseElement.isPostOutput(postIndex))
-                        joint.setAsHasInput();
                     joint.addReference(jointRef);
-                    baseElement.setJointIndex(postIndex, jointIndex);
-                    if (jointIndex == 0) {
-                        baseElement.setVoltage(postIndex, 0.0);
-                        baseElement.setMultiBitsValue(postIndex, "z");
-                    }
+                    baseElement.setJointIndex(postIndex, jointIndex);                    
                 }
             }
             //</editor-fold>
@@ -1227,6 +1230,9 @@ public class ContainerPanel extends JCanvas {
             totalVoltageSourceCount += elementVoltageSourceCount;
         }
         
+        this.analyzePropagationLevels();
+        
+        System.out.println("Highest Propagation Level: " + this.highestPropagationLevel );
         voltageSourceElements = new BaseElement[totalVoltageSourceCount];
         circuitNonLinear = false;
 
@@ -1258,11 +1264,6 @@ public class ContainerPanel extends JCanvas {
 
         matrixSize = matrixFullSize = rowCount;
         temporalVoltageMatrix = new double[rowCount][rowCount];
-        voltageMatrix = new double[rowCount][rowCount];
-        mutibitsMatrix = new String[rowCount][rowCount];
-        for (int i = 0; i < rowCount; i++) {
-            initializeArray(mutibitsMatrix[i], "z");
-        }
         temporalMultibitsMatrix = new String[rowCount][rowCount];
         for (int i = 0; i < rowCount; i++) {
             initializeArray(temporalMultibitsMatrix[i], "z");
@@ -1272,9 +1273,6 @@ public class ContainerPanel extends JCanvas {
 
         for (BaseElement baseElement : elements) {
             baseElement.stampVoltages();
-            System.out.println("After Stamp: " + baseElement.getClass().toString());
-            MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
-            
         }
         
         //<editor-fold defaultstate="collapsed" desc="Closures">
@@ -1329,8 +1327,8 @@ public class ContainerPanel extends JCanvas {
             }
         }
         
-        System.out.println("After Clousures");
-        MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
+//        System.out.println("After Clousures");
+//        MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
         
         //</editor-fold>
 
@@ -1485,5 +1483,59 @@ public class ContainerPanel extends JCanvas {
         System.out.println("\n----------------------------------------");
 
         mapForStamp = true;
+    }
+
+    private void prepareElementsForAnalysis() {
+        /* Ordering BaseElement list to improve analysis of Joints*/
+        Vector<BaseElement> newList = new Vector<BaseElement>();
+        Vector<BaseElement> wiresList = new Vector<BaseElement>();
+        for(BaseElement element : this.elements){
+            if(element.isWire()){
+                wiresList.add(element);
+                ((Wire)element).clearJoinInput();
+            }else{
+                newList.add(element);
+            }
+            element.clearForAnalysis();
+        }
+        
+        for(BaseElement wire : wiresList){
+            newList.add(wire);
+        }
+        
+        this.elements = newList;
+    }
+
+    private void analyzePropagationLevels() {
+        this.highestPropagationLevel = 1;
+        for(Joint joint : joints){
+            /*Maybe there is a better way to analyze this without re-creating the iterated joint list for each node*/
+            List<Integer> iteratedJoints = new ArrayList<Integer>();
+            int value = this.getPropagationLevels(joint.getIndex(), iteratedJoints, 1);
+            if(value > highestPropagationLevel)
+                this.highestPropagationLevel = value;
+        }
+        
+    }
+
+    private int getPropagationLevels(int jointIndex, List<Integer> iteratedJoints, int level) {
+        Joint joint = this.getJoint(jointIndex);
+        if(joint == null || !joint.hasWiresConnected() || iteratedJoints.contains(jointIndex))
+            return level;
+        iteratedJoints.add(jointIndex);
+        int highestLevel = level;
+        for(JointReference jointReference : joint.references){
+            if(!jointReference.element.isWire())
+                continue;
+            int firstJointIndex = jointReference.element.joints[0];
+            int oppositeJointIndex = firstJointIndex == joint.getIndex()
+                                     ? jointReference.element.joints[1]
+                                     : firstJointIndex;
+            
+            int value = getPropagationLevels(oppositeJointIndex, iteratedJoints, level + 1);
+            if(value > highestLevel)
+                highestLevel = value;
+        }        
+        return highestLevel;
     }
 }

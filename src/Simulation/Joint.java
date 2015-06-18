@@ -18,6 +18,7 @@ public class Joint {
     private boolean isError;
     private boolean hasInput;
     private int index;
+    private int wiresConnected;
 
     public Joint() {
         references = new Vector<JointReference>();
@@ -54,8 +55,12 @@ public class Joint {
     }
     
     public void addReference(JointReference jointRef) {
+        if(jointRef.element.isPostOutput(jointRef.postNumber))
+            this.setAsHasInput();
+        
         this.references.add(jointRef);
         if(jointRef.element.isWire()){
+            this.wiresConnected++;
             if(this.hasInput)
                 ((Wire)jointRef.element).setJointInput(this.index);
         }
@@ -68,5 +73,13 @@ public class Joint {
                     ((Wire)reference.element).setJointInput(this.index);
             }
         }
+    }
+
+    public boolean hasWiresConnected() {
+        return this.wiresConnected > 1;
+    }
+
+    public int getIndex() {
+        return this.index;
     }
 }

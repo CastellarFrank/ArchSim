@@ -9,6 +9,7 @@ import GUI.ContainerPanel;
 import GUI.Edit.EditInfo;
 import GUI.Edit.Editable;
 import Simulation.Configuration;
+import Simulation.Joint;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -319,6 +320,16 @@ public abstract class BaseElement implements Editable {
         for (int jointIndex : joints) {
             this.containerPanel.getJoint(jointIndex).setSelected(value);
         }
+    }
+    
+    public Joint getJointByPostIndex(int postIndex){
+        if(postIndex < 0 || postIndex >= this.joints.length)
+            return null;
+        return this.containerPanel.getJoint(this.joints[postIndex]);
+    }
+    
+    public Joint getJointByJointIndex(int jointIndex){
+        return this.containerPanel.getJoint(jointIndex);
     }
 
     public void selectRect(Rectangle r) {
@@ -696,4 +707,14 @@ public abstract class BaseElement implements Editable {
         return false;
     }
     //</editor-fold>
+
+    public void clearForAnalysis() {
+        this.joints = new int[getPostCount() + getInternalNodeCount()];
+    }
+    
+    public boolean needsPropagation(){
+        /*Depending of when the elements returns true at overriding this 
+        function can improve a lot the performance at runtime*/
+        return false;
+    }
 }

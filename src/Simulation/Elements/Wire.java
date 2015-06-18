@@ -80,7 +80,6 @@ public class Wire extends BaseElement {
             if (using == null || using.contains("z") || using .contains("x")) {
                 int otherPoint = index == 1 ? 0 : 1;
                 containerPanel.stampVoltageSource(joints[index], joints[otherPoint], voltageSourceReference, 0, select);
-                this.jointInput = -1;
                 return;
             }
             
@@ -105,7 +104,6 @@ public class Wire extends BaseElement {
         int otherPoint = index == 1 ? 0 : 1;
         containerPanel.stampVoltageSource(joints[index], joints[otherPoint], 
                 voltageSourceReference, 0, select);
-        this.jointInput = -1;
     }
     
     @Override
@@ -284,5 +282,9 @@ public class Wire extends BaseElement {
         if(joint == null)
             return;
         joint.setAsHasInput();
+    }
+
+    public void clearJoinInput() {
+        this.jointInput = -1;
     }
 }
