@@ -1397,7 +1397,7 @@ public class ContainerPanel extends JCanvas {
                     
                     secondRowInfo.type = RowType.CONSTANT;
                     rowInfo.notUsedInMatrix = true;
-                    secondRowInfo.voltage = (temporalRightSideVoltages[index] + rightSideSum) / valueP;
+                    secondRowInfo.voltage = Math.abs((temporalRightSideVoltages[index] + rightSideSum) / valueP);
                     secondRowInfo.multiBitsValue = temporalRightSideMultibits[index];
                     index = -1;
                 } else {
@@ -1418,9 +1418,9 @@ public class ContainerPanel extends JCanvas {
                             rowInfo.notUsedInMatrix = true;
                             isAnyConstant = true;
                             secondRowInfo.type = RowType.CONSTANT;
-                            secondRowInfo.voltage = isJoint 
+                            secondRowInfo.voltage = Math.abs(isJoint 
                                                     ? rowInfo.voltage
-                                                    : (temporalRightSideVoltages[index] + rightSideSum) / valueP;
+                                                    : (temporalRightSideVoltages[index] + rightSideSum) / valueP);
                             secondRowInfo.multiBitsValue = isJoint 
                                                            ? rowInfo.multiBitsValue
                                                            :temporalRightSideMultibits[index];

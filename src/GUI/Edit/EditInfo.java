@@ -85,4 +85,10 @@ public class EditInfo {
             return false;
         }
     }
+
+    void setEditionDialog(EditionDialog parentEditionDialog) {
+        if(this.inputTypeHandler != null){
+            this.inputTypeHandler.setEditionDialog(parentEditionDialog);
+        }
+    }
 }

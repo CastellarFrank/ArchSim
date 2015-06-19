@@ -46,6 +46,7 @@ public class EditionDialog extends javax.swing.JDialog {
         int index = 0;
         EditInfo temporalEditInfo;
         while ((temporalEditInfo = editableElement.getEditInfo(index)) != null) {
+            temporalEditInfo.setEditionDialog(this);
             editInfos.add(temporalEditInfo);
             index++;
         }
@@ -249,4 +250,8 @@ public class EditionDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel mainPanel;
     // End of variables declaration//GEN-END:variables
+
+    void setErrorMessage(String errorMessage) {
+        this.errormsg.setText(errorMessage);
+    }
 }

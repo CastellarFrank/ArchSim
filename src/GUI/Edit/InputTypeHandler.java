@@ -7,6 +7,9 @@ package GUI.Edit;
 
 import Utils.TextUtils;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -19,6 +22,10 @@ import javax.swing.event.DocumentListener;
  * @author Franklin
  */
 public class InputTypeHandler {
+
+    void setEditionDialog(EditionDialog parentEditionDialog) {
+        this.parentDialog = parentEditionDialog;
+    }
 
     public enum EntryType{
         BINARY(2),
@@ -40,6 +47,7 @@ public class InputTypeHandler {
         }
     }
     
+    EditionDialog parentDialog;
     JTextField txtBinary;
     JTextField txtDecimal;
     JTextField txtHexadecimal;
@@ -49,18 +57,25 @@ public class InputTypeHandler {
     ArrayList<JComponent> components;
     boolean isCurrentValueValid = true;
     String errorMessage = "";
+    boolean isUndefinedValue = false;
     
     
     public InputTypeHandler(String currentValue){
-        this. currentValue = currentValue;
-        long value = 0;
-        try {
-            value = Long.parseLong(currentValue, 2);
-        } catch (Exception e) {}
+        this.currentValue = currentValue;
         
-        this.txtBinary = new JTextField(Long.toBinaryString(value), 13);
-        this.txtDecimal = new JTextField(String.valueOf(value), 13);
-        this.txtHexadecimal = new JTextField(Long.toHexString(value), 13);
+        if(currentValue.matches("[zZxX]")){
+            this.txtBinary = new JTextField(currentValue, 13);
+            this.txtDecimal = new JTextField(currentValue, 13);
+            this.txtHexadecimal = new JTextField(currentValue, 13);
+        }else{
+            long value = 0;
+            try {
+                value = new BigInteger(currentValue, 2).longValue();
+            } catch (Exception e) {}
+            this.txtBinary = new JTextField(Long.toBinaryString(value), 13);
+            this.txtDecimal = new JTextField(String.valueOf(value), 13);
+            this.txtHexadecimal = new JTextField(Long.toHexString(value), 13);
+        }
         
         this.setDocumentHandlers();
         this.initializeComponentsStructure();
@@ -69,9 +84,11 @@ public class InputTypeHandler {
     public String getCurrentAsBinary(){
         if(!this.isCurrentValueValid)
             return "";
+        if(this.isUndefinedValue)
+            return this.currentValue;
         
-        return Long.toBinaryString(Long.parseLong(this.currentValue, 
-                this.currentValueType == null ? 2 : this.currentValueType.getBaseValue()));
+        return Long.toBinaryString(new BigInteger(this.currentValue, 
+                this.currentValueType == null ? 2 : this.currentValueType.getBaseValue()).longValue());
     }
     
     public String getCurrentValue() {
@@ -128,7 +145,6 @@ public class InputTypeHandler {
                 if(!modifying)
                     analyze(textElement.getText(), entryType);
             }
-
             @Override
             public void removeUpdate(DocumentEvent e) {
                 if(!modifying)
@@ -140,11 +156,51 @@ public class InputTypeHandler {
                     analyze(textElement.getText(), entryType);
             }
         });
+        
+        textElement.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+               char c = e.getKeyChar();
+               parentDialog.setErrorMessage("");
+               if (c == KeyEvent.VK_BACK_SPACE) {
+                  return;
+               }
+               String charAsString = String.valueOf(c);
+               if(charAsString.matches("[zZxX]")){
+                   return;
+               }
+               
+               switch(entryType){
+                   case BINARY:
+                        if(!charAsString.matches("[0-1]")){
+                            errorMessage = "The character: [" + c + "] is not Binary.";
+                            if(parentDialog != null)
+                                parentDialog.setErrorMessage(errorMessage);
+                            e.consume();
+                        }
+                       break;
+                   case DECIMAL:
+                        if(!charAsString.matches("[0-9]")){
+                            errorMessage = "The character: [" + c + "] is not Decimal.";
+                            if(parentDialog != null)
+                                parentDialog.setErrorMessage(errorMessage);
+                            e.consume();
+                        }
+                       break;
+                   case HEXADECIMAL:
+                       if(!charAsString.matches("[0-9a-fA-F]")){
+                            errorMessage = "The character: [" + c + "] is not Hexadecimal.";
+                            if(parentDialog != null)
+                                parentDialog.setErrorMessage(errorMessage);
+                            e.consume();
+                        }
+                       break;
+               }
+            }
+        });
     }
     
     private void analyze(String value, EntryType entryType){
-        this.currentValue = value;
-        this.currentValueType = entryType;
         this.modifying = true;
         if(entryType == null){
             this.modifying = false;
@@ -152,32 +208,64 @@ public class InputTypeHandler {
             this.errorMessage = "Base not recognized.";
             return;
         }
+        boolean isZValue = false;
+        if(value.isEmpty() || value == null || value.matches("[zZ]")){
+            this.currentValue = "z";
+            this.isUndefinedValue = true;
+            isZValue = true;
+        }else if(value.matches("[xX]")){
+            isZValue = true;
+            this.currentValue = "x";
+            this.isUndefinedValue = true;
+        }else{
+            this.currentValue = value;
+            this.isUndefinedValue = false;
+        }
         
-        long longValue;
-        try {
-             longValue = Long.parseLong(value, entryType.getBaseValue());
-        } catch (NumberFormatException e) {
-            this.modifying = false;
-            this.isCurrentValueValid = false;
-            this.errorMessage = "The: [" + entryType.getBaseName()+ "] value is invalid.";
-            return;
+        this.currentValueType = entryType;
+        
+        long longValue = 0;
+        if(!isZValue){
+            try {
+                longValue = Long.parseLong(value, entryType.getBaseValue());
+           } catch (NumberFormatException e) {
+               this.modifying = false;
+               this.isCurrentValueValid = false;
+               this.errorMessage = "The: [" + entryType.getBaseName()+ "] value is invalid.";
+               return;
+           }
         }
         
         switch(entryType){
             case BINARY :
-                this.txtDecimal.setText(String.valueOf(longValue));
-                this.txtHexadecimal.setText(Long.toHexString(longValue));
+                if(isZValue){
+                    this.txtDecimal.setText(this.currentValue);
+                    this.txtHexadecimal.setText(this.currentValue);
+                }else{
+                    this.txtDecimal.setText(String.valueOf(longValue));
+                    this.txtHexadecimal.setText(Long.toHexString(longValue));
+                }
                 break;
             case DECIMAL:
-                this.txtBinary.setText(Long.toBinaryString(longValue));
-                this.txtHexadecimal.setText(Long.toHexString(longValue));
+                if(isZValue){
+                    this.txtBinary.setText(this.currentValue);
+                    this.txtHexadecimal.setText(this.currentValue);
+                }else{
+                    this.txtBinary.setText(Long.toBinaryString(longValue));
+                    this.txtHexadecimal.setText(Long.toHexString(longValue));
+                }
                 break;
             case HEXADECIMAL:
-                this.txtBinary.setText(Long.toBinaryString(longValue));
-                this.txtDecimal.setText(String.valueOf(longValue));
+                if(isZValue){
+                    this.txtBinary.setText(this.currentValue);
+                    this.txtDecimal.setText(this.currentValue);
+                }else{
+                    this.txtBinary.setText(Long.toBinaryString(longValue));
+                    this.txtDecimal.setText(String.valueOf(longValue));
+                }
                 break;
         }
-        modifying = false;
         isCurrentValueValid = true;
+        modifying = false;
     }
 }

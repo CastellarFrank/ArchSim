@@ -190,12 +190,11 @@ public abstract class BaseElement implements Editable {
     }
 
     public void setVoltageColor(Graphics g, double voltage) {
-        voltage = Math.abs(voltage);
         if (needsHighlight()) {
             g.setColor(BaseElement.selectedColor);
         } else {
             if (voltage >= Configuration.LOGIC_1_VOLTAGE) {
-                g.setColor(BaseElement.highSignalColor);
+                g.setColor(BaseElement.highSignalColor); 
             } else {
                 g.setColor(BaseElement.lowSignalColor);
             }
