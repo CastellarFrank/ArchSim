@@ -7,6 +7,7 @@ package Simulation.Elements.Inputs;
 import Exceptions.ArchException;
 import GUI.Edit.EditInfo;
 import GUI.Edit.InputTypeHandler;
+import GUI.Edit.MultiBaseInputTypeHandler;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import java.awt.Font;
@@ -22,7 +23,7 @@ import org.w3c.dom.Element;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class MultiBitsInput extends BaseElement {
-    int textSpace = 10;
+    int separationBetweenText = 10;
     public MultiBitsInput(int x, int y) {
         super(x, y);
         binaryValues = new String[1];
@@ -39,7 +40,7 @@ public class MultiBitsInput extends BaseElement {
     public void setPoints() {
         super.setPoints();        
         lead1 = point2;
-        lead1.x -= (textSpace * sign(dx));
+        lead1.x -= (separationBetweenText * sign(dx));
     }
     
     @Override
@@ -57,7 +58,7 @@ public class MultiBitsInput extends BaseElement {
     
     @Override
     public void draw(Graphics g) {
-        Font f = new Font("SansSerif", Font.BOLD, 16);
+        Font f = fontSimulationNumberType;
         g.setFont(f);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         setBbox(point1, lead1, 0);
@@ -77,6 +78,7 @@ public class MultiBitsInput extends BaseElement {
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, lead1);
         drawPosts(g);
+        drawDescriptionElementText(g, "(M-Input)", separationBetweenText, inputElementDescriptionColor);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class MultiBitsInput extends BaseElement {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("value",new InputTypeHandler(binaryValues[0]));
+            return new EditInfo("value",new MultiBaseInputTypeHandler(binaryValues[0]));
         
         return null;
     }
@@ -114,7 +116,7 @@ public class MultiBitsInput extends BaseElement {
             InputTypeHandler input = editInfo.getInputTypeHandler();
             String value = input == null ? editInfo.value : input.getCurrentAsBinary();
             if (!value.matches("[0-1xzXZ]*"))
-                return;
+                return; 
             setBinaryValue(0, value);    
             calculateVoltageValue();
         }

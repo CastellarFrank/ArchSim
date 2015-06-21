@@ -15,6 +15,7 @@ import Simulation.Elements.Gates.NotGate;
 import Simulation.Elements.Gates.OrGate;
 import Simulation.Elements.Gates.XnorGate;
 import Simulation.Elements.Gates.XorGate;
+import Simulation.Elements.Inputs.ClockInput;
 import Simulation.Elements.Inputs.LogicInput;
 import Simulation.Elements.Inputs.MultiBitsInput;
 import Simulation.Elements.ModuleChip;
@@ -241,6 +242,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu5 = new javax.swing.JMenu();
         lInputMenu = new javax.swing.JMenuItem();
         multiBitsMenu = new javax.swing.JMenuItem();
+        clockInputMenu = new javax.swing.JMenuItem();
         jMenu6 = new javax.swing.JMenu();
         lOuputMenu = new javax.swing.JMenuItem();
         multiBitsOutputMenu = new javax.swing.JMenuItem();
@@ -373,6 +375,15 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         });
         jMenu5.add(multiBitsMenu);
 
+        clockInputMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_3, java.awt.event.InputEvent.CTRL_MASK));
+        clockInputMenu.setText("Clock Input");
+        clockInputMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clockInputMenuActionPerformed(evt);
+            }
+        });
+        jMenu5.add(clockInputMenu);
+
         jMenu3.add(jMenu5);
 
         jMenu6.setText("Add Output");
@@ -441,7 +452,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 468, Short.MAX_VALUE)
+            .addGap(0, 476, Short.MAX_VALUE)
         );
 
         pack();
@@ -524,6 +535,10 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         pauseContinueMenu.setText(this.startExecutionText);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void clockInputMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clockInputMenuActionPerformed
+        setAddingElementInfo(ClockInput.class.getName(), null);
+    }//GEN-LAST:event_clockInputMenuActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAndMenu;
     private javax.swing.JMenuItem addNandMenu;
@@ -532,6 +547,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenuItem addWireMenu;
     private javax.swing.JMenuItem addXnorMenu;
     private javax.swing.JMenuItem addXorMenu;
+    private javax.swing.JMenuItem clockInputMenu;
     private javax.swing.JMenuItem closeMenu;
     private javax.swing.JMenuItem inverterMenu;
     private javax.swing.JMenu jMenu1;

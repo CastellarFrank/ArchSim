@@ -9,6 +9,7 @@ import GUI.Simulation.SimulationCanvas;
 import java.awt.Container;
 import java.awt.Frame;
 import java.util.Vector;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
@@ -81,6 +82,9 @@ public class EditionDialog extends javax.swing.JDialog {
                         info.value = ((JTextField)component).getText();
                         if (!info.accepts(info.value))
                             valid = false;
+                        break;
+                    }else if(component instanceof JCheckBox){
+                        info.value = ((JCheckBox)component).isSelected() ? "1" : "0";
                         break;
                     }
                 }

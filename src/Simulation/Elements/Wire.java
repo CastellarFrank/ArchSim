@@ -77,8 +77,9 @@ public class Wire extends BaseElement {
                 using = binaryValues[index];
             }
             
-            if (using == null || using.contains("z") || using .contains("x")) {
+            if (using == null || using.contains("z") || using.contains("x")) {
                 int otherPoint = index == 1 ? 0 : 1;
+                select = using != null ? using : "z";
                 containerPanel.stampVoltageSource(joints[index], joints[otherPoint], voltageSourceReference, 0, select);
                 return;
             }

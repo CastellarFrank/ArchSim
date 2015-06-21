@@ -24,14 +24,17 @@ public class LogicInput extends BasicSwitch {
     int separationBetweenText = 10;
     public LogicInput(int x, int y) {
         super(x, y);
+        this.isOpen = true;
     }
 
     public LogicInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
+        this.isOpen = true;
     }
 
     public LogicInput(int x, int y, int x2, int y2, int flags) {
         super(x, y, x2, y2, flags);
+        this.isOpen = true;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class LogicInput extends BasicSwitch {
 
     @Override
     public void draw(Graphics g) {
-        Font f = new Font("SansSerif", Font.BOLD, 16);
+        Font f = fontSimulationNumberType;
         g.setFont(f);
         g.setColor(needsHighlight() ? BaseElement.selectedColor : BaseElement.defaultColor);
         String text = isOpen ? "L" : "H";
@@ -69,6 +72,7 @@ public class LogicInput extends BasicSwitch {
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, lead1);
         drawPosts(g);
+        drawDescriptionElementText(g, "(L-Input)", separationBetweenText, inputElementDescriptionColor);
     }
     
     @Override

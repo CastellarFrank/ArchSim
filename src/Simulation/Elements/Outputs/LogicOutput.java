@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class LogicOutput extends BaseElement {
-
+    int separationBetweenText = 10;
     public boolean isOpen;
     
     public LogicOutput(int x, int y) {
@@ -43,7 +43,8 @@ public class LogicOutput extends BaseElement {
     @Override
     public void setPoints() {
         super.setPoints();
-        lead1 = interpolatePoint(point1, point2, 1 - 12 / dn);
+        lead1 = point2;
+        lead1.x -= (separationBetweenText * sign(dx));
     }
 
     @Override
@@ -53,7 +54,7 @@ public class LogicOutput extends BaseElement {
 
     @Override
     public void draw(Graphics g) {
-        Font f = new Font("SansSerif", Font.BOLD, 20);
+        Font f = fontSimulationNumberType;
         g.setFont(f);
         g.setColor(needsHighlight() ? selectedColor : defaultColor);
         String s = "z";
@@ -79,6 +80,7 @@ public class LogicOutput extends BaseElement {
         
         drawThickLine(g, point1, lead1);
         drawPosts(g);
+        drawDescriptionElementText(g, "(L-Output)", separationBetweenText, outputElementDescriptionColor);
     }
 
     @Override

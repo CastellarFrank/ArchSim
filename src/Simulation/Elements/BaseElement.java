@@ -28,13 +28,17 @@ public abstract class BaseElement implements Editable {
 
     //<editor-fold defaultstate="collapsed" desc="Static Members">
     public static Color selectedColor, whiteColor, defaultColor, postColor = Color.DARK_GRAY, connectedPostColor = Color.GREEN, collidePostColor = new Color(255, 200, 0), invalidPostColor = Color.RED;
+    public static final Font fontSimulationNumberType = new Font("SansSerif", Font.BOLD, 16),
+                  fontSimulationDescriptionTextType = new Font("Segoe UI", Font.BOLD, 10);
     public static Color highSignalColor, lowSignalColor,
-            unknownSignalColor, highImpedanceSignalColor;
+            unknownSignalColor, highImpedanceSignalColor, 
+            inputElementDescriptionColor = new Color(0, 128, 0), outputElementDescriptionColor = new Color(128, 0, 0);
     public static Color textColor;
     public static Font font;    
     public static final double pi = 3.14159265358979323846;
     public static final int pointRadious = 7;
     public static final int selectionSeparationMargin = 4;
+    public static final int spacingBetweenTextAndDescriptionElement = 5;
     
     //</editor-fold>
     
@@ -317,7 +321,10 @@ public abstract class BaseElement implements Editable {
         this.jointsSelected = value;
         //Update joints
         for (int jointIndex : joints) {
-            this.containerPanel.getJoint(jointIndex).setSelected(value);
+            Joint jointElement = this.containerPanel.getJoint(jointIndex);
+            if(jointElement != null){
+                jointElement.setSelected(value);
+            }
         }
     }
     
@@ -643,6 +650,32 @@ public abstract class BaseElement implements Editable {
             textReduction = fm.stringWidth(text);
         }
         g.drawString(text, x2 - textReduction, (int) (y2 + fm.getAscent() / 2.0));
+    }
+    
+    public void drawDescriptionElementText(Graphics g, String text, Color fontColor){
+        this.drawDescriptionElementText(g, text, 0, fontColor);
+    }
+    
+    public void drawDescriptionElementText(Graphics g, String text, int textSpace, Color fontColor){
+        if (text == null || text.isEmpty())
+            return;
+        Font oldFont = g.getFont();
+        Color oldColor = g.getColor();
+        Font newFont = fontSimulationDescriptionTextType;
+        g.setFont(newFont);
+        g.setColor(fontColor);
+        FontMetrics fm = g.getFontMetrics();
+        int textReduction = -textSpace;
+        if(x < x2)
+            textReduction = fm.stringWidth(text) + textSpace;
+        
+        int ySeparation = y >= y2 
+                      ? -spacingBetweenTextAndDescriptionElement
+                      : spacingBetweenTextAndDescriptionElement + fm.getAscent();
+        
+        g.drawString(text, x2 - textReduction, y2 + ySeparation);
+        g.setFont(oldFont);
+        g.setColor(oldColor);
     }
 
     public void drawCenteredText(Graphics g, String s, int x, int y, boolean cx) {

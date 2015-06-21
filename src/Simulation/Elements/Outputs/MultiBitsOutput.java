@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class MultiBitsOutput extends BaseElement {
-
+    int separationBetweenText = 10;
     public MultiBitsOutput(int x, int y) {
         super(x, y);
         binaryValues = new String[1];
@@ -34,7 +34,8 @@ public class MultiBitsOutput extends BaseElement {
     @Override
     public void setPoints() {
         super.setPoints();
-        lead1 = interpolatePoint(point1, point2, 1 - 12 / dn);
+        lead1 = point2;
+        lead1.x -= (separationBetweenText * sign(dx));
     }
 
     @Override
@@ -44,7 +45,7 @@ public class MultiBitsOutput extends BaseElement {
 
     @Override
     public void draw(Graphics g) {
-        Font f = new Font("SansSerif", Font.BOLD, 16);
+        Font f = fontSimulationNumberType;
         g.setFont(f);
         g.setColor(needsHighlight() ? selectedColor : defaultColor);
         setBbox(point1, lead1, 0);
@@ -64,6 +65,7 @@ public class MultiBitsOutput extends BaseElement {
         
         drawThickLine(g, point1, lead1);
         drawPosts(g);
+        drawDescriptionElementText(g, "(M-Output)", separationBetweenText, outputElementDescriptionColor);
     }
 
     @Override
