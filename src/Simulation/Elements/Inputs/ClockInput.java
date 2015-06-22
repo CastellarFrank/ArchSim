@@ -35,7 +35,7 @@ import org.w3c.dom.Element;
 public class ClockInput extends BasicSwitch {
     int separationBetweenText = 10;
     long timerInMiliSeconds = 1000;
-    boolean enabled = false;
+    boolean enabled = true;
     public ClockInput(int x, int y) throws ArchException {
         super(x, y);
         this.isOpen = true;
@@ -44,6 +44,8 @@ public class ClockInput extends BasicSwitch {
     public ClockInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
         this.isOpen = true;
+        this.enabled = Boolean.parseBoolean(extraParams[1]);
+        this.timerInMiliSeconds = Long.parseLong(extraParams[2]);
     }
 
     public ClockInput(int x, int y, int x2, int y2, int flags) throws ArchException {
@@ -120,6 +122,13 @@ public class ClockInput extends BasicSwitch {
     public Element getXmlElement(Document document) {
         Element element = super.getXmlElement(document);
         element.setAttribute("type", ClockInput.class.getName());
+        
+        Element extraParam0 = document.createElement("param");
+        extraParam0.setTextContent(String.valueOf(this.enabled));
+        element.appendChild(extraParam0);
+        extraParam0 = document.createElement("param");
+        extraParam0.setTextContent(Long.toString(this.timerInMiliSeconds));
+        element.appendChild(extraParam0);
         return element;
     }
 
