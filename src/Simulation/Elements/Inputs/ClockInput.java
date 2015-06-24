@@ -251,7 +251,6 @@ public class ClockInput extends BasicSwitch {
         if(this.isElementBeenManagement ){
             if(oldTime == this.timerInMiliSeconds)
                 return;
-            
             this.containerPanel.clockEventManagement.updateClockInterval(this, oldTime);
         }else{
             this.isElementBeenManagement = true;

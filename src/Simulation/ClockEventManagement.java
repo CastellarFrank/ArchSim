@@ -47,7 +47,6 @@ public class ClockEventManagement {
                 try {
                     executeClocksLogic();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(ClockEventManagement.class.getName()).log(Level.SEVERE, null, ex);
                     System.out.println("Clock Failed, This shouldn't happened.");
                 }
             }
@@ -57,6 +56,14 @@ public class ClockEventManagement {
     
     public void simulationStopped(){    
         this.isSimulationRunning = false;
+        
+        try {
+            /*The waiting time could be removed, 
+            but the threat could throw an Interrupt Exception, 
+            which exception it really doesn't matter.*/
+            Thread.sleep(this.executionTimeInterval);
+        } catch (InterruptedException ex) {}
+        /*Just to make sure that the threat is going to be stopped.*/
         this.mainlyThread.interrupt();
     }
     
