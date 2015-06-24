@@ -14,7 +14,7 @@ import javax.swing.JComponent;
  */
 public abstract class InputTypeHandler {    
     EditionDialog parentDialog;
-    String currentValue;
+    protected String currentValue;
     boolean isCurrentValueValid;
     ArrayList<JComponent> components;
     String errorMessage = "";

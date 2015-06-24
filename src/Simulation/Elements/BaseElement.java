@@ -29,7 +29,8 @@ public abstract class BaseElement implements Editable {
     //<editor-fold defaultstate="collapsed" desc="Static Members">
     public static Color selectedColor, whiteColor, defaultColor, postColor = Color.DARK_GRAY, connectedPostColor = Color.GREEN, collidePostColor = new Color(255, 200, 0), invalidPostColor = Color.RED;
     public static final Font fontSimulationNumberType = new Font("SansSerif", Font.BOLD, 16),
-                  fontSimulationDescriptionTextType = new Font("Segoe UI", Font.BOLD, 10);
+                  fontSimulationDescriptionTextType = new Font("Segoe UI", Font.BOLD, 10),
+                  fontSimulationEditionDialogType = new Font("Consolas", Font.PLAIN, 14);
     public static Color highSignalColor, lowSignalColor,
             unknownSignalColor, highImpedanceSignalColor, 
             inputElementDescriptionColor = new Color(0, 128, 0), outputElementDescriptionColor = new Color(128, 0, 0);

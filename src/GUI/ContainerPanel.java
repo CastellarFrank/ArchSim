@@ -7,6 +7,7 @@ package GUI;
 import DataStructures.CircuitGenerator;
 import GUI.NestedWatcher.CustomTreeModel;
 import GUI.Watcher.WatchesTableModel;
+import Simulation.ClockEventManagement;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Elements.ModuleChip;
@@ -57,6 +58,8 @@ public class ContainerPanel extends JCanvas {
      * <code>SimulationCanvas</code>*
      */
     public SimulationScope simulationScope;
+    
+    public ClockEventManagement clockEventManagement;
     
     public int highestPropagationLevel;
     /**
@@ -557,6 +560,7 @@ public class ContainerPanel extends JCanvas {
      */
     public void resume() {
         isPaused = false;
+        this.clockEventManagement.simulationStarted();
     }
 
     /**
@@ -564,6 +568,7 @@ public class ContainerPanel extends JCanvas {
      */
     public void pause() {
         isPaused = true;
+        this.clockEventManagement.simulationStopped();
     }
 
     /**
@@ -572,7 +577,7 @@ public class ContainerPanel extends JCanvas {
     public void reset() {
         totalTime = 0;
         isPaused = true;
-        
+        this.clockEventManagement.simulationReseted();
         for (BaseElement element : elements) {
             if (element instanceof ModuleChip) {
                 ((ModuleChip)element).reset();
@@ -740,6 +745,7 @@ public class ContainerPanel extends JCanvas {
         elements = new Vector<BaseElement>(50);
         joints = new Vector<Joint>(100);
         simulationScope = SimulationFactory.createSimulationScope();
+        this.clockEventManagement = new ClockEventManagement(this);
 
         BaseElement.defaultColor = Color.BLACK;
         BaseElement.whiteColor = Color.WHITE;

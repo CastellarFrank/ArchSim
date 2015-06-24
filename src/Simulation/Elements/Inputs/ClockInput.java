@@ -5,9 +5,9 @@
 package Simulation.Elements.Inputs;
 
 import Exceptions.ArchException;
+import GUI.ContainerPanel;
 import GUI.Edit.EditInfo;
 import GUI.Edit.InputTypeHandler;
-import GUI.Edit.MultiBaseInputTypeHandler;
 import GUI.Edit.NumberInputTypeHandler;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
@@ -18,13 +18,11 @@ import static Simulation.Elements.BaseElement.pointRadious;
 import static Simulation.Elements.BaseElement.selectionSeparationMargin;
 import static Simulation.Elements.BaseElement.sign;
 import Simulation.Elements.BasicSwitch;
-import Utils.TextUtils;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -36,6 +34,7 @@ public class ClockInput extends BasicSwitch {
     int separationBetweenText = 10;
     long timerInMiliSeconds = 1000;
     boolean enabled = true;
+    boolean isElementBeenManagement = false;
     public ClockInput(int x, int y) throws ArchException {
         super(x, y);
         this.isOpen = true;
@@ -55,6 +54,10 @@ public class ClockInput extends BasicSwitch {
     
     @Override
     public void toggle() {
+    }
+    
+    public void manualToggle(){
+        this.isOpen = !isOpen;
     }
     
     @Override
@@ -112,7 +115,9 @@ public class ClockInput extends BasicSwitch {
             this.enabled = !editInfo.value.equals("0");
         }else if(n == 1){
             InputTypeHandler input = editInfo.getInputTypeHandler();
+            long oldTime = this.timerInMiliSeconds;
             this.timerInMiliSeconds = input.getCurrentAsDecimal();
+            this.checkManagement(oldTime);
         }
     }
     
@@ -208,5 +213,49 @@ public class ClockInput extends BasicSwitch {
         
         boolean tempSelected = verticalRect.intersects(r) || horizontalRect.intersects(r);
         this.setSelected(tempSelected);
+    }
+    
+    @Override
+    public void setContainerPanel(ContainerPanel containerPanel) {
+        this.containerPanel = containerPanel;
+        setupInitialManagement();
+    }
+
+    public long getTimerInMiliSeconds() {
+        return timerInMiliSeconds;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isElementBeenManagement() {
+        return isElementBeenManagement;
+    }
+    
+    public void setElementBeenManagementStatus(boolean isElementBeenManagement){
+        this.isElementBeenManagement = isElementBeenManagement;
+    }
+
+    private void setupInitialManagement() {
+        if(this.enabled){
+            this.isElementBeenManagement = true;
+            this.containerPanel.clockEventManagement.addClock(this);
+        }
+    }
+
+    private void checkManagement(long oldTime) {
+        if(!this.enabled)
+            return;
+        
+        if(this.isElementBeenManagement ){
+            if(oldTime == this.timerInMiliSeconds)
+                return;
+            
+            this.containerPanel.clockEventManagement.updateClockInterval(this, oldTime);
+        }else{
+            this.isElementBeenManagement = true;
+            this.containerPanel.clockEventManagement.addClock(this);
+        }
     }
 }

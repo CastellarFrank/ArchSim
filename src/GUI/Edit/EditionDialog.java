@@ -11,6 +11,7 @@ import java.awt.Frame;
 import java.util.Vector;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
 /**
@@ -85,6 +86,9 @@ public class EditionDialog extends javax.swing.JDialog {
                         break;
                     }else if(component instanceof JCheckBox){
                         info.value = ((JCheckBox)component).isSelected() ? "1" : "0";
+                        break;
+                    }else if(component instanceof JSpinner){
+                        info.value = ((JSpinner)component).getValue().toString();
                         break;
                     }
                 }
