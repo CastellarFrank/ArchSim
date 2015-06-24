@@ -1238,7 +1238,6 @@ public class ContainerPanel extends JCanvas {
         
         this.analyzePropagationLevels();
         
-        System.out.println("Highest Propagation Level: " + this.highestPropagationLevel );
         voltageSourceElements = new BaseElement[totalVoltageSourceCount];
         circuitNonLinear = false;
 
@@ -1485,8 +1484,6 @@ public class ContainerPanel extends JCanvas {
             }
         }
         //</editor-fold>  
-        
-        System.out.println("\n----------------------------------------");
 
         mapForStamp = true;
     }

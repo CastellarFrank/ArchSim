@@ -101,35 +101,45 @@ public class Debugger extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        scroll = new javax.swing.JScrollPane();
         deleteAll = new javax.swing.JButton();
+        jSplitPane1 = new javax.swing.JSplitPane();
+        scroll = new javax.swing.JScrollPane();
+        scroll1 = new javax.swing.JScrollPane();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+        setMaximizable(true);
+        setResizable(true);
 
-        deleteAll.setText("Delete All");
+        deleteAll.setText("Delete All Variables");
         deleteAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteAllActionPerformed(evt);
             }
         });
 
+        jSplitPane1.setDividerLocation(370);
+        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        jSplitPane1.setLeftComponent(scroll);
+        jSplitPane1.setRightComponent(scroll1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(scroll, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(deleteAll)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addContainerGap(367, Short.MAX_VALUE))
+            .addComponent(jSplitPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(scroll, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addContainerGap()
                 .addComponent(deleteAll)
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
         );
 
         pack();
@@ -141,6 +151,8 @@ public class Debugger extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_deleteAllActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton deleteAll;
+    private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JScrollPane scroll;
+    private javax.swing.JScrollPane scroll1;
     // End of variables declaration//GEN-END:variables
 }
