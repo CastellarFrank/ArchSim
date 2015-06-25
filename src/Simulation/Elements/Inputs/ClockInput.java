@@ -18,11 +18,15 @@ import static Simulation.Elements.BaseElement.pointRadious;
 import static Simulation.Elements.BaseElement.selectionSeparationMargin;
 import static Simulation.Elements.BaseElement.sign;
 import Simulation.Elements.BasicSwitch;
+import Utils.TextUtils;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,6 +39,8 @@ public class ClockInput extends BasicSwitch {
     long timerInMiliSeconds = 1000;
     boolean enabled = true;
     boolean isElementBeenManagement = false;
+    String userReference;
+    int uniqueId;
     public ClockInput(int x, int y) throws ArchException {
         super(x, y);
         this.isOpen = true;
@@ -45,6 +51,7 @@ public class ClockInput extends BasicSwitch {
         this.isOpen = true;
         this.enabled = Boolean.parseBoolean(extraParams[1]);
         this.timerInMiliSeconds = Long.parseLong(extraParams[2]);
+        this.userReference = extraParams[2];
     }
 
     public ClockInput(int x, int y, int x2, int y2, int flags) throws ArchException {
@@ -86,7 +93,7 @@ public class ClockInput extends BasicSwitch {
         drawThickLine(g, point1, extra1);
         drawThickLine(g, extra1, lead1);
         drawPosts(g);
-        drawDescriptionElementText(g, "(Clock)", separationBetweenText, inputElementDescriptionColor);
+        drawDescriptionElementText(g, "(" + this.userReference + ")", separationBetweenText, inputElementDescriptionColor);
     }
     
     @Override
@@ -105,6 +112,16 @@ public class ClockInput extends BasicSwitch {
                        .addComponent(new JCheckBox("Enabled", this.enabled));
         }else if(n == 1){
             return new EditInfo("value", new NumberInputTypeHandler(String.valueOf(this.timerInMiliSeconds)));
+        }else if(n == 2){
+            JLabel lblName = new JLabel(TextUtils.LeftEmptyPadding("Name:", 13));
+            lblName.setFont(fontSimulationEditionDialogType);
+            JTextField txtName = new JTextField(this.userReference);
+            Dimension prefSize = txtName.getPreferredSize();
+            prefSize = new Dimension(140, prefSize.height);
+            txtName.setPreferredSize(prefSize);
+            return new EditInfo("value", 0, 0, 0, false)
+                       .addComponent(lblName)
+                       .addComponent(txtName);
         }
         return null;
     }
@@ -118,6 +135,11 @@ public class ClockInput extends BasicSwitch {
             long oldTime = this.timerInMiliSeconds;
             this.timerInMiliSeconds = input.getCurrentAsDecimal();
             this.checkManagement(oldTime);
+        }else if(n == 2){
+            String newName = editInfo.value;
+            if(newName == null || newName.isEmpty())
+                newName = "Clock " + this.uniqueId;
+            this.userReference = newName;
         }
     }
     
@@ -128,12 +150,21 @@ public class ClockInput extends BasicSwitch {
         Element element = super.getXmlElement(document);
         element.setAttribute("type", ClockInput.class.getName());
         
+        //Is Enabled
         Element extraParam0 = document.createElement("param");
         extraParam0.setTextContent(String.valueOf(this.enabled));
         element.appendChild(extraParam0);
+        
+        //Milliseconds
         extraParam0 = document.createElement("param");
         extraParam0.setTextContent(Long.toString(this.timerInMiliSeconds));
         element.appendChild(extraParam0);
+        
+        //Name
+        extraParam0 = document.createElement("param");
+        extraParam0.setTextContent(this.userReference);
+        element.appendChild(extraParam0);
+        
         return element;
     }
 
@@ -218,6 +249,9 @@ public class ClockInput extends BasicSwitch {
     @Override
     public void setContainerPanel(ContainerPanel containerPanel) {
         this.containerPanel = containerPanel;
+        this.uniqueId = this.containerPanel.clockEventManagement.getNewUniqueId();
+        if(this.userReference == null || this.userReference.isEmpty())
+            this.userReference = "Clock " + this.uniqueId;
         setupInitialManagement();
     }
 
@@ -256,5 +290,13 @@ public class ClockInput extends BasicSwitch {
             this.isElementBeenManagement = true;
             this.containerPanel.clockEventManagement.addClock(this);
         }
+    }
+
+    public int getUniqueId() {
+        return this.uniqueId;
+    }
+
+    public String getUserReference() {
+        return this.userReference;
     }
 }

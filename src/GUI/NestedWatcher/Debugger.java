@@ -27,6 +27,7 @@ public class Debugger extends javax.swing.JInternalFrame {
     SimulationCanvas simulationCanvas;
     SimulationScope simulationScope;
     JXTreeTable table;
+    CustomClocksChart customChart;
 
     /**
      * Creates new form Debugger
@@ -37,6 +38,8 @@ public class Debugger extends javax.swing.JInternalFrame {
         simulationScope = simWin.simulationScope;
 
         table = new JXTreeTable(simWin.debuggerModel);
+        this.customChart = new CustomClocksChart();
+        simWin.clockEventManagement.setCustomClocksChart(this.customChart);
         Highlighter highligher = HighlighterFactory.createSimpleStriping(HighlighterFactory.LEDGER);
         table.setHighlighters(highligher);
         table.setAutoResizeMode(JXTreeTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
@@ -47,6 +50,7 @@ public class Debugger extends javax.swing.JInternalFrame {
 
         table.setVisible(true);
         scroll.getViewport().add(table);
+        scroll1.getViewport().add(customChart.getCustomClocksChart());
         setVisible(true);
     }
 

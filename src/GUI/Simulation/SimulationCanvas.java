@@ -16,6 +16,7 @@ import GUI.Watcher.WatchesTableModel;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
 import Simulation.Elements.BasicSwitch;
+import Simulation.Elements.Inputs.ClockInput;
 import Simulation.Elements.ModuleChip;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -157,6 +158,8 @@ public class SimulationCanvas extends ContainerPanel implements
         if (e.getClickCount() == 1 && deleting && mouseComponent != null) {
             if (mouseComponent instanceof ModuleChip) {
                 simulationScope.unregister(((ModuleChip)mouseComponent).getModuleInstanceId());
+            }else if(mouseComponent instanceof ClockInput){
+                this.clockEventManagement.removeClock((ClockInput)mouseComponent);
             }
             this.elements.remove(mouseComponent);
             mouseComponent = null;
@@ -353,6 +356,8 @@ public class SimulationCanvas extends ContainerPanel implements
                     BaseElement element = elements.get(i);
                     if (element instanceof ModuleChip) {
                         simulationScope.unregister(((ModuleChip)element).getModuleInstanceId());
+                    }else if(element instanceof ClockInput){
+                        this.clockEventManagement.removeClock((ClockInput)element);
                     }
                     elements.remove(i);
                     anyRemoved = true;

@@ -6,6 +6,7 @@
 package Simulation;
 
 import GUI.ContainerPanel;
+import GUI.NestedWatcher.CustomClocksChart;
 import Simulation.Elements.Inputs.ClockInput;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,9 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author Franklin
@@ -28,6 +26,8 @@ public class ClockEventManagement {
     long executionTimeInterval = 100;
     public final Object lockElement = new Object();
     ContainerPanel containerPanel;
+    int uniqueIdCounter = 0;
+    CustomClocksChart clocksChartLogic;
     
     public ClockEventManagement(ContainerPanel containerPanel){
         this.clocksByExecutionTime = new HashMap<Long, List<ClockInput>>();
@@ -104,13 +104,17 @@ public class ClockEventManagement {
         synchronized(this.lockElement){
             List<ClockInput> clocksList = this.clocksByExecutionTime.get(oldTime);
             clocksList.remove(clock);
+            if(clocksList.isEmpty())
+                this.clocksByExecutionTime.remove(oldTime);
             addClockLogic(clock);
         }
     }
     
     public void addClock(ClockInput clockInput){
         synchronized(this.lockElement){
-            addClockLogic(clockInput);
+            if(this.clocksChartLogic != null)
+                this.clocksChartLogic.addClockSeries(clockInput);
+            this.addClockLogic(clockInput);
         }
     }
 
@@ -128,5 +132,29 @@ public class ClockEventManagement {
 
     private void saveVariableValues(long startExecutionTime) {
         // TODO
+    }
+
+    public int getNewUniqueId() {
+        return uniqueIdCounter++;
+    }
+
+    public void setCustomClocksChart(CustomClocksChart customChart) {
+        synchronized(this.lockElement){
+            this.clocksChartLogic = customChart;
+            this.clocksChartLogic.processClocks(clocksByExecutionTime.values());
+        }
+    }
+
+    public void removeClock(ClockInput clockInput) {
+        synchronized(this.lockElement){
+            long timer = clockInput.getTimerInMiliSeconds();
+            List<ClockInput> clocksList = this.clocksByExecutionTime.get(timer);
+            clocksList.remove(clockInput);
+            if(clocksList.isEmpty())
+                this.clocksByExecutionTime.remove(timer);
+            
+            if(this.clocksChartLogic != null)
+                this.clocksChartLogic.removeClockSeries(clockInput);
+        }
     }
 }

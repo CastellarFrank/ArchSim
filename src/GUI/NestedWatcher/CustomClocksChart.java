@@ -1,0 +1,221 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package GUI.NestedWatcher;
+
+import Simulation.Elements.Inputs.ClockInput;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.BorderFactory;
+import javax.swing.border.CompoundBorder;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.SymbolAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.RectangleInsets;
+
+/**
+ *
+ * @author Franklin
+ */
+public class CustomClocksChart{
+    
+    XYSeriesCollection seriesCollection;
+    XYItemRenderer chartRenderer;
+    XYPlot chartPlot;
+    NumberAxis domainAxis;
+    SymbolAxis rangeAxis;
+    
+    List<String> rangeSymbols;
+    JFreeChart chartElement;
+    ChartPanel chartPanel;
+    boolean scrolling = false;
+    int domainMaxValue = 0;
+    final int domainDisplayRange = 10000;
+    final int domainMaxValueDifference = 200;
+    
+    List<Integer> rangeAxisClocksPosition;
+    
+    Map<Integer, ClockChartInformation> clocksInformationByClockId;
+    
+    public CustomClocksChart(){
+        this.initializeAndConfigureComponents();
+    }
+    
+    public static ChartPanel instanceNewChartPanel() {
+        return new CustomClocksChart().getCustomClocksChart();
+    }
+    
+    public ChartPanel getCustomClocksChart(){
+        return this.chartPanel;
+    }
+    
+    private void initializeAndConfigureComponents() {
+        this.clocksInformationByClockId = new HashMap<Integer, ClockChartInformation>();
+        this.rangeAxisClocksPosition = new ArrayList<Integer>();
+        
+        this.seriesCollection = new XYSeriesCollection();
+        
+        this.chartRenderer = new XYLineAndShapeRenderer(true, false); 
+        
+        this.domainAxis = new NumberAxis(null);
+        this.domainAxis.setRange(0, this.domainDisplayRange);
+        this.domainAxis.setTickUnit(new NumberTickUnit(1000));
+        this.rangeAxis = new SymbolAxis(null, new String[]{});
+        this.rangeSymbols = new ArrayList<String>();
+        
+        //Configuring Plot
+        this.chartPlot = new XYPlot(seriesCollection,  this.domainAxis, this.rangeAxis, this.chartRenderer);
+        this.chartPlot.setBackgroundPaint(Color.WHITE);
+        this.chartPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+        this.chartPlot.setRangeGridlinePaint(Color.WHITE);
+        this.chartPlot.setAxisOffset(new RectangleInsets(5D, 5D, 5D, 5D));
+        this.chartPlot.setDomainCrosshairVisible(true);
+        this.chartPlot.setDomainCrosshairPaint(Color.BLUE);
+        this.chartPlot.setDomainCrosshairStroke(new BasicStroke(1.2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND,
+              1.0f, new float[] {6.0f, 6.0f}, 0.0f));
+        this.chartPlot.setRangeCrosshairVisible(false);
+        
+        //Configuring Chart
+        this.chartElement = this.createChart();
+        
+        //Configuring ChartPanel
+        this.chartPanel = new ChartPanel(chartElement){
+            @Override
+            public void restoreAutoBounds() {
+                super.restoreAutoBounds();
+                scrolling = false;
+                UpdateDomainRange();
+            }
+
+            @Override
+            public void zoom(Rectangle2D selection) {
+                scrolling = true;
+                super.zoom(selection);
+            }
+        };
+        chartPanel.setDomainZoomable(true);
+        chartPanel.setRangeZoomable(false);
+        chartPanel.setMouseWheelEnabled(true);
+        chartPanel.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getScrollType() != MouseWheelEvent.WHEEL_UNIT_SCROLL) return;
+                scrolling = true;
+            }
+        });
+        CompoundBorder compoundborder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4), BorderFactory.createEtchedBorder());
+        chartPanel.setBorder(compoundborder);
+        Dimension prefSize = this.chartPanel.getPreferredSize();
+        this.chartPanel.setPreferredSize(new Dimension(prefSize.width  / 2, prefSize.height /2 - 50));
+    }
+    
+    private JFreeChart createChart(){
+        JFreeChart chart = new JFreeChart(null, new Font("Tahoma", 0, 18), this.chartPlot, true);
+        chart.setBackgroundPaint(Color.WHITE);
+        return chart;
+    }
+    
+    private void UpdateDomainRange() {
+        int value;
+        if(this.domainMaxValue > this.domainDisplayRange && !scrolling){
+            value = this.domainDisplayRange - this.domainDisplayRange;
+            this.domainAxis.setRange(value, this.domainMaxValue + this.domainMaxValueDifference);
+        }
+    }
+
+    public void addClockSeries(ClockInput clockInput) {
+        int uniqueId = clockInput.getUniqueId();
+        String userReferenceName = clockInput.getUserReference();
+        
+        //Adding new values at Range Axis.
+        int rangeIndex = this.rangeSymbols.size() / 3;
+        this.rangeSymbols.add(0, "");
+        this.rangeSymbols.add(0, userReferenceName);
+        this.rangeSymbols.add(0, "");
+        updateRangeAxis();
+        this.chartPlot.setRangeAxis(this.rangeAxis);
+        this.rangeAxisClocksPosition.add(0, uniqueId);
+        
+        //Creating new Series
+        XYSeries newDomainSeries = new XYSeries(userReferenceName);
+        int firstRangeElement = rangeIndex * 3; 
+        int lastRangeElement = firstRangeElement + 2;
+        int xValue = this.domainMaxValue;
+        int yValue = clockInput.isOpen ? firstRangeElement : lastRangeElement;
+        newDomainSeries.add(xValue, yValue);
+        this.seriesCollection.addSeries(newDomainSeries);
+        
+        ClockChartInformation clockInfo = new ClockChartInformation(clockInput);
+        clockInfo.setReferenceName(userReferenceName);
+        clockInfo.setDomainSerie(newDomainSeries);
+        this.clocksInformationByClockId.put(uniqueId, clockInfo);
+    }
+
+    private void updateRangeAxis() {
+        this.rangeAxis = new SymbolAxis(null, this.rangeSymbols.toArray(new String[this.rangeSymbols.size()]));
+        this.chartPlot.setRangeAxis(this.rangeAxis);
+    }
+
+    public void removeClockSeries(ClockInput clockInput) {
+        int uniqueId = clockInput.getUniqueId();
+        this.removeClock(uniqueId);
+    }
+
+    public void processClocks(Collection<List<ClockInput>> values) {
+        for(List<ClockInput> clocks : values){
+            for(ClockInput clock: clocks){
+                this.addClockSeries(clock);
+            }
+        }
+    }
+
+    private void removeClock(int uniqueId) {
+        if(!this.clocksInformationByClockId.containsKey(uniqueId))
+            return;
+        
+        //Removing Series
+        ClockChartInformation clockInfo = this.clocksInformationByClockId.get(uniqueId);
+        this.seriesCollection.removeSeries(clockInfo.getDomainSerie());
+        
+        //Removing Range Axis Info
+        int rangeIndex = this.getClockRangePositionIndex(uniqueId);
+        int firstElement = rangeIndex * 3;
+        this.rangeSymbols.remove(firstElement);
+        this.rangeSymbols.remove(firstElement);
+        this.rangeSymbols.remove(firstElement);
+        this.updateRangeAxis();
+        this.rangeAxisClocksPosition.remove(rangeIndex);
+        
+        //Removing map
+        this.clocksInformationByClockId.remove(uniqueId);
+    }
+
+    private int getClockRangePositionIndex(int uniqueId) {
+        for(int i = 0; i< this.rangeAxisClocksPosition.size(); i++){
+            if(this.rangeAxisClocksPosition.get(i) == uniqueId)
+                return i;
+        }
+        return -1;
+    }
+}

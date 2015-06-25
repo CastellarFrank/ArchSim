@@ -49,7 +49,7 @@ public class NumberInputTypeHandler extends InputTypeHandler{
     }
     
     private void initializeComponentsStructure(){
-        JLabel binaryLabel = new JLabel(TextUtils.LeftEmptyPadding("Milliseconds:", 12));
+        JLabel binaryLabel = new JLabel(TextUtils.LeftEmptyPadding("Milliseconds:", 13));
         binaryLabel.setFont(BaseElement.fontSimulationEditionDialogType);
         components.add(binaryLabel);
         components.add(this.spinnerValue);
