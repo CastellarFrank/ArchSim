@@ -104,6 +104,7 @@ public class SimulationCanvas extends ContainerPanel implements
             addKeyListener(this);
             
             drilldowns = new ArrayList<DrilldownWindow>();
+            this.initializeDebuggerIfNull();
         } catch (ArchException ex) {
             Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -190,12 +191,7 @@ public class SimulationCanvas extends ContainerPanel implements
         if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
             if (mouseComponent != null && mouseComponent instanceof ModuleChip) {                
                 pop.show(e.getComponent(), e.getX(), e.getY());  
-                if (watchesTableModel == null)
-                    watchesTableModel = new WatchesTableModel(simulationScope);
-                if (debugger == null) {
-                    debuggerModel = new CustomTreeModel(simulationScope, watchesTableModel.getModelData());
-                    debugger = new Debugger(this);
-                }
+                initializeDebuggerIfNull();
                 return;
             }
         }
@@ -210,12 +206,23 @@ public class SimulationCanvas extends ContainerPanel implements
             if (draggingClass.equals(ModuleChip.class.getName())) {
                 newElementBeenDrawn = constructElement(draggingClass, x, y, x, y, draggingExtraParams);
             } else {
+                if(newElementBeenDrawn != null && newElementBeenDrawn instanceof ClockInput)
+                    this.clockEventManagement.removeClock((ClockInput)newElementBeenDrawn);
                 newElementBeenDrawn = constructElement(draggingClass, x, y);
             }
         }
 
         checkForSwitchClicked();
         dragging = true;
+    }
+
+    private void initializeDebuggerIfNull() {
+        if (watchesTableModel == null)
+            watchesTableModel = new WatchesTableModel(simulationScope);
+        if (debugger == null) {
+            debuggerModel = new CustomTreeModel(simulationScope, watchesTableModel.getModelData());
+            debugger = new Debugger(this);
+        }
     }
 
     @Override

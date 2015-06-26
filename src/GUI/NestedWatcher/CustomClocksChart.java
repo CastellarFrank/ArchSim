@@ -18,14 +18,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.border.CompoundBorder;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -50,9 +47,9 @@ public class CustomClocksChart{
     JFreeChart chartElement;
     ChartPanel chartPanel;
     boolean scrolling = false;
-    int domainMaxValue = 0;
-    final int domainDisplayRange = 10000;
-    final int domainMaxValueDifference = 200;
+    double domainMaxValue = 0;
+    final double domainDisplayRange = 10;
+    final double domainMaxValueDifference = 1;
     
     List<Integer> rangeAxisClocksPosition;
     
@@ -78,9 +75,9 @@ public class CustomClocksChart{
         
         this.chartRenderer = new XYLineAndShapeRenderer(true, false); 
         
-        this.domainAxis = new NumberAxis(null);
+        this.domainAxis = new NumberAxis("Seconds");
         this.domainAxis.setRange(0, this.domainDisplayRange);
-        this.domainAxis.setTickUnit(new NumberTickUnit(1000));
+        this.domainAxis.setAutoTickUnitSelection(true);
         this.rangeAxis = new SymbolAxis(null, new String[]{});
         this.rangeSymbols = new ArrayList<String>();
         
@@ -105,7 +102,7 @@ public class CustomClocksChart{
             public void restoreAutoBounds() {
                 super.restoreAutoBounds();
                 scrolling = false;
-                UpdateDomainRange();
+                updateDomainRange();
             }
 
             @Override
@@ -128,6 +125,9 @@ public class CustomClocksChart{
         chartPanel.setBorder(compoundborder);
         Dimension prefSize = this.chartPanel.getPreferredSize();
         this.chartPanel.setPreferredSize(new Dimension(prefSize.width  / 2, prefSize.height /2 - 50));
+        Dimension maxSize = this.chartPanel.getMaximumSize();
+        this.chartPanel.setMaximumSize(new Dimension(1000, 200));
+
     }
     
     private JFreeChart createChart(){
@@ -136,10 +136,10 @@ public class CustomClocksChart{
         return chart;
     }
     
-    private void UpdateDomainRange() {
-        int value;
+    private void updateDomainRange() {
+        double value;
         if(this.domainMaxValue > this.domainDisplayRange && !scrolling){
-            value = this.domainDisplayRange - this.domainDisplayRange;
+            value = this.domainMaxValue - this.domainDisplayRange;
             this.domainAxis.setRange(value, this.domainMaxValue + this.domainMaxValueDifference);
         }
     }
@@ -149,27 +149,28 @@ public class CustomClocksChart{
         String userReferenceName = clockInput.getUserReference();
         
         //Adding new values at Range Axis.
-        int rangeIndex = this.rangeSymbols.size() / 3;
+        int rangeIndex = 0;
         this.rangeSymbols.add(0, "");
         this.rangeSymbols.add(0, userReferenceName);
         this.rangeSymbols.add(0, "");
         updateRangeAxis();
-        this.chartPlot.setRangeAxis(this.rangeAxis);
         this.rangeAxisClocksPosition.add(0, uniqueId);
         
         //Creating new Series
         XYSeries newDomainSeries = new XYSeries(userReferenceName);
         int firstRangeElement = rangeIndex * 3; 
         int lastRangeElement = firstRangeElement + 2;
-        int xValue = this.domainMaxValue;
-        int yValue = clockInput.isOpen ? firstRangeElement : lastRangeElement;
+        double xValue = this.domainMaxValue;
+        double yValue = clockInput.isOpen ? firstRangeElement : lastRangeElement;
         newDomainSeries.add(xValue, yValue);
         this.seriesCollection.addSeries(newDomainSeries);
         
         ClockChartInformation clockInfo = new ClockChartInformation(clockInput);
         clockInfo.setReferenceName(userReferenceName);
         clockInfo.setDomainSerie(newDomainSeries);
+        clockInfo.setMaxValue(this.domainMaxValue);
         this.clocksInformationByClockId.put(uniqueId, clockInfo);
+        this.recalculateRangeIndex();
     }
 
     private void updateRangeAxis() {
@@ -199,7 +200,7 @@ public class CustomClocksChart{
         this.seriesCollection.removeSeries(clockInfo.getDomainSerie());
         
         //Removing Range Axis Info
-        int rangeIndex = this.getClockRangePositionIndex(uniqueId);
+        int rangeIndex = clockInfo.getRangeIndex();
         int firstElement = rangeIndex * 3;
         this.rangeSymbols.remove(firstElement);
         this.rangeSymbols.remove(firstElement);
@@ -209,13 +210,74 @@ public class CustomClocksChart{
         
         //Removing map
         this.clocksInformationByClockId.remove(uniqueId);
+        this.recalculateRangeIndex();
     }
 
-    private int getClockRangePositionIndex(int uniqueId) {
-        for(int i = 0; i< this.rangeAxisClocksPosition.size(); i++){
-            if(this.rangeAxisClocksPosition.get(i) == uniqueId)
-                return i;
+    public void processClocksToggled(List<Integer> clocksToggled) {
+        for(int clockUniqueId : clocksToggled){
+            this.makeClockToggle(clockUniqueId);
         }
-        return -1;
+    }
+
+    private void makeClockToggle(int clockUniqueId) {
+        if(!this.clocksInformationByClockId.containsKey(clockUniqueId))
+            return;
+        
+        ClockChartInformation clockInfo = this.clocksInformationByClockId.get(clockUniqueId);
+        int rangeIndex = clockInfo.getRangeIndex();
+        int bottomRangeIndex = rangeIndex*3;
+        int topRangeIndex = bottomRangeIndex + 2;
+        ClockInput clock = clockInfo.getClock();
+        
+        double xValue;
+        xValue = clockInfo.getMaxValue() + ((double)clock.getTimerInMiliSeconds()) / 1000;
+        clockInfo.setMaxValue(xValue);
+        if(xValue > this.domainMaxValue)
+            this.domainMaxValue = xValue;
+        
+        XYSeries serie = clockInfo.getDomainSerie();
+        if(clock.isOpen){
+            serie.add(xValue, topRangeIndex);
+            serie.add(xValue, bottomRangeIndex);
+        }else{
+            serie.add(xValue, bottomRangeIndex);
+            serie.add(xValue, topRangeIndex);
+        }
+        this.updateDomainRange();
+    }
+
+    public void changeSeriesName(int uniqueId, String newName) {
+        ClockChartInformation clockInfo = this.clocksInformationByClockId.get(uniqueId);
+        int clockRangeindex = clockInfo.getRangeIndex();
+        int bottomRangeIndex = clockRangeindex * 3;
+        this.rangeSymbols.set(bottomRangeIndex + 1, newName);
+        this.updateRangeAxis();
+        clockInfo.setReferenceName(newName);
+    }
+
+    public void resetSeries() {
+        this.domainMaxValue = 0;
+        this.domainAxis.setRange(0,this.domainDisplayRange);
+        for(ClockChartInformation clock :this.clocksInformationByClockId.values()){
+            XYSeries series = clock.getDomainSerie();
+            series.clear();
+            series.add(domainMaxValue, domainMaxValue);
+            clock.setMaxValue(domainMaxValue);
+        }
+    }
+
+    private void recalculateRangeIndex() {
+        for(int i = 0; i < this.rangeAxisClocksPosition.size(); i++){
+            int uniqueId = this.rangeAxisClocksPosition.get(i);
+            this.clocksInformationByClockId.get(uniqueId).setRangeIndex(i);
+        }
+    }
+
+    public boolean seriesNameExists(String seriesName, int ignoreClockId) {
+        for(ClockChartInformation clockInfo : this.clocksInformationByClockId.values()){
+            if(clockInfo.getClock().getUniqueId() != ignoreClockId && clockInfo.getUserReferenceName().equals(seriesName))
+                return true;
+        }
+        return false;
     }
 }

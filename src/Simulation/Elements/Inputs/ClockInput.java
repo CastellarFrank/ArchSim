@@ -6,6 +6,7 @@ package Simulation.Elements.Inputs;
 
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
+import GUI.Edit.ClockInputNameTypeHandler;
 import GUI.Edit.EditInfo;
 import GUI.Edit.InputTypeHandler;
 import GUI.Edit.NumberInputTypeHandler;
@@ -18,15 +19,11 @@ import static Simulation.Elements.BaseElement.pointRadious;
 import static Simulation.Elements.BaseElement.selectionSeparationMargin;
 import static Simulation.Elements.BaseElement.sign;
 import Simulation.Elements.BasicSwitch;
-import Utils.TextUtils;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -113,15 +110,9 @@ public class ClockInput extends BasicSwitch {
         }else if(n == 1){
             return new EditInfo("value", new NumberInputTypeHandler(String.valueOf(this.timerInMiliSeconds)));
         }else if(n == 2){
-            JLabel lblName = new JLabel(TextUtils.LeftEmptyPadding("Name:", 13));
-            lblName.setFont(fontSimulationEditionDialogType);
-            JTextField txtName = new JTextField(this.userReference);
-            Dimension prefSize = txtName.getPreferredSize();
-            prefSize = new Dimension(140, prefSize.height);
-            txtName.setPreferredSize(prefSize);
-            return new EditInfo("value", 0, 0, 0, false)
-                       .addComponent(lblName)
-                       .addComponent(txtName);
+            return new EditInfo("value", new ClockInputNameTypeHandler(userReference, 
+                                                                       this.containerPanel.clockEventManagement,
+                                                                       this.uniqueId));
         }
         return null;
     }
@@ -136,9 +127,12 @@ public class ClockInput extends BasicSwitch {
             this.timerInMiliSeconds = input.getCurrentAsDecimal();
             this.checkManagement(oldTime);
         }else if(n == 2){
-            String newName = editInfo.value;
+            InputTypeHandler input = editInfo.getInputTypeHandler();
+            String newName = input.getCurrent();
             if(newName == null || newName.isEmpty())
                 newName = "Clock " + this.uniqueId;
+            if(!this.userReference.equals(newName))
+                this.containerPanel.clockEventManagement.updateSeriesName(this.uniqueId, newName);
             this.userReference = newName;
         }
     }
@@ -272,16 +266,11 @@ public class ClockInput extends BasicSwitch {
     }
 
     private void setupInitialManagement() {
-        if(this.enabled){
-            this.isElementBeenManagement = true;
-            this.containerPanel.clockEventManagement.addClock(this);
-        }
+        this.isElementBeenManagement = true;
+        this.containerPanel.clockEventManagement.addClock(this);
     }
 
     private void checkManagement(long oldTime) {
-        if(!this.enabled)
-            return;
-        
         if(this.isElementBeenManagement ){
             if(oldTime == this.timerInMiliSeconds)
                 return;

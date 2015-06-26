@@ -10,6 +10,7 @@ import GUI.Watcher.WatchesTableModel;
 import Simulation.ClockEventManagement;
 import Simulation.Configuration;
 import Simulation.Elements.BaseElement;
+import Simulation.Elements.Inputs.ClockInput;
 import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Wire;
 import Simulation.Joint;
@@ -725,6 +726,8 @@ public class ContainerPanel extends JCanvas {
         element.setPoints();
 
         if (!(element instanceof ModuleChip) && element.x == element.x2 && element.y == element.y2) {
+            if(element instanceof ClockInput)
+                clockEventManagement.removeClock((ClockInput)element);
             return;
         }
         elements.add(element);

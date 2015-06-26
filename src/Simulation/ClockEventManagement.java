@@ -22,6 +22,7 @@ public class ClockEventManagement {
     Map<Long, List<ClockInput>> clocksByExecutionTime;
     Thread mainlyThread;
     boolean isSimulationRunning = false;
+    boolean needsRestart = false;
     long startExecutionTime = 0;
     long executionTimeInterval = 100;
     public final Object lockElement = new Object();
@@ -35,6 +36,7 @@ public class ClockEventManagement {
     }
     
     public void simulationReseted(){
+        this.needsRestart = true;
         this.simulationStopped();
     }
     
@@ -65,39 +67,44 @@ public class ClockEventManagement {
         } catch (InterruptedException ex) {}
         /*Just to make sure that the threat is going to be stopped.*/
         this.mainlyThread.interrupt();
+        if(this.needsRestart){
+            this.resetSeries();
+            this.needsRestart = false;
+        }
     }
     
     private void executeClocksLogic() throws InterruptedException {
         while(this.isSimulationRunning){
             Thread.sleep(this.executionTimeInterval);
             synchronized(this.lockElement){
+                if(this.clocksByExecutionTime.isEmpty()){
+                    this.resetSeries();
+                    continue;
+                }
                 this.startExecutionTime += this.executionTimeInterval;
                 Iterator<Entry<Long, List<ClockInput>>> it = this.clocksByExecutionTime.entrySet().iterator();
-                boolean anyWasToggled = false;
+                List<Integer> clocksIds = new ArrayList<Integer>();
+                boolean anyToggled = false;
                 while(it.hasNext()){
                     Entry<Long, List<ClockInput>> entry = it.next();
-                    if(this.startExecutionTime % entry.getKey() == 0){
+                    if(this.startExecutionTime > 0 && this.startExecutionTime % entry.getKey() == 0){
                         List<ClockInput> clocks = entry.getValue();
-                        for (int i = 0; i < clocks.size(); i++) {
-                            ClockInput clock = clocks.get(i);
+                        for (ClockInput clock : clocks) {
                             if(clock.isEnabled()){
-                                anyWasToggled = true;
                                 clock.manualToggle();
-                            }else{
-                                clock.setElementBeenManagementStatus(false);
-                                clocks.remove(clock);
-                                i--;
+                                anyToggled = true;
                             }
+                            clocksIds.add(clock.getUniqueId());
                         }
                     }
                 }
-                if(anyWasToggled){
-                    this.saveVariableValues(startExecutionTime);
+                this.makeSeriesChanges(clocksIds);
+                if(anyToggled){
                     this.containerPanel.prepareForAnalysis();
+                    this.saveVariableValues(startExecutionTime);
                 }
             }
         }
-        this.startExecutionTime = 0;
     }
     
     public void updateClockInterval(ClockInput clock, long oldTime){
@@ -156,5 +163,22 @@ public class ClockEventManagement {
             if(this.clocksChartLogic != null)
                 this.clocksChartLogic.removeClockSeries(clockInput);
         }
+    }
+    
+    public void makeSeriesChanges(List<Integer> clocksToggled){
+        this.clocksChartLogic.processClocksToggled(clocksToggled);
+    }
+
+    public void updateSeriesName(int uniqueId, String newName) {
+        this.clocksChartLogic.changeSeriesName(uniqueId, newName);
+    }
+
+    private void resetSeries() {
+        this.startExecutionTime = 0;
+        this.clocksChartLogic.resetSeries();
+    }
+
+    public boolean seriesNameExist(String currentValue, int ignoreClockId) {
+        return this.clocksChartLogic.seriesNameExists(currentValue, ignoreClockId);
     }
 }

@@ -32,6 +32,10 @@ public abstract class InputTypeHandler {
     public abstract String getCurrentAsBinary();
     
     public abstract long getCurrentAsDecimal();
+    
+    public String getCurrent(){
+        return currentValue;
+    }
         
     public String getErrorMessage() {
         return this.errorMessage;
