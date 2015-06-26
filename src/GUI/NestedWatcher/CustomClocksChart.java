@@ -125,9 +125,6 @@ public class CustomClocksChart{
         chartPanel.setBorder(compoundborder);
         Dimension prefSize = this.chartPanel.getPreferredSize();
         this.chartPanel.setPreferredSize(new Dimension(prefSize.width  / 2, prefSize.height /2 - 50));
-        Dimension maxSize = this.chartPanel.getMaximumSize();
-        this.chartPanel.setMaximumSize(new Dimension(1000, 200));
-
     }
     
     private JFreeChart createChart(){
@@ -213,13 +210,13 @@ public class CustomClocksChart{
         this.recalculateRangeIndex();
     }
 
-    public void processClocksToggled(List<Integer> clocksToggled) {
+    public void updateClocksSeries(List<Integer> clocksToggled) {
         for(int clockUniqueId : clocksToggled){
-            this.makeClockToggle(clockUniqueId);
+            this.updateClockSerie(clockUniqueId);
         }
     }
 
-    private void makeClockToggle(int clockUniqueId) {
+    private void updateClockSerie(int clockUniqueId) {
         if(!this.clocksInformationByClockId.containsKey(clockUniqueId))
             return;
         
@@ -236,13 +233,16 @@ public class CustomClocksChart{
             this.domainMaxValue = xValue;
         
         XYSeries serie = clockInfo.getDomainSerie();
+        
         if(clock.isOpen){
-            serie.add(xValue, topRangeIndex);
+            if(clock.isEnabled())
+                serie.add(xValue, topRangeIndex);
             serie.add(xValue, bottomRangeIndex);
         }else{
-            serie.add(xValue, bottomRangeIndex);
+            if(clock.isEnabled())
+                serie.add(xValue, bottomRangeIndex);
             serie.add(xValue, topRangeIndex);
-        }
+        } 
         this.updateDomainRange();
     }
 

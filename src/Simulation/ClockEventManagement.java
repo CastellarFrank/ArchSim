@@ -166,7 +166,7 @@ public class ClockEventManagement {
     }
     
     public void makeSeriesChanges(List<Integer> clocksToggled){
-        this.clocksChartLogic.processClocksToggled(clocksToggled);
+        this.clocksChartLogic.updateClocksSeries(clocksToggled);
     }
 
     public void updateSeriesName(int uniqueId, String newName) {
