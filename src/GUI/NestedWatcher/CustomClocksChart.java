@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.BorderFactory;
+import javax.swing.JScrollBar;
 import javax.swing.border.CompoundBorder;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -42,6 +43,7 @@ public class CustomClocksChart{
     XYPlot chartPlot;
     NumberAxis domainAxis;
     SymbolAxis rangeAxis;
+    Debugger debugger;
     
     List<String> rangeSymbols;
     JFreeChart chartElement;
@@ -50,17 +52,16 @@ public class CustomClocksChart{
     double domainMaxValue = 0;
     final double domainDisplayRange = 10;
     final double domainMaxValueDifference = 1;
+    int increaseHeightValue = 0;
+    
     
     List<Integer> rangeAxisClocksPosition;
     
     Map<Integer, ClockChartInformation> clocksInformationByClockId;
     
-    public CustomClocksChart(){
+    public CustomClocksChart(Debugger debugger){
         this.initializeAndConfigureComponents();
-    }
-    
-    public static ChartPanel instanceNewChartPanel() {
-        return new CustomClocksChart().getCustomClocksChart();
+        this.debugger = debugger;
     }
     
     public ChartPanel getCustomClocksChart(){
@@ -124,7 +125,8 @@ public class CustomClocksChart{
         CompoundBorder compoundborder = BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4), BorderFactory.createEtchedBorder());
         chartPanel.setBorder(compoundborder);
         Dimension prefSize = this.chartPanel.getPreferredSize();
-        this.chartPanel.setPreferredSize(new Dimension(prefSize.width  / 2, prefSize.height /2 - 50));
+        this.chartPanel.setPreferredSize(new Dimension(prefSize.width  / 2, prefSize.height /2 - 2));
+        this.increaseHeightValue = prefSize.height / 4;
     }
     
     private JFreeChart createChart(){
@@ -168,6 +170,7 @@ public class CustomClocksChart{
         clockInfo.setMaxValue(this.domainMaxValue);
         this.clocksInformationByClockId.put(uniqueId, clockInfo);
         this.recalculateRangeIndex();
+        this.adjustChartHeight(true);
     }
 
     private void updateRangeAxis() {
@@ -208,6 +211,7 @@ public class CustomClocksChart{
         //Removing map
         this.clocksInformationByClockId.remove(uniqueId);
         this.recalculateRangeIndex();
+        this.adjustChartHeight(false);
     }
 
     public void updateClocksSeries(List<Integer> clocksToggled) {
@@ -279,5 +283,25 @@ public class CustomClocksChart{
                 return true;
         }
         return false;
+    }
+
+    private void adjustChartHeight(boolean add) {
+        int result, symbol;
+        if(add){
+            result = 0;
+            symbol = 1;
+        }else{
+            result = 2;
+            symbol = -1;
+        }
+        
+        if(this.rangeAxisClocksPosition.size() % 3 != result)
+            return;
+        Dimension prefSize = this.chartPanel.getPreferredSize();
+        this.chartPanel.setPreferredSize(new Dimension(prefSize.width, prefSize.height + (increaseHeightValue * symbol)));
+        this.chartPanel.revalidate();
+        this.debugger.pack();
+        JScrollBar vertical = debugger.getCustomChartScrollPane().getVerticalScrollBar();
+        vertical.setValue( vertical.getMaximum());
     }
 }

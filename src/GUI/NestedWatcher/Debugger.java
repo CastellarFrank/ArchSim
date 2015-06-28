@@ -8,6 +8,7 @@ import GUI.Simulation.SimulationCanvas;
 import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Dimension;
 import java.awt.Point;
+import javax.swing.JScrollPane;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -38,7 +39,7 @@ public class Debugger extends javax.swing.JInternalFrame {
         simulationScope = simWin.simulationScope;
 
         table = new JXTreeTable(simWin.debuggerModel);
-        this.customChart = new CustomClocksChart();
+        this.customChart = new CustomClocksChart(this);
         simWin.clockEventManagement.setCustomClocksChart(this.customChart);
         Highlighter highligher = HighlighterFactory.createSimpleStriping(HighlighterFactory.LEDGER);
         table.setHighlighters(highligher);
@@ -70,6 +71,10 @@ public class Debugger extends javax.swing.JInternalFrame {
                 } while (currentNode != null);
             }            
         }
+    }
+    
+    public JScrollPane getCustomChartScrollPane(){
+        return this.scroll1;
     }
 
     private void configureCommonTableProperties(JXTable table) {

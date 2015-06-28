@@ -45,10 +45,10 @@ public class ClockInput extends BasicSwitch {
 
     public ClockInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
-        this.isOpen = true;
+        this.isOpen = Boolean.parseBoolean(extraParams[0]);
         this.enabled = Boolean.parseBoolean(extraParams[1]);
         this.timerInMiliSeconds = Long.parseLong(extraParams[2]);
-        this.userReference = extraParams[2];
+        this.userReference = extraParams[3];
     }
 
     public ClockInput(int x, int y, int x2, int y2, int flags) throws ArchException {
