@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JPopupMenu;
@@ -40,25 +41,31 @@ public class MainWindow extends javax.swing.JFrame {
     public boolean needsRefresh = false;
     List<SimulationWindow> simulationWindows;
     public boolean debuggerRefresh = false;
+    public DesignElementsTreeView elementsTreeView;
     
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
-        this.simulationWindows = new ArrayList<SimulationWindow>();
-        setPreferredSize(new Dimension(1280, 800));
         initComponents();
-        
+        setPreferredSize(new Dimension(1280, 800));
+        this.simulationWindows = new ArrayList<SimulationWindow>();
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         Loader.getInstance().setup();
         
         prepareModuleMenu();
         this.setExtendedState(MAXIMIZED_BOTH);
     }
+
+    public void initializeDesignPalette() {
+        this.elementsTreeView = new DesignElementsTreeView(this);
+        this.elementsTreeView.updateModuleSection(this.moduleMenus);
+    }
     
     public void refreshModules() {
         Loader.getInstance().loadModules();
         prepareModuleMenu();
+        this.elementsTreeView.updateModuleSection(this.moduleMenus);
     }
     
     public void updateSimulationWindowsMenus(){
@@ -112,6 +119,8 @@ public class MainWindow extends javax.swing.JFrame {
         changeSettingsMenu = new javax.swing.JMenuItem();
         helpMenu = new javax.swing.JMenu();
         aboutMenuItem = new javax.swing.JMenuItem();
+        windowMenu = new javax.swing.JMenu();
+        designPaletteMenu = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ArchSim: A hardware design and simulation tool");
@@ -186,6 +195,19 @@ public class MainWindow extends javax.swing.JFrame {
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
+
+        windowMenu.setText("Window");
+
+        designPaletteMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        designPaletteMenu.setText("Show Design Palette");
+        designPaletteMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                designPaletteMenuActionPerformed(evt);
+            }
+        });
+        windowMenu.add(designPaletteMenu);
+
+        menuBar.add(windowMenu);
 
         setJMenuBar(menuBar);
 
@@ -267,6 +289,17 @@ public class MainWindow extends javax.swing.JFrame {
         ab.setVisible(true);        
     }//GEN-LAST:event_aboutMenuItemActionPerformed
 
+    private void designPaletteMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_designPaletteMenuActionPerformed
+        this.elementsTreeView.setVisible(true);
+        if(this.elementsTreeView.getDesktopPane() != this.desktopPane)
+            this.desktopPane.add(this.elementsTreeView);
+        try {
+            this.elementsTreeView.setSelected(true);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_designPaletteMenuActionPerformed
+
     
     private void openSimulationFile(Document document, String fileName) {
         SimulationWindow simulationWindow = new SimulationWindow(this);
@@ -320,12 +353,14 @@ public class MainWindow extends javax.swing.JFrame {
                 MainWindow mainWindow = new MainWindow();
                 mainWindow.setVisible(true);
                 mainWindow.popUpModuleErrors();
+                mainWindow.initializeDesignPalette();
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutMenuItem;
     private javax.swing.JMenuItem changeSettingsMenu;
+    private javax.swing.JMenuItem designPaletteMenu;
     private javax.swing.JDesktopPane desktopPane;
     private javax.swing.JMenuItem exitMenuItem;
     private javax.swing.JMenu fileMenu;
@@ -335,6 +370,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem simWindow;
+    private javax.swing.JMenu windowMenu;
     // End of variables declaration//GEN-END:variables
 
     public void removeSimulationWindow(SimulationWindow simulationWindow) {

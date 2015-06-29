@@ -21,18 +21,23 @@ import Simulation.Elements.ModuleChip;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Point;
+import static java.awt.datatransfer.DataFlavor.stringFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.TransferHandler;
 
 /**
  *
@@ -108,6 +113,56 @@ public class SimulationCanvas extends ContainerPanel implements
         } catch (ArchException ex) {
             Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
         }
+        this.setTransferHandler(new TransferHandler(){
+            @Override
+            public boolean canImport(TransferHandler.TransferSupport support) {
+                if(!support.isDataFlavorSupported(stringFlavor))
+                    return false;
+                
+                Transferable t = support.getTransferable();
+                String data = null;
+                try {
+                    data = t.getTransferData(stringFlavor).toString();
+                } catch (UnsupportedFlavorException ex) {
+                    Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                return data != null && data.startsWith(":<dP0t4t0:3");
+            }
+
+            @Override
+            public boolean importData(TransferHandler.TransferSupport support) {
+                if(!canImport(support))
+                    return false;
+                
+                Transferable t = support.getTransferable();
+                String data = null;
+                try {
+                    data = t.getTransferData(stringFlavor).toString();
+                } catch (UnsupportedFlavorException ex) {
+                    Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(SimulationCanvas.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                if(data == null || data.isEmpty())
+                    return false;
+                
+                data = data.replaceFirst(":<dP0t4t0:3", "");
+                
+                String[] elements = data.split(",");
+                String [] extraParam = null;
+                if(elements.length > 1)
+                    extraParam = new String[]{ elements[1] };
+                
+                draggingClass = elements[0];
+                draggingExtraParams = extraParam;
+                setDrawingCursor();
+                return true;
+            }
+        });
     }
 
     public void prepareForReanalysis() {
