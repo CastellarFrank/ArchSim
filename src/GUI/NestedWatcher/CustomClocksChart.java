@@ -265,7 +265,10 @@ public class CustomClocksChart{
         for(ClockChartInformation clock :this.clocksInformationByClockId.values()){
             XYSeries series = clock.getDomainSerie();
             series.clear();
-            series.add(domainMaxValue, domainMaxValue);
+            int rangeIndex = clock.getRangeIndex();
+            int bottomIndex = rangeIndex * 3;
+            int yValue = clock.getClock().isOpen ? bottomIndex : bottomIndex + 2;
+            series.add(domainMaxValue, yValue);
             clock.setMaxValue(domainMaxValue);
         }
     }

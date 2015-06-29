@@ -56,6 +56,7 @@ public class Debugger extends javax.swing.JInternalFrame {
     }
 
     public void refresh() {
+        simulationCanvas.parent.debuggerRefresh = false;
         if (table != null) {
             ((CustomTreeModel) (table.getTreeTableModel())).refresh();
 

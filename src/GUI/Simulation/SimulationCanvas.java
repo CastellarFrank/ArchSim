@@ -41,7 +41,7 @@ import javax.swing.JPopupMenu;
 public class SimulationCanvas extends ContainerPanel implements
         MouseListener, MouseMotionListener, KeyListener {
 
-    MainWindow parent;
+    public MainWindow parent;
     public String draggingClass;
     public String[] draggingExtraParams;
     public boolean deleting = false;
@@ -222,7 +222,10 @@ public class SimulationCanvas extends ContainerPanel implements
         if (debugger == null) {
             debuggerModel = new CustomTreeModel(simulationScope, watchesTableModel.getModelData());
             debugger = new Debugger(this);
+            debugger.setVisible(false);
+            this.parent.addDebuggerWindow(debugger);
         }
+        
     }
 
     @Override
@@ -386,12 +389,11 @@ public class SimulationCanvas extends ContainerPanel implements
 
     @Override
     public void updatePreview(Graphics g) {
+        boolean needsRefresh = this.needsAnalysis || parent.debuggerRefresh;
         super.updatePreview(g);
-        //if (watcherWindow != null && !watcherWindow.isSelected()) 
-        //    watcherWindow.refreshModel();
-        if (debugger != null && !debugger.isSelected())
-            debugger.refresh();
         
+        if (debugger != null && needsRefresh)
+            debugger.refresh();
     }
     
     public void destroyAll() {

@@ -242,12 +242,13 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         if (!Configuration.COMPILE_ON_SAVE || !saveMetadataFile)
             return;
         
-        saveModuleMetadata(module);
+        parent.needsRefresh = saveModuleMetadata(module);
+        
     }
     
-    public void saveModuleMetadata(ModuleDecl module) {
+    public static boolean saveModuleMetadata(ModuleDecl module) {
         if (module == null)
-            return;
+            return false;
         
         File newTarget = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH +
                 "/" + TextUtils.AddMetadataTypeFileExtension(module.getModuleName()));
@@ -282,12 +283,14 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             StreamResult result = new StreamResult(newTarget);
 
             transformer.transform(domSource, result);
-            parent.needsRefresh = true;
+            return true;
         } catch (ParserConfigurationException ex) {
             Logger.getLogger(DesignWindow.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
+        
+        return false;
     }
 
     public void destroyFrame() {

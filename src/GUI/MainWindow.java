@@ -5,6 +5,7 @@
 package GUI;
 
 import DataStructures.Loader;
+import DataStructures.ModuleLoadingError;
 import DataStructures.ModuleRepository;
 import GUI.Design.DesignWindow;
 import GUI.NestedWatcher.Debugger;
@@ -16,6 +17,7 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -36,11 +38,14 @@ public class MainWindow extends javax.swing.JFrame {
     public ArrayList<String> moduleNames = null;
     public ArrayList<MenuInfo> moduleMenus = null;
     public boolean needsRefresh = false;
+    List<SimulationWindow> simulationWindows;
+    public boolean debuggerRefresh = false;
     
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
+        this.simulationWindows = new ArrayList<SimulationWindow>();
         setPreferredSize(new Dimension(1280, 800));
         initComponents();
         
@@ -54,6 +59,12 @@ public class MainWindow extends javax.swing.JFrame {
     public void refreshModules() {
         Loader.getInstance().loadModules();
         prepareModuleMenu();
+    }
+    
+    public void updateSimulationWindowsMenus(){
+        for(SimulationWindow simulationWindow : this.simulationWindows){
+            simulationWindow.refreshSimulationMenuStructure();
+        }
     }
     
     private void prepareModuleMenu() {
@@ -209,6 +220,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void simWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simWindowActionPerformed
         SimulationWindow simulationWindow = new SimulationWindow(this);
+        this.simulationWindows.add(simulationWindow);
         desktopPane.add(simulationWindow);
         
         simulationWindow.setVisible(true);
@@ -305,7 +317,9 @@ public class MainWindow extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new MainWindow().setVisible(true);
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.setVisible(true);
+                mainWindow.popUpModuleErrors();
             }
         });
     }
@@ -322,4 +336,17 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JMenuItem simWindow;
     // End of variables declaration//GEN-END:variables
+
+    public void removeSimulationWindow(SimulationWindow simulationWindow) {
+        this.simulationWindows.remove(simulationWindow);
+    }
+
+    private void popUpModuleErrors() {
+        List<ModuleLoadingError> errors = Loader.getInstance().getLoadingErrors();
+        if(!errors.isEmpty()){
+            ErrorLoadedModules errorWindow = new ErrorLoadedModules(errors);
+            errorWindow.setLocation((getWidth() - errorWindow.getWidth())/2, (getHeight() - errorWindow.getHeight())/2);
+            errorWindow.setVisible(true);
+        }
+    }
 }

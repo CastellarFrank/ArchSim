@@ -26,6 +26,7 @@ import Utils.FileUtils;
 import Utils.TextUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -57,12 +58,14 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     public final String startExecutionText = "Start Execution";
     public final String continueExecutionText = "Continue";
     public final String pauseExecutionText = "Pause";
+    MainWindow parentWindow;
     
     /**
      * Creates new form SimulationWindow
      */
     public SimulationWindow(MainWindow parent) {
         super("Component Simulation Window", true, true, true, true);
+        this.parentWindow = parent;
         initComponents();
         
         //<editor-fold defaultstate="collapsed" desc="Set look and feel">
@@ -87,9 +90,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         if (parent.needsRefresh) {
             parent.refreshModules();
         }
-        
-        createMenuStructure(parent.moduleMenus);
-        
+                
         canvas = new SimulationCanvas(parent);
         this.setContentPane(canvas);
         
@@ -99,9 +100,13 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         if (canvas.isPaused) {
             pauseContinueMenu.setText(this.startExecutionText);
         }
+        
+        this.refreshSimulationMenuStructure();
     }
     
-    private void createMenuStructure(ArrayList<MenuInfo> menus) {
+    public void refreshSimulationMenuStructure() {
+        ArrayList<MenuInfo> menus = this.parentWindow.moduleMenus;
+        modulesMenu.removeAll();
         for (MenuInfo menu : menus) {
             if (menu.isMenuItem) {
                 modulesMenu.add(makeMenuItem(menu.label));
@@ -195,12 +200,13 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         }
     }
     
-    public boolean closeLogic() {        
+    public boolean closeLogic() {    
         if (canvas.containsElements()) {
             int result = JOptionPane.showConfirmDialog(this, "Would you like to save before exit?",
                     "Exiting", JOptionPane.YES_OPTION);
             if (result == -1)
                 return false;
+            this.parentWindow.removeSimulationWindow(this);
             if (result == JOptionPane.YES_OPTION) {
                 saveComponent();
                 canvas.destroyAll();
@@ -210,6 +216,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
                 dispose();
             }
         } else {
+            this.parentWindow.removeSimulationWindow(this);
             canvas.destroyAll();
             dispose();
         }
@@ -251,6 +258,8 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         jMenu2 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         pauseContinueMenu = new javax.swing.JMenuItem();
+        windowMenu = new javax.swing.JMenu();
+        debuggerMenu = new javax.swing.JMenuItem();
 
         setBackground(new java.awt.Color(255, 255, 255));
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
@@ -442,6 +451,19 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
         jMenuBar1.add(jMenu2);
 
+        windowMenu.setText("Window");
+
+        debuggerMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        debuggerMenu.setText("Show Debugger");
+        debuggerMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                debuggerMenuActionPerformed(evt);
+            }
+        });
+        windowMenu.add(debuggerMenu);
+
+        jMenuBar1.add(windowMenu);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -539,6 +561,15 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         setAddingElementInfo(ClockInput.class.getName(), null);
     }//GEN-LAST:event_clockInputMenuActionPerformed
 
+    private void debuggerMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_debuggerMenuActionPerformed
+        try {
+            this.canvas.debugger.setVisible(true);
+            this.canvas.debugger.setSelected(true);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(SimulationWindow.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_debuggerMenuActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem addAndMenu;
     private javax.swing.JMenuItem addNandMenu;
@@ -549,6 +580,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenuItem addXorMenu;
     private javax.swing.JMenuItem clockInputMenu;
     private javax.swing.JMenuItem closeMenu;
+    private javax.swing.JMenuItem debuggerMenu;
     private javax.swing.JMenuItem inverterMenu;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
@@ -566,6 +598,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     private javax.swing.JMenuItem multiBitsOutputMenu;
     private javax.swing.JMenuItem pauseContinueMenu;
     private javax.swing.JMenuItem saveMenu;
+    private javax.swing.JMenu windowMenu;
     // End of variables declaration//GEN-END:variables
 
     @Override

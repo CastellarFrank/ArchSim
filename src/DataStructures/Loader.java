@@ -4,6 +4,7 @@
  */
 package DataStructures;
 
+import GUI.Design.DesignWindow;
 import GUI.MenuInfo;
 import Simulation.Configuration;
 import Utils.TextUtils;
@@ -28,8 +29,12 @@ import org.w3c.dom.NodeList;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class Loader {
+    private final List<String> loadingModuleLogsList;
+    private final List<ModuleLoadingError> moduleLoadingErrorList;
 
     private Loader() {
+        this.loadingModuleLogsList = new ArrayList<String>();
+        this.moduleLoadingErrorList = new ArrayList<ModuleLoadingError>();
     }
 
     /**
@@ -101,6 +106,7 @@ public class Loader {
      * <code>ModuleRepository</code> singleton class.
      */
     public void loadModules() {
+        this.moduleLoadingErrorList.clear();
         ModuleRepository.getInstance().clear();
         //Iterará un directorio y cargará la info de los modulos en ModuleRepository
         File directory = new File(Configuration.MODULES_DIRECTORY_PATH);
@@ -119,8 +125,11 @@ public class Loader {
 
         for (File file : modules) {
             if (file.isFile()) {
+                this.loadingModuleLogsList.clear();
                 MenuInfo info = checkPossibleModule(file);
-                if (info != null) {
+                if (info == null) {
+                    this.moduleLoadingErrorList.add(new ModuleLoadingError(file.getName(), loadingModuleLogsList));
+                }else{
                     menus.add(info);
                 }
             } else {
@@ -130,8 +139,14 @@ public class Loader {
                 List<File> project = (List<File>) FileUtils.listFiles(file, null, true);
 
                 for (File projectModule : project) {
+                    if(!projectModule.isFile())
+                        continue;
+                    
+                    this.loadingModuleLogsList.clear();
                     MenuInfo info = checkPossibleModule(projectModule);
-                    if (info != null) {
+                    if (info == null) {
+                        this.moduleLoadingErrorList.add(new ModuleLoadingError(projectModule.getName(), loadingModuleLogsList));
+                    }else{
                         dir.addChild(info);
                     }
                 }
@@ -142,14 +157,27 @@ public class Loader {
         
         ModuleRepository.getInstance().setMenuData(menus);
     }
+    
+    public List<ModuleLoadingError> getLoadingErrors(){
+        return this.moduleLoadingErrorList;
+    }
 
     private MenuInfo checkPossibleModule(File file) {
-        if (Configuration.DEBUG_MODE) {
+        if (Configuration.DEBUG_MODE)
             System.out.println("Loading module... " + file.getAbsolutePath());
-        }
+        
+        this.loadingModuleLogsList.add("Getting source code from file: [" + file.getAbsolutePath() +"].");
         String source = getSourceCode(file);
+        this.loadingModuleLogsList.add("Parsing module Source code.");
         ModuleDecl parsed = getModuleLogic(source);
         if (parsed != null) {
+            
+            //Before checking if MetaDataFile exists, the module would be re-compiled.
+            if(!DesignWindow.saveModuleMetadata(parsed)){
+                this.loadingModuleLogsList.add("Couldn't create a MetadataFile for module: [" + file.getName() +"].");
+                return null;
+            }
+            
             String moduleName = getModuleName(file);
             ModuleInfo moduleInfo = getModuleInfo(moduleName);
             if (moduleInfo == null) {
@@ -167,12 +195,14 @@ public class Loader {
             ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
 
             MenuInfo info = new MenuInfo(moduleInfo.getModuleName(), true);
+            this.loadingModuleLogsList.add("The module: [" + moduleInfo.getModuleName() + "] was succesfully loaded.");
             return info;
-            
         } else {
-            System.out.println("ModuleDecl (" + file.getName() + ") is null. Possibly parse error");
+            String msg = "ModuleDecl [" + file.getName() + "] is null. Possibly parse error.";
+            System.out.println(msg);
+            this.loadingModuleLogsList.add(msg);
+            return null;
         }
-        return null;
     }
 
     /**
@@ -184,8 +214,10 @@ public class Loader {
      */
     public String getSourceCode(File moduleFile) {
         if (!moduleFile.exists()) {
+            this.loadingModuleLogsList.add("The module file: [" + moduleFile.getName() + "], doesn't exist.");
             return null;
         }
+        
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -195,15 +227,18 @@ public class Loader {
 
             NodeList program = doc.getElementsByTagName("behaviour");
             if (program.getLength() != 1) {
-                /*ERROR*/
+                String msg = "The file: [" + moduleFile.getName() +"] is invalid, doesn't have a behavior section.";
+                this.loadingModuleLogsList.add(msg);
                 return null;
             }
             String source = ((Element) program.item(0)).getTextContent();
             return source;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+            String msg = "An error ocurred at getting SourceCode from the file: [" + moduleFile.getName() + "].";
+            this.loadingModuleLogsList.add(msg);
+            return null;
         }
-        return null;
     }
 
     /**
@@ -218,8 +253,9 @@ public class Loader {
             return CompilationHelper.parseWithSemantics(source);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        }
-        return null;
+            this.loadingModuleLogsList.add("Couldn't parse the source code, error: [" + ex.getMessage() + "].");
+            return null;
+        }        
     }
 
     /**
@@ -242,13 +278,16 @@ public class Loader {
         
         File moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
                 + "/" + TextUtils.AddMetadataTypeFileExtension(moduleStringName));
+        this.loadingModuleLogsList.add("Checking for the Metadata File: [" + moduleInfoFile.getAbsolutePath() +"].");
         
         if(!moduleInfoFile.exists()){
             moduleInfoFile = new File(Configuration.MODULE_METADATA_DIRECTORY_PATH
                     + "/" + moduleStringName);
-            
+            this.loadingModuleLogsList.add("Metadata File not found.");
+            this.loadingModuleLogsList.add("Checking for the Metadata File: [" + moduleInfoFile.getAbsolutePath() +"]");
             if (!moduleInfoFile.exists()) {
                 System.out.println("Couldn't load the module: [ " + moduleStringName + " ] The metadata file doesn't exist.");
+                this.loadingModuleLogsList.add("There isn't any Metadata File for the module: [" + moduleStringName + "].");
                 return null;
             }
         }
@@ -262,12 +301,16 @@ public class Loader {
 
             NodeList names = doc.getElementsByTagName("name");
             if (names.getLength() == 0) {
-                System.out.println("Couldn't load the Metadata Module File: [ " + moduleInfoFile.getName() + " ] The file doesn't contain the needed 'name' element.");
+                String msg = "Invlaid Metadata File: [ " + moduleInfoFile.getName() + " ] The file doesn't contain the needed 'name' element.";
+                System.out.println(msg);
+                this.loadingModuleLogsList.add(msg);
                 return null;
             }
             Element name = (Element) names.item(0);
             if (moduleStringName == null || !name.getTextContent().equals(moduleStringName)) {
-                System.out.println("Couldn't load the Metadata Module File: [ " + moduleInfoFile.getName() + " ] The module name: ["+ name.getTextContent() +"] doesn't math with the Metadata module name: [" + moduleStringName + "].");
+                String msg = "Couldn't load the Metadata Module File: [ " + moduleInfoFile.getName() + " ] The module name: ["+ name.getTextContent() +"] doesn't math with the Metadata module name: [" + moduleStringName + "].";
+                System.out.println(msg);
+                this.loadingModuleLogsList.add(msg);
             } else {
                 ModuleInfo info = new ModuleInfo();
                 info.setModuleName(moduleStringName);
@@ -290,10 +333,11 @@ public class Loader {
             return null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        }
-        /*Parseo del XML*/
+            this.loadingModuleLogsList.add("The following error ocurred at getting information from Metadata File: [" + ex.getMessage() + "].");
+            /*Parseo del XML*/
         /*si el parseo sale bien retornar el objecto sino null*/
         return null;
+        }
     }
 
     /**

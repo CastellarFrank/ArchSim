@@ -121,6 +121,7 @@ public class WatchesSelector extends javax.swing.JDialog {
         }
         debugger.setVisible(true);
         realParent.addDebuggerWindow(debugger);
+        realParent.debuggerRefresh = true;
         
         this.dispose();
     }//GEN-LAST:event_addBtnActionPerformed
