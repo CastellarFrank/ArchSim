@@ -147,6 +147,9 @@
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="lOuputMenu">
                   <Properties>
+                    <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                      <KeyStroke key="Shift+Ctrl+1"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Logic Output"/>
                   </Properties>
                   <Events>
@@ -155,6 +158,9 @@
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="multiBitsOutputMenu">
                   <Properties>
+                    <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                      <KeyStroke key="Shift+Ctrl+2"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="MultiBits Output"/>
                   </Properties>
                   <Events>

@@ -397,6 +397,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
 
         jMenu6.setText("Add Output");
 
+        lOuputMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_1, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         lOuputMenu.setText("Logic Output");
         lOuputMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -405,6 +406,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         });
         jMenu6.add(lOuputMenu);
 
+        multiBitsOutputMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_2, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         multiBitsOutputMenu.setText("MultiBits Output");
         multiBitsOutputMenu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
