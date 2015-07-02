@@ -166,7 +166,13 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                         Logger.getLogger(SyntaxTests.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }*/
-                if (tabs.getSelectedIndex() == 1) {
+                if(tabs.getSelectedIndex() == 0){
+                    if(newSource.hasBeenModified || !compiled){
+                        ModuleDecl mod = compileWithoutSemantics();
+                        compileLogic(mod);
+                        newSource.hasBeenModified = false;
+                    }
+                }else if (tabs.getSelectedIndex() == 1) {
                     newSource.setSelected();
                 }
             }
@@ -186,21 +192,43 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         String pureFileName = TextUtils.GetFileNameWithoutExtension(target.getName());
         File newTarget = new File(target.getParent() + File.separator + TextUtils.AddDesignTypeFileExtension(pureFileName));
         
-        boolean saveMetadataFile = true;
+        boolean saveMetadataFile = false;
         ModuleDecl module = compileWithoutSemantics();
-        if(module != null){
-            File currentFile = new File(this.filePath);
-            boolean isSameFile = currentFile.compareTo(target) == 0 || currentFile.compareTo(newTarget) == 0;
-            if(!isSameFile){
-                File moduleDirectoryFile = new File(Configuration.MODULES_DIRECTORY_PATH);
-                if(FileUtils.CheckIfPathIsChild(moduleDirectoryFile, newTarget)){
-                    if(ModuleRepository.getInstance().getModuleNames().contains(module.getModuleName())){
-                        JOptionPane.showMessageDialog(this, "Can't save the File, already exists a module named: [" + module.getModuleName() + "].", "Duplicated Module", JOptionPane.ERROR_MESSAGE);
-                        return;
+        if(module == null){
+            int response = JOptionPane.showConfirmDialog(
+                    this, 
+                    "The module has compilation errors.\nDo you want to save the file anyway?.", 
+                    "Compilation Error", 
+                    JOptionPane.YES_NO_OPTION, 
+                    JOptionPane.WARNING_MESSAGE);
+            if(response != JOptionPane.YES_OPTION)
+                return;
+        }else{
+            String moduleName = module.getModuleName();
+            File moduleDirectoryFile = new File(Configuration.MODULES_DIRECTORY_PATH);
+            boolean isChildPath = FileUtils.CheckIfPathIsChild(moduleDirectoryFile, newTarget);
+            if(isChildPath){
+                File currentFile = new File(this.filePath);
+                boolean isSameFile = currentFile.compareTo(target) == 0 || currentFile.compareTo(newTarget) == 0;
+                if(isSameFile){
+                    if(ModuleRepository.getInstance().isModuleBeingUsed(moduleName)){
+                        int response = JOptionPane.showConfirmDialog(
+                                this, 
+                                "The module: [" + moduleName + "] is being used.\nDo you want to save the module?, module instances will be automatically updated.", 
+                                "Module is being used", 
+                                JOptionPane.YES_NO_OPTION, 
+                                JOptionPane.WARNING_MESSAGE);
+                        if(response != JOptionPane.YES_OPTION)
+                            return;
                     }
                 }else{
-                    saveMetadataFile = false;
+                    if(ModuleRepository.getInstance().getModuleNames().contains(moduleName)){
+                        JOptionPane.showMessageDialog(this, "Can't save the File, already exists a module named: [" + moduleName + "].", "Duplicated Module", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                 }
+                
+                saveMetadataFile = true;
             }
         }
         
@@ -208,8 +236,10 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         FileUtils.DeleteFile(newTarget);
         
         try {
-            if(newSource.hasBeenModified || !compiled)
+            if(newSource.hasBeenModified || !compiled){
                 compileLogic(module);
+                newSource.hasBeenModified = false;
+            }
             
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -235,7 +265,6 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
         }
-        newSource.hasBeenModified = false;
         addFilenameToTitle(newTarget.getName());
         modified = false;
         
@@ -300,6 +329,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         NodeList behaviour = document.getElementsByTagName("behaviour");
         newSource.setProgram(behaviour.item(0).getTextContent());
         newSource.hasBeenModified = false;
+        compiled = true;
         
         NodeList elements = document.getElementsByTagName("element");
         

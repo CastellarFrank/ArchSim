@@ -156,6 +156,7 @@ public class Loader {
         }
         
         ModuleRepository.getInstance().setMenuData(menus);
+        ModuleRepository.getInstance().notifySimulationWindows();
     }
     
     public List<ModuleLoadingError> getLoadingErrors(){
@@ -188,12 +189,19 @@ public class Loader {
             if (!parsed.hasModuleInstances()) {
                 moduleInfo.setIsLeaf(true);
             }
-
-            ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
-            ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
-            ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
-            ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
-
+            
+            ModuleRepository.registeringModuleLock.writeLock().lock();
+            try{
+                ModuleRepository.getInstance().unregisterModule(moduleInfo.getModuleName());
+                ModuleRepository.getInstance().registerModuleLogic(moduleInfo.getModuleName(), parsed);
+                ModuleRepository.getInstance().registerModule(moduleInfo.getModuleName(), moduleInfo);
+                ModuleRepository.getInstance().addDesignPrototype(moduleInfo.getModuleName(), file);
+            }finally{
+                ModuleRepository.registeringModuleLock.writeLock().unlock();
+            }
+            
+            ModuleRepository.getInstance().updateModuleChips(moduleInfo.getModuleName());
+           
             MenuInfo info = new MenuInfo(moduleInfo.getModuleName(), true);
             this.loadingModuleLogsList.add("The module: [" + moduleInfo.getModuleName() + "] was succesfully loaded.");
             return info;

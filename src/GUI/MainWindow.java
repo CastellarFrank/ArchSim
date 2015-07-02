@@ -10,6 +10,7 @@ import DataStructures.ModuleRepository;
 import GUI.Design.DesignWindow;
 import GUI.NestedWatcher.Debugger;
 import GUI.Simulation.DrilldownWindow;
+import GUI.Simulation.SimulationCanvas;
 import GUI.Simulation.SimulationWindow;
 import Simulation.Configuration;
 import java.awt.Dimension;
@@ -50,6 +51,7 @@ public class MainWindow extends javax.swing.JFrame {
         initComponents();
         setPreferredSize(new Dimension(1280, 800));
         this.simulationWindows = new ArrayList<SimulationWindow>();
+        ModuleRepository.getInstance().setParentComponent(this);
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
         Loader.getInstance().setup();
         
@@ -375,6 +377,14 @@ public class MainWindow extends javax.swing.JFrame {
 
     public void removeSimulationWindow(SimulationWindow simulationWindow) {
         this.simulationWindows.remove(simulationWindow);
+    }
+    
+    public void updateSimulationWindows(){
+        for(SimulationWindow simulation : this.simulationWindows){
+            SimulationCanvas canvas = simulation.getCanvasElement();
+            canvas.setRefreshModules(true);
+            canvas.prepareForReanalysis();
+        }
     }
 
     private void popUpModuleErrors() {

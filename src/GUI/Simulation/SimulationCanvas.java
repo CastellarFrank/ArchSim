@@ -4,6 +4,7 @@
  */
 package GUI.Simulation;
 
+import DataStructures.ModuleRepository;
 import Exceptions.ArchException;
 import GUI.ContainerPanel;
 import GUI.Edit.EditionDialog;
@@ -213,7 +214,9 @@ public class SimulationCanvas extends ContainerPanel implements
 
         if (e.getClickCount() == 1 && deleting && mouseComponent != null) {
             if (mouseComponent instanceof ModuleChip) {
-                simulationScope.unregister(((ModuleChip)mouseComponent).getModuleInstanceId());
+                ModuleChip moduleChip = (ModuleChip)mouseComponent;
+                simulationScope.unregister(moduleChip.getModuleInstanceId());
+                ModuleRepository.getInstance().unregisterModuleChip(moduleChip.getModuleName(), moduleChip);
             }else if(mouseComponent instanceof ClockInput){
                 this.clockEventManagement.removeClock((ClockInput)mouseComponent);
             }
@@ -420,7 +423,9 @@ public class SimulationCanvas extends ContainerPanel implements
                 if (elements.get(i).isSelected()) {
                     BaseElement element = elements.get(i);
                     if (element instanceof ModuleChip) {
-                        simulationScope.unregister(((ModuleChip)element).getModuleInstanceId());
+                        ModuleChip moduleChip = (ModuleChip)element;
+                        simulationScope.unregister(moduleChip.getModuleInstanceId());
+                        ModuleRepository.getInstance().unregisterModuleChip(moduleChip.getModuleName(), moduleChip);
                     }else if(element instanceof ClockInput){
                         this.clockEventManagement.removeClock((ClockInput)element);
                     }
@@ -459,5 +464,9 @@ public class SimulationCanvas extends ContainerPanel implements
         for (DrilldownWindow window : drilldowns) {
             window.dispose();
         }
+    }
+
+    public void setRefreshModules(boolean b) {
+        this.refreshModules = true;
     }
 }

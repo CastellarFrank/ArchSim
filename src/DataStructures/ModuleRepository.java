@@ -4,13 +4,19 @@
  */
 package DataStructures;
 
+import GUI.MainWindow;
 import GUI.MenuInfo;
 import Simulation.Configuration;
+import Simulation.Elements.ModuleChip;
 import VerilogCompiler.SyntacticTree.Declarations.ModuleDecl;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -28,11 +34,16 @@ import org.w3c.dom.NodeList;
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
  */
 public class ModuleRepository {
-
+    
+    public static final ReadWriteLock  registeringModuleLock = new ReentrantReadWriteLock();
+    public final Object registeringModuleChipLock = new Object();
+    
+    private MainWindow parent;
     private HashMap<String, ModuleInfo> moduleInfos;
     private HashMap<String, ModuleDecl> modulesLogic;
     private HashMap<String, Element> designPrototypes;
     private ArrayList<MenuInfo> menuData;
+    private Map<String, List<ModuleChip>> moduleChipsByModuleName;
     
     private HashMap<String, Integer> moduleIndexes;
 
@@ -41,6 +52,7 @@ public class ModuleRepository {
         designPrototypes = new HashMap<String, Element>();
         modulesLogic = new HashMap<String, ModuleDecl>();
         moduleIndexes = new HashMap<String, Integer>();
+        this.moduleChipsByModuleName = new HashMap<String, List<ModuleChip>>();
     }
     
     public int getNextIndex(String moduleName) {
@@ -197,6 +209,52 @@ public class ModuleRepository {
         return ModuleRepositoryHolder.INSTANCE;
     }
 
+    public void registerModuleChip(String moduleName, ModuleChip moduleChip) {
+        synchronized(this.registeringModuleChipLock){
+            if(this.moduleChipsByModuleName.containsKey(moduleName)){
+                this.moduleChipsByModuleName.get(moduleName).add(moduleChip);
+            }else{
+                List<ModuleChip> moduleChips = new ArrayList<ModuleChip>();
+                moduleChips.add(moduleChip);
+                this.moduleChipsByModuleName.put(moduleName, moduleChips);
+            }
+        }
+    }
+    
+    public void unregisterModuleChip(String moduleName, ModuleChip moduleChip){
+        synchronized(this.registeringModuleChipLock){
+            if(!this.moduleChipsByModuleName.containsKey(moduleName))
+                return;
+            this.moduleChipsByModuleName.get(moduleName).remove(moduleChip);
+        }
+    }
+    
+    public void updateModuleChips(String moduleName){
+        synchronized(this.registeringModuleChipLock){
+            if(!this.moduleChipsByModuleName.containsKey(moduleName))
+                return;
+            
+            for(ModuleChip moduleChip : this.moduleChipsByModuleName.get(moduleName))
+                moduleChip.setNeedsRefresh(true);
+        }
+    }
+    
+    public boolean isModuleBeingUsed(String moduleName){
+        if(!this.moduleChipsByModuleName.containsKey(moduleName))
+            return false;
+        
+        List<ModuleChip> chipList = this.moduleChipsByModuleName.get(moduleName);
+        return chipList != null && !chipList.isEmpty();
+    }
+
+    public void setParentComponent(MainWindow parent) {
+        this.parent = parent;
+    }
+
+    void notifySimulationWindows() {
+        this.parent.updateSimulationWindows();
+    }
+    
     private static class ModuleRepositoryHolder {
 
         private static final ModuleRepository INSTANCE = new ModuleRepository();

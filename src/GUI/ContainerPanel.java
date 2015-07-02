@@ -88,7 +88,7 @@ public class ContainerPanel extends JCanvas {
     protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
     protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
     protected boolean needsAnalysis = false, needsJointsAnalyze = false;
-    protected boolean runnable = true, circuitNonLinear, converged;
+    protected boolean runnable = true, circuitNonLinear, converged, refreshModules;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
@@ -724,7 +724,8 @@ public class ContainerPanel extends JCanvas {
         element.x2 = snapGrid(element.x2);
         element.y2 = snapGrid(element.y2);
         element.setPoints();
-
+        
+        //remove
         if (!(element instanceof ModuleChip) && element.x == element.x2 && element.y == element.y2) {
             if(element instanceof ClockInput)
                 clockEventManagement.removeClock((ClockInput)element);
@@ -1281,6 +1282,8 @@ public class ContainerPanel extends JCanvas {
 
         for (BaseElement baseElement : elements) {
             baseElement.stampVoltages();
+            System.out.println("-------------------\nElement: " + baseElement.getClass().toString());
+            MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
         }
         
         //<editor-fold defaultstate="collapsed" desc="Closures">
@@ -1495,12 +1498,20 @@ public class ContainerPanel extends JCanvas {
         /* Ordering BaseElement list to improve analysis of Joints*/
         Vector<BaseElement> newList = new Vector<BaseElement>();
         Vector<BaseElement> wiresList = new Vector<BaseElement>();
+        boolean refreshNeeded = this.refreshModules;
+        this.refreshModules = false;
         for(BaseElement element : this.elements){
             if(element.isWire()){
                 wiresList.add(element);
                 ((Wire)element).clearJoinInput();
             }else{
-                newList.add(element);
+                if(refreshNeeded && element instanceof ModuleChip){
+                    if(((ModuleChip)element).needsRefresh()){
+                        newList.add(element);
+                    }
+                }else{
+                    newList.add(element);
+                }
             }
             element.clearForAnalysis();
         }

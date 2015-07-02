@@ -7,7 +7,6 @@ package GUI.Simulation;
 import GUI.Design.DesignWindow;
 import GUI.MainWindow;
 import GUI.MenuInfo;
-import Simulation.Elements.BaseElement;
 import Simulation.Elements.Gates.AndGate;
 import Simulation.Elements.Gates.NandGate;
 import Simulation.Elements.Gates.NorGate;
@@ -606,5 +605,9 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
     @Override
     public void actionPerformed(ActionEvent e) {
         setAddingElementInfo(ModuleChip.class.getName(), new String[] {e.getActionCommand()});      
+    }
+
+    public SimulationCanvas getCanvasElement() {
+        return this.canvas;
     }
 }

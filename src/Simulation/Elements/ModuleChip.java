@@ -51,6 +51,7 @@ public class ModuleChip extends BaseElement {
     
     private String userReference;
     //</editor-fold>
+    private boolean refresh;
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ModuleChip(int x, int y, String[] extraParams) {
@@ -88,14 +89,26 @@ public class ModuleChip extends BaseElement {
     @Override
     public void setContainerPanel(ContainerPanel containerPanel) {
         super.setContainerPanel(containerPanel);
-        moduleInstance = ModuleRepository.getInstance().getModuleLogic(moduleName);
-        moduleInstanceId = ModuleInstanceIdGenerator.generate();
-        InstanceModuleScope scope = moduleInstance.getScope();
-        this.containerPanel.simulationScope.register(moduleInstanceId, scope);
+        ModuleRepository.registeringModuleLock.readLock().lock();
+        try{
+            moduleInstance = ModuleRepository.getInstance().getModuleLogic(moduleName);
+            moduleInstanceId = ModuleInstanceIdGenerator.generate();
+            InstanceModuleScope scope = moduleInstance.getScope();
+            this.containerPanel.simulationScope.register(moduleInstanceId, scope);
+            ModuleRepository.getInstance().registerModuleChip(moduleName, this);
+        }finally{
+            ModuleRepository.registeringModuleLock.readLock().unlock();
+        }
     }   
 
     private void newInit(int realX, int realY, String moduleName) {
-        Element element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
+        Element element; 
+        ModuleRepository.registeringModuleLock.readLock().lock();
+        try{
+            element = ModuleRepository.getInstance().getDesignPrototype(moduleName);
+        }finally{
+            ModuleRepository.registeringModuleLock.readLock().unlock();
+        }
         if (element == null) {
             throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
         }
@@ -130,6 +143,7 @@ public class ModuleChip extends BaseElement {
     }
 
     private void setupPorts(NodeList ports) {
+        this.voltageSources.clear();
         this.ports = new PortElement[ports.getLength()];
 
         for (int i = 0; i < ports.getLength(); i++) {
@@ -185,7 +199,7 @@ public class ModuleChip extends BaseElement {
         for (int i = 0; i < getPostCount(); i++) {
             if (ports[i].isOutput && voltageSources.contains(i)) {
                 containerPanel.stampVoltageSource(0, joints[i], ports[i].voltageSourceIndex,
-                        0, ports[i].previousValue);
+                        voltages[i], ports[i].previousValue);
             }
         }
     }
@@ -298,6 +312,18 @@ public class ModuleChip extends BaseElement {
     public boolean needsPropagation() {
         return true;
     }
+
+    @Override
+    public void clearForAnalysis() {
+        if(this.refresh){
+            this.refresh = false;
+            this.newInit(x, y, moduleName);
+        }
+        
+        super.clearForAnalysis();
+    }
+    
+    
     
     public void otherDraw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
@@ -306,15 +332,6 @@ public class ModuleChip extends BaseElement {
 
         for (int i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
-            if (p.isOutput) {
-                if (binaryValues != null && binaryValues[i] != null 
-                        && !binaryValues[i].contains("z")
-                        && !binaryValues[i].contains("x")
-                        && !binaryValues[i].replaceAll("0", "").isEmpty())
-                    voltages[i] = Configuration.LOGIC_1_VOLTAGE;
-                else
-                    voltages[i] = Configuration.LOGIC_0_VOLTAGE;
-            }
             p.voltage = voltages[i];
             p.draw(g2d, joints[i]);
         }
@@ -375,7 +392,13 @@ public class ModuleChip extends BaseElement {
                         .getFormattedValue(moduleInstanceId, ports[i].portName);
                 binaryValues[i] = value == null ? "z" : value;
                 ports[i].previousValue = binaryValues[i];
-                
+                if (binaryValues != null && binaryValues[i] != null 
+                        && !binaryValues[i].contains("z")
+                        && !binaryValues[i].contains("x")
+                        && !binaryValues[i].replaceAll("0", "").isEmpty())
+                    voltages[i] = Configuration.LOGIC_1_VOLTAGE;
+                else
+                    voltages[i] = Configuration.LOGIC_0_VOLTAGE;
             }
         }
     }
@@ -424,6 +447,14 @@ public class ModuleChip extends BaseElement {
         element.appendChild(extraParam0);
 
         return element;
+    }
+
+    public void setNeedsRefresh(boolean b) {
+        this.refresh = b;
+    }
+
+    public boolean needsRefresh() {
+        return this.refresh;
     }
 
     class PortElement {
