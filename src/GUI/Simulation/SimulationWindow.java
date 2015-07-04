@@ -131,7 +131,11 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         JMenu menu = new JMenu(info.label);
         
         for (MenuInfo child : info.children) {
-            menu.add(makeMenuItem(child.label));
+            if(child.isMenuItem){
+                menu.add(makeMenuItem(child.label));
+            }else{
+                menu.add(makeMenu(child));
+            }
         }
         
         return menu;

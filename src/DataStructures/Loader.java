@@ -124,35 +124,9 @@ public class Loader {
         ArrayList<MenuInfo> menus = new ArrayList<MenuInfo>();
 
         for (File file : modules) {
-            if (file.isFile()) {
-                this.loadingModuleLogsList.clear();
-                MenuInfo info = checkPossibleModule(file);
-                if (info == null) {
-                    this.moduleLoadingErrorList.add(new ModuleLoadingError(file.getName(), loadingModuleLogsList));
-                }else{
-                    menus.add(info);
-                }
-            } else {
-                String folder = file.getName();
-                MenuInfo dir = new MenuInfo(folder, false);
-
-                List<File> project = (List<File>) FileUtils.listFiles(file, null, true);
-
-                for (File projectModule : project) {
-                    if(!projectModule.isFile())
-                        continue;
-                    
-                    this.loadingModuleLogsList.clear();
-                    MenuInfo info = checkPossibleModule(projectModule);
-                    if (info == null) {
-                        this.moduleLoadingErrorList.add(new ModuleLoadingError(projectModule.getName(), loadingModuleLogsList));
-                    }else{
-                        dir.addChild(info);
-                    }
-                }
-                
-                menus.add(dir);
-            }
+            MenuInfo element = this.getMenuInfoFromFile(file);
+            if(element != null)
+                menus.add(element);
         }
         
         ModuleRepository.getInstance().setMenuData(menus);
@@ -385,6 +359,32 @@ public class Loader {
             System.out.println(ex.getMessage());
         }
         return null;
+    }
+    
+    private MenuInfo getMenuInfoFromFile(File file){
+        if(file == null)
+            return null;
+        
+        if (file.isFile()) {
+            this.loadingModuleLogsList.clear();
+            MenuInfo info = checkPossibleModule(file);
+            if (info == null) 
+                this.moduleLoadingErrorList.add(new ModuleLoadingError(file.getName(), loadingModuleLogsList));
+            
+            return info;
+        } else {
+            String folder = file.getName();
+            MenuInfo dir = new MenuInfo(folder, false);
+            
+            File[] childElements = file.listFiles();
+            for (File childElement : childElements) {  
+                MenuInfo childMenuInfo = this.getMenuInfoFromFile(childElement);
+                if(childMenuInfo != null)
+                    dir.addChild(childMenuInfo);
+            }
+            
+            return dir;
+        }
     }
 
     private static class LoaderHolder {

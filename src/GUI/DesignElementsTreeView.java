@@ -19,25 +19,17 @@ import Simulation.Elements.ModuleChip;
 import Simulation.Elements.Outputs.LogicOutput;
 import Simulation.Elements.Outputs.MultiBitsOutput;
 import Simulation.Elements.Wire;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
-import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -108,16 +100,29 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
 
     void updateModuleSection(List<MenuInfo> moduleMenus) {
         this.moduleSection.removeAllChildren();
+        
         for(MenuInfo menu : moduleMenus){
-            if(menu.isMenuItem){
-                this.moduleSection.add(new DesignElementTreeNode(menu.label, ModuleChip.class.getName(), menu.label));
-            }else{
-                DefaultMutableTreeNode subFolder = new DefaultMutableTreeNode(menu.label);
-                this.moduleSection.add(subFolder);
-                for(MenuInfo menuItem : menu.children){
-                    subFolder.add(new DesignElementTreeNode(menuItem.label, ModuleChip.class.getName(), menuItem.label));
-                }
+            DefaultMutableTreeNode menuElement = getTreeNodeFromMenuInfo(menu);
+            if(menuElement != null)
+                this.moduleSection.add(menuElement);
+        }
+    }
+    
+    DefaultMutableTreeNode getTreeNodeFromMenuInfo(MenuInfo menu){
+        if(menu == null)
+            return null;
+        
+        if(menu.isMenuItem){
+            return new DesignElementTreeNode(menu.label, ModuleChip.class.getName(), menu.label);
+        }else{
+            DefaultMutableTreeNode subFolder = new DefaultMutableTreeNode(menu.label);
+            this.moduleSection.add(subFolder);
+            for(MenuInfo menuItem : menu.children){
+                DefaultMutableTreeNode childMenu = this.getTreeNodeFromMenuInfo(menuItem);
+                if(childMenu != null)
+                    subFolder.add(childMenu);
             }
+            return subFolder;
         }
     }
 

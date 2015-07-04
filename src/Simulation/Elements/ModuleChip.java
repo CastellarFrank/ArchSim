@@ -113,7 +113,7 @@ public class ModuleChip extends BaseElement {
             throw new ModuleDesignNotFoundException(moduleName + "'s design was not found");
         }
         this.moduleName = element.getAttribute("moduleName");
-        this.userReference = this.moduleName + ModuleRepository.getInstance().getNextIndex(this.moduleName);
+        this.userReference = this.moduleName + "_" + ModuleRepository.getInstance().getNextIndex(this.moduleName);
         textX = Integer.parseInt(element.getAttribute("textX"));
         textY = Integer.parseInt(element.getAttribute("textY"));
 
