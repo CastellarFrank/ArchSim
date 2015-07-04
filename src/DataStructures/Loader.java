@@ -173,6 +173,12 @@ public class Loader {
         ModuleDecl parsed = getModuleLogic(source);
         if (parsed != null) {
             
+            //Checking if already exists a module with the same name.
+            if(ModuleRepository.getInstance().moduleIsRegistered(parsed.getModuleName())){
+                this.loadingModuleLogsList.add("Already exists a module named: [" + parsed.getModuleName()+ "].");
+                return null;
+            }
+            
             //Before checking if MetaDataFile exists, the module would be re-compiled.
             if(!DesignWindow.saveModuleMetadata(parsed)){
                 this.loadingModuleLogsList.add("Couldn't create a MetadataFile for module: [" + file.getName() +"].");
