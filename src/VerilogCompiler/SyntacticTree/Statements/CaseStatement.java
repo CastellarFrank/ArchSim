@@ -84,7 +84,7 @@ public class CaseStatement extends Statement {
                                 (expressionValue.xValue && value.xValue ||
                                 expressionValue.zValue && value.zValue ||
                                 value.value != null && 
-                                Convert.getInteger(expressionValue) == Convert.getInteger(value))) {
+                                Convert.getInteger(expressionValue).compareTo(Convert.getInteger(value)) == 0)) {
                             caseItem.execute(simulationScope, moduleName);
                             return;
                         }

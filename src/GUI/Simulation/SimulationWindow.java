@@ -533,7 +533,7 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             canvas.pause();
             pauseContinueMenu.setText(this.continueExecutionText);
         }
-        canvas.prepareForReanalysis();
+        canvas.prepareForAnalysis();
     }//GEN-LAST:event_pauseContinueMenuActionPerformed
 
     private void inverterMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inverterMenuActionPerformed

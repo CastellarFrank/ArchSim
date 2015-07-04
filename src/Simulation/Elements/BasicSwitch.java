@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 public class BasicSwitch extends BaseElement {
 
     public boolean isOpen;
+    public boolean toggleAtClicking = true;
 
     public BasicSwitch(int x, int y) {
         super(x, y);

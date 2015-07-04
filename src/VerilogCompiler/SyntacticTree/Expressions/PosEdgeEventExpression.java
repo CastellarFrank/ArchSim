@@ -15,9 +15,8 @@ import VerilogCompiler.SyntacticTree.VNode;
  */
 public class PosEdgeEventExpression extends EventExpression {
     Expression expression;
-    ExpressionValue previousValue = new ExpressionValue(1, 1);
-    
-    Integer prevCondition = 0;
+    long previousValue;
+    boolean isXorZvalue = true;
 
     public PosEdgeEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -47,20 +46,28 @@ public class PosEdgeEventExpression extends EventExpression {
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleInstanceId) {
         ExpressionValue newValue = expression.evaluate(simulationScope, moduleInstanceId);
         
-        if (newValue.xValue || newValue.zValue)
-            return new ExpressionValue();
-        
-        Integer nValue = Integer.parseInt(newValue.value.toString());       
-        
-        previousValue = newValue;
-        
-        int prev = prevCondition.intValue();
-        prevCondition = nValue;
-        
-        if (prev == 0 && nValue == 1)
-            return new ExpressionValue(1, 1);
-        else 
-            return new ExpressionValue(0, 1);
+        if(isXorZvalue){
+            if (!newValue.xValue && !newValue.zValue){
+                this.isXorZvalue = false;
+                long newLongValue = Long.parseLong(newValue.value.toString());
+                this.previousValue = newLongValue;
+                if(newLongValue  == 1)
+                    return new ExpressionValue(1, 1);
+            }
+        }else{
+            if(this.previousValue == 0){
+                if(newValue.xValue || newValue.zValue){
+                    this.isXorZvalue = true;
+                    return new ExpressionValue(1, 1);
+                }else{
+                    long newLongValue = Long.parseLong(newValue.value.toString());
+                    this.previousValue = newLongValue;
+                    if(newLongValue == 1)
+                        return new ExpressionValue(1, 1);
+                }
+            }
+        }
+        return new ExpressionValue(0, 1);
     }
 
     @Override
@@ -72,8 +79,6 @@ public class PosEdgeEventExpression extends EventExpression {
 
     @Override
     public void clearEvent() {
-        previousValue = new ExpressionValue(1, 1);
-        prevCondition = 0;
+        this.isXorZvalue = true;
     }
-    
 }

@@ -41,6 +41,7 @@ public class ClockInput extends BasicSwitch {
     public ClockInput(int x, int y) throws ArchException {
         super(x, y);
         this.isOpen = true;
+        this.toggleAtClicking = false;
     }
 
     public ClockInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
@@ -49,18 +50,17 @@ public class ClockInput extends BasicSwitch {
         this.enabled = Boolean.parseBoolean(extraParams[1]);
         this.timerInMiliSeconds = Long.parseLong(extraParams[2]);
         this.userReference = extraParams[3];
+        this.toggleAtClicking = false;
     }
 
     public ClockInput(int x, int y, int x2, int y2, int flags) throws ArchException {
         super(x, y, x2, y2, flags);
         this.isOpen = true;
+        this.toggleAtClicking = false;
     }
     
     @Override
     public void toggle() {
-    }
-    
-    public void manualToggle(){
         this.isOpen = !isOpen;
     }
     

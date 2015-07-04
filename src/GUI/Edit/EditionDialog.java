@@ -197,7 +197,7 @@ public class EditionDialog extends javax.swing.JDialog {
         if (saveLogic()) {
             Container parent = getParent();
             if(this.simulationCanvasElement != null)
-                this.simulationCanvasElement.prepareForReanalysis();
+                this.simulationCanvasElement.prepareRunWithoutAnalysis();
             else{
                 parent.repaint();
             }

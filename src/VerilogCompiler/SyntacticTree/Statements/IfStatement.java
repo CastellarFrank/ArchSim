@@ -73,8 +73,8 @@ public class IfStatement extends Statement {
         
         if (value != null){
             if(value.xValue || value.zValue)
-                return;
-            if(value.value != null)
+                intValue = 0;
+            else if(value.value != null)
                 intValue = Integer.parseInt(value.value.toString());
         }
         if (intValue == 1)

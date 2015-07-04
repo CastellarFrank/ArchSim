@@ -333,7 +333,7 @@ public class ModuleChip extends BaseElement {
         for (int i = 0; i != getPostCount(); i++) {
             PortElement p = ports[i];
             p.voltage = voltages[i];
-            p.draw(g2d, joints[i]);
+            p.draw(g2d, joints[i], i);
         }
 
         Color old = g2d.getBackground();
@@ -494,10 +494,20 @@ public class ModuleChip extends BaseElement {
             textPosition = new Point(xa, ya);
         }
 
-        public void draw(Graphics g, int jointIndex) {
+        public void draw(Graphics g, int jointIndex, int position) {
             Color old = g.getColor();
             
-            setVoltageColor(g, voltage);
+            if (binaryValues != null && binaryValues[position] != null) {
+                if (needsHighlight())
+                    g.setColor(BaseElement.selectedColor);
+                else if (binaryValues[position].contains("z"))
+                    g.setColor(BaseElement.highImpedanceSignalColor);
+                else if (binaryValues[position].contains("x"))
+                    g.setColor(BaseElement.unknownSignalColor);
+                else
+                    setVoltageColor(g, voltages[position]);
+            }
+            
             drawThickLine(g, post, stub);
             g.setColor(old);
             

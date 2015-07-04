@@ -15,9 +15,8 @@ import VerilogCompiler.SyntacticTree.VNode;
  */
 public class NegEdgeEventExpression extends EventExpression {
     Expression expression;
-    ExpressionValue previousValue = new ExpressionValue(0, 1);
-    
-    Integer prevCondition = 0;
+    long previousValue;
+    boolean isXorZValue = true;
 
     public NegEdgeEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -48,20 +47,29 @@ public class NegEdgeEventExpression extends EventExpression {
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleInstanceId) {
         ExpressionValue newValue = expression.evaluate(simulationScope, moduleInstanceId);
         
-        if (newValue.xValue || newValue.zValue)
-            return new ExpressionValue();
+        if(isXorZValue){
+            if (!newValue.xValue && !newValue.zValue){
+                this.isXorZValue = false;
+                long newLongValue = Long.parseLong(newValue.value.toString());
+                this.previousValue = newLongValue;
+                if(newLongValue  == 0)
+                    return new ExpressionValue(1, 1);
+            }
+        }else{
+            if(previousValue == 1){
+                if(newValue.xValue || newValue.zValue){
+                    this.isXorZValue = true;
+                    return new ExpressionValue(1, 1);
+                }else{
+                    long newLongValue = Long.parseLong(newValue.value.toString());
+                    this.previousValue = newLongValue;
+                    if(newLongValue == 0)
+                        return new ExpressionValue(1, 1);
+                }
+            }
+        }
         
-        Integer nValue = Integer.parseInt(newValue.value.toString());       
-        
-        previousValue = newValue;
-        
-        int prev = prevCondition.intValue();
-        prevCondition = nValue;
-        
-        if (prev == 1 && nValue == 0)
-            return new ExpressionValue(1, 1);
-        else 
-            return new ExpressionValue(0, 1);
+        return new ExpressionValue(0, 1);
     }
 
     @Override
@@ -71,7 +79,6 @@ public class NegEdgeEventExpression extends EventExpression {
 
     @Override
     public void clearEvent() {
-        previousValue = new ExpressionValue(0, 1);
-        prevCondition = 0;
+        this.isXorZValue = true;
     }
 }

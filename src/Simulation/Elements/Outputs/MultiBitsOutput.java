@@ -48,7 +48,7 @@ public class MultiBitsOutput extends BaseElement {
         Font f = fontSimulationNumberType;
         g.setFont(f);
         g.setColor(needsHighlight() ? selectedColor : defaultColor);
-        setBbox(point1, lead1, 0);
+        setBbox(point1, lead1, 0); 
         drawText(g, binaryValues[0]);
         
         

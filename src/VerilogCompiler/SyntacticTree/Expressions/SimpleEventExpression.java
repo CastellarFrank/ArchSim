@@ -16,7 +16,8 @@ import java.math.BigInteger;
  */
 public class SimpleEventExpression extends EventExpression {
     Expression expression;
-    int previousValue = Integer.MIN_VALUE;
+    long previousValue;
+    boolean isXorZValue = true;
 
     public SimpleEventExpression(Expression expression, int line, int column) {
         super(line, column);
@@ -43,16 +44,25 @@ public class SimpleEventExpression extends EventExpression {
 
     @Override
     public ExpressionValue evaluate(SimulationScope simulationScope, String moduleName) {
-        ExpressionValue exp = expression.evaluate(simulationScope, moduleName);
+        ExpressionValue newValue = expression.evaluate(simulationScope, moduleName);
         
-        if (exp.xValue || exp.zValue) {
-            return new ExpressionValue();
-        }
-        BigInteger intValue = new BigInteger(exp.value.toString());
-        
-        if (previousValue != intValue.intValue()) {
-            previousValue = intValue.intValue();
-            return new ExpressionValue(1, 1);
+        if(isXorZValue){
+            if(!newValue.xValue && !newValue.zValue){
+                this.isXorZValue = false;
+                this.previousValue = new BigInteger(newValue.value.toString()).longValue();
+                return new ExpressionValue(1, 1);
+            }   
+        }else{
+            if(newValue.xValue || newValue.zValue){
+                this.isXorZValue = true;
+                return new ExpressionValue(1, 1);
+            }else{
+                long prevLongValue = previousValue;
+                long newLongValue = new BigInteger(newValue.value.toString()).longValue();
+                this.previousValue = newLongValue;
+                if(prevLongValue != newLongValue)
+                    return new ExpressionValue(1, 1);
+            }
         }
         
         return new ExpressionValue(0, 1);
@@ -65,7 +75,7 @@ public class SimpleEventExpression extends EventExpression {
 
     @Override
     public void clearEvent() {
-        previousValue = Integer.MIN_VALUE;
+        this.isXorZValue = true;
     }
     
 }

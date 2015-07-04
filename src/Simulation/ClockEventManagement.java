@@ -91,7 +91,7 @@ public class ClockEventManagement {
                         List<ClockInput> clocks = entry.getValue();
                         for (ClockInput clock : clocks) {
                             if(clock.isEnabled()){
-                                clock.manualToggle();
+                                clock.toggle();
                                 anyToggled = true;
                             }
                             clocksIds.add(clock.getUniqueId());
@@ -100,7 +100,7 @@ public class ClockEventManagement {
                 }
                 this.makeSeriesChanges(clocksIds);
                 if(anyToggled){
-                    this.containerPanel.prepareForAnalysis();
+                    this.containerPanel.prepareRunWithoutAnalysis();
                     this.saveVariableValues(startExecutionTime);
                 }
             }

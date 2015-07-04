@@ -90,6 +90,7 @@ public class ContainerPanel extends JCanvas {
     protected boolean needsAnalysis = false, needsJointsAnalyze = false;
     protected boolean runnable = true, circuitNonLinear, converged, refreshModules;
     //</editor-fold>
+    protected boolean runWithoutAnalysis;
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
     /**
@@ -607,7 +608,7 @@ public class ContainerPanel extends JCanvas {
      * @param g graphics used to paint.
      */
     public void updatePreview(Graphics g) {
-        boolean currentState = needsAnalysis;
+        boolean needsRun = needsAnalysis || this.runWithoutAnalysis;
         if (needsAnalysis || needsJointsAnalyze) {
             this.analyze();
             needsAnalysis = false;
@@ -616,7 +617,8 @@ public class ContainerPanel extends JCanvas {
         
         printThings();
 
-        if (!isPaused && currentState) {
+        if (!isPaused && needsRun) {
+            this.runWithoutAnalysis = false;
             runStep();
             //analyze();
             if (watchesTableModel != null) {
@@ -1282,8 +1284,8 @@ public class ContainerPanel extends JCanvas {
 
         for (BaseElement baseElement : elements) {
             baseElement.stampVoltages();
-            System.out.println("-------------------\nElement: " + baseElement.getClass().toString());
-            MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
+//            System.out.println("-------------------\nElement: " + baseElement.getClass().toString());
+//            MatrixUtils.printNumberMatrix(temporalVoltageMatrix);
         }
         
         //<editor-fold defaultstate="collapsed" desc="Closures">
@@ -1554,5 +1556,10 @@ public class ContainerPanel extends JCanvas {
                 highestLevel = value;
         }        
         return highestLevel;
+    }
+
+    public void prepareRunWithoutAnalysis() {
+        this.runWithoutAnalysis = true;
+        this.repaint();
     }
 }

@@ -166,17 +166,13 @@ public class SimulationCanvas extends ContainerPanel implements
         });
     }
 
-    public void prepareForReanalysis() {
-        needsAnalysis = true;
-        repaint();
-    }
-
     public void checkForSwitchClicked() {
         if (mouseComponent instanceof BasicSwitch) {
             BasicSwitch component = (BasicSwitch) mouseComponent;
-            component.toggle();
-
-            prepareForReanalysis();
+            if(component.toggleAtClicking){
+                component.toggle();
+                this.prepareRunWithoutAnalysis();
+            }
         }
     }
 
@@ -208,7 +204,7 @@ public class SimulationCanvas extends ContainerPanel implements
                 constructAndAddElement(draggingClass, x, y, x + 50, y, draggingExtraParams);
                 draggingClass = null;
                 draggingExtraParams = null;
-                prepareForReanalysis();
+                this.prepareForAnalysis();
             }
         }
 
@@ -222,7 +218,7 @@ public class SimulationCanvas extends ContainerPanel implements
             }
             this.elements.remove(mouseComponent);
             mouseComponent = null;
-            prepareForReanalysis();
+            this.prepareForAnalysis();
         }
 
         if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
@@ -294,7 +290,7 @@ public class SimulationCanvas extends ContainerPanel implements
         selectedArea = null;
         if (newElementBeenDrawn != null) {
             addElement(newElementBeenDrawn);
-            prepareForReanalysis();
+            this.prepareForAnalysis();
             newElementBeenDrawn = null;
             this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
@@ -449,7 +445,7 @@ public class SimulationCanvas extends ContainerPanel implements
 
     @Override
     public void updatePreview(Graphics g) {
-        boolean needsRefresh = this.needsAnalysis || parent.debuggerRefresh;
+        boolean needsRefresh = this.needsAnalysis || parent.debuggerRefresh || this.runWithoutAnalysis;
         super.updatePreview(g);
         
         if (debugger != null && needsRefresh)

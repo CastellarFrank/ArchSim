@@ -383,7 +383,7 @@ public class MainWindow extends javax.swing.JFrame {
         for(SimulationWindow simulation : this.simulationWindows){
             SimulationCanvas canvas = simulation.getCanvasElement();
             canvas.setRefreshModules(true);
-            canvas.prepareForReanalysis();
+            canvas.prepareForAnalysis();
         }
     }
 
