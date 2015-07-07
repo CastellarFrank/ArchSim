@@ -5,12 +5,15 @@
 package GUI.NestedWatcher;
 
 import GUI.Watcher.WatchModelEntry;
+import GUI.Watcher.WatchModelEntryDataLog;
 import Simulation.Elements.ModuleChip;
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.SimulationScope;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
@@ -22,7 +25,10 @@ public class CustomTreeModel extends AbstractTreeTableModel {
 
     private String[] titles = {"Variable", "Binary Value", "Decimal Value", "Hex Value"};
     private ArrayList<WatchModelEntry> variables;
+    private List<WatchModelEntryDataLog> variableLogs;
     private SimulationScope scope;
+    private boolean useLogs = false;
+    private boolean logsLoaded = false;
 
     public CustomTreeModel(DefaultMutableTreeNode root) {
         super(root);        
@@ -35,7 +41,7 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     }
     
     public final DefaultMutableTreeNode generateRoot() {
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(null, null, null, null), true);
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(), true);
         ArrayList<WatchModelEntry> toDelete = new ArrayList<WatchModelEntry>();
         
         HashMap<String, DefaultMutableTreeNode> categories = new HashMap<String, DefaultMutableTreeNode>();
@@ -44,7 +50,7 @@ public class CustomTreeModel extends AbstractTreeTableModel {
             ModuleChip chip = watchModelEntry.chip;
             if (chip != null) {
                 if (categories.containsKey(chip.getUserReference())) continue;
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(chip.getUserReference(), true));
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(chip.getUserReference()));
                 categories.put(chip.getUserReference(), node);
             }
         }
@@ -61,14 +67,21 @@ public class CustomTreeModel extends AbstractTreeTableModel {
                 toDelete.add(watchModelEntry);
             else
                 if (info.isArray) {
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(null, variableName, moduleId, chip));
+                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(variableName, true));
                     Object[] values = (Object[]) scope.getVariableValue(moduleId, variableName).value;
                     for (int i = 0; i < values.length; i++) {
-                        node.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, i, chip), false));
+                        Object val = values[i];
+                        if (val != null && !val.toString().matches("[xXzZ]"))
+                            val = scope.padWithZeros(val, info.signalSize);
+                        String stringValue = val == null ? "z" : val.toString();
+                        node.add(new DefaultMutableTreeNode(new TableRowData(variableName, stringValue, info.isArray, i), false));
                     }
                     parent.add(node);
                 } else {
-                    parent.add(new DefaultMutableTreeNode(new TableRowData(scope, variableName, moduleId, chip)));
+                    ExpressionValue infoValue = scope.getVariableValue(moduleId, variableName);
+                    Object val = infoValue == null ? null : infoValue.getValueAsString();
+                    String stringValue = val == null ? "z" : scope.getFormattedValue(moduleId, variableName);
+                    parent.add(new DefaultMutableTreeNode(new TableRowData(variableName, stringValue, info.isArray)));
                 }
         }
         
@@ -85,8 +98,18 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     }
     
     public void refresh() {
-        root = generateRoot();
+        if(!this.useLogs){
+            this.root = generateRoot();
+            return;
+        }
+        
+        if(this.logsLoaded)
+            return;
+        
+        this.logsLoaded = true;
+        this.root = generateLogsRoot();
     }
+    
     
     public void clear() {
         variables.clear();
@@ -208,6 +231,13 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     public boolean isLeaf(Object node) {
         return getChildCount(node) == 0;
     }
-    
-    
+
+    void changeCurrentLogEntries(List<WatchModelEntryDataLog> entries, boolean useLogs) {
+        this.variableLogs = entries;
+        this.useLogs = useLogs;
+    }
+
+    private DefaultMutableTreeNode generateLogsRoot() {
+        return this.generateRoot();
+    }    
 }

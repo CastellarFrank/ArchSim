@@ -53,8 +53,6 @@ public class SimulationCanvas extends ContainerPanel implements
     public boolean deleting = false;
     public JPopupMenu pop;
     
-    Debugger debugger;
-    
     ArrayList<DrilldownWindow> drilldowns;
     
     public WatchesTableModel getWatchingVariables() {

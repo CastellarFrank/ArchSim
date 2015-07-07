@@ -81,7 +81,13 @@ public class ExpressionValue {
     }
     
     public void setToZValue(){
-        this.value = "z";
+        if(this.value instanceof Object[]){
+            Object[] values = (Object[]) value;
+            for(int i = 0; i<values.length; i++)
+                values [i] = "z";
+        }else{
+            this.value = "z";
+        }
         this.bits = 1;
         this.base = Base.BINARY;
         this.xValue = false;
@@ -89,7 +95,13 @@ public class ExpressionValue {
     }
     
     public void setToXValue(){
-        this.value = "x";
+        if(this.value instanceof Object[]){
+            Object[] values = (Object[]) value;
+            for(int i = 0; i<values.length; i++)
+                values [i] = "x";
+        }else{
+            this.value = "x";
+        }
         this.bits = 1;
         this.base = Base.BINARY;
         this.xValue = true;

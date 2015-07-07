@@ -6,6 +6,7 @@ package GUI;
 
 import DataStructures.CircuitGenerator;
 import GUI.NestedWatcher.CustomTreeModel;
+import GUI.NestedWatcher.Debugger;
 import GUI.Watcher.WatchesTableModel;
 import Simulation.ClockEventManagement;
 import Simulation.Configuration;
@@ -70,6 +71,8 @@ public class ContainerPanel extends JCanvas {
      */
     public WatchesTableModel watchesTableModel = null;
     public CustomTreeModel debuggerModel = null;
+    public Debugger debugger;
+    
     protected Vector<BaseElement> elements;
     protected BaseElement[] voltageSourceElements;
     protected Vector<Joint> joints;
@@ -609,6 +612,7 @@ public class ContainerPanel extends JCanvas {
      */
     public void updatePreview(Graphics g) {
         boolean needsRun = needsAnalysis || this.runWithoutAnalysis;
+        this.runWithoutAnalysis = false;
         if (needsAnalysis || needsJointsAnalyze) {
             this.analyze();
             needsAnalysis = false;
@@ -616,13 +620,15 @@ public class ContainerPanel extends JCanvas {
         }
         
         printThings();
-
+        
         if (!isPaused && needsRun) {
-            this.runWithoutAnalysis = false;
             runStep();
             //analyze();
             if (watchesTableModel != null) {
                 watchesTableModel.updateValues();
+                if(this.debugger != null){
+                    this.debugger.saveVariablesIfNeeded(watchesTableModel.getModelData());
+                }
             }
             
             long sysTime = System.currentTimeMillis();

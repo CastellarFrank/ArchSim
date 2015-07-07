@@ -4,11 +4,6 @@
  */
 package GUI.NestedWatcher;
 
-import Simulation.Elements.ModuleChip;
-import VerilogCompiler.Interpretation.ExpressionValue;
-import VerilogCompiler.Interpretation.SimulationScope;
-import VerilogCompiler.SemanticCheck.VariableInfo;
-
 /**
  *
  * @author Néstor A. Bermúdez < nestor.bermudezs@gmail.com >
@@ -16,81 +11,39 @@ import VerilogCompiler.SemanticCheck.VariableInfo;
 public class TableRowData {
 
     private String variableName;
-    private String value;
+    private String stringValue;
     private int index = -1;
-    private String moduleInstanceId;
     private boolean isRoot;
     private boolean isCategory;
-    ModuleChip chip;
     
-    public TableRowData(String label, boolean isCategory) {
+    public TableRowData(){
+        this.isCategory = false;
+        this.isRoot = true;
+        this.stringValue = "[...]";
+    }
+    
+    public TableRowData(String label) {
         this.variableName = label;
-        this.isCategory = isCategory;
+        this.isCategory = true;
     }
-
-    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, ModuleChip chip) {
-        this.variableName = variableName;
-        this.moduleInstanceId = moduleInstanceId;
-        this.chip = chip;
+    
+    public TableRowData(String variableName, boolean isArrayHeader){
+         this.variableName = variableName;
         this.isCategory = false;
-        if (scope == null) {
-            this.isRoot = true;
-            this.value = "[...]";
-        } else {
-            this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
-            ExpressionValue info = scope.getVariableValue(moduleInstanceId, variableName);
-            Object val = info == null ? null : info.getValueAsString();
-            this.value = val == null ? "z" : scope.getFormattedValue(moduleInstanceId, variableName);
-            try {
-                Integer vale = Integer.parseInt(value, 2);
-                //this.value = this.value + " (" + vale + ")";
-            } catch (Exception e) {
-            }
-        }
+        this.isRoot = true;
+        this.stringValue = "[...]";
     }
 
-    public TableRowData(SimulationScope scope, String variableName, String moduleInstanceId, int index, ModuleChip chip) {
+    public TableRowData(String variableName, String value, boolean isArray) {
         this.variableName = variableName;
-        this.moduleInstanceId = moduleInstanceId;
-        this.index = index;
-        this.chip = chip;
         this.isCategory = false;
-        if (scope == null) {
-            this.isRoot = true;
-            this.value = "[...]";
-        } else {
-            this.isRoot = scope.getVariableInfo(moduleInstanceId, variableName).isArray;
-            VariableInfo info = scope.getVariableInfo(moduleInstanceId, variableName);
-            if (isRoot) {                
-                Object val = ((Object[]) scope.getVariableValue(moduleInstanceId, variableName).value)[index];
-                if (val != null)
-                    val = scope.padWithZeros(val, info.signalSize);
-                this.value = val == null ? "z" : val.toString();
-            } else {
-                this.value = scope.getFormattedValue(moduleInstanceId, variableName);
-            }
-            try {
-                Integer val = Integer.parseInt(value, 2);
-                //this.value = this.value + " (" + val + ")";
-            } catch (Exception e) {
-            }
-        }
+        this.isRoot = isArray;
+        this.stringValue = value;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
+    public TableRowData(String variableName, String value, boolean isArray, int index) {
+        this(variableName, value, isArray);
         this.index = index;
-    }
-
-    public String getModuleInstanceId() {
-        return moduleInstanceId;
-    }
-
-    public void setModuleInstanceId(String moduleInstanceId) {
-        this.moduleInstanceId = moduleInstanceId;
     }
 
     public String getVariableName() {
@@ -100,17 +53,13 @@ public class TableRowData {
             return "[" + index + "]";
         }
     }
-
-    public void setVariableName(String variableName) {
-        this.variableName = variableName;
-    }
-
+    
     public String getValue() {
-        return value;
+        return stringValue;
     }
 
     public void setValue(String value) {
-        this.value = value;
+        this.stringValue = value;
     }
     
     public boolean isCategory() {
@@ -123,18 +72,5 @@ public class TableRowData {
 
     public boolean isRoot() {
         return isRoot;
-    }
-
-    public void setIsRoot(boolean isRoot) {
-        this.isRoot = isRoot;
-    }
-
-    public void update(SimulationScope scope) {
-        value = scope.getFormattedValue(moduleInstanceId, variableName);
-        try {
-            Integer val = Integer.parseInt(value, 2);
-            //this.value = this.value + " (" + val + ")";
-        } catch (Exception e) {
-        }
     }
 }

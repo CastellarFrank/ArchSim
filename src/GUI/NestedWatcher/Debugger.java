@@ -5,9 +5,13 @@
 package GUI.NestedWatcher;
 
 import GUI.Simulation.SimulationCanvas;
+import GUI.Watcher.WatchModelEntry;
+import GUI.Watcher.WatchModelEntryDataLog;
 import VerilogCompiler.Interpretation.SimulationScope;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -29,6 +33,7 @@ public class Debugger extends javax.swing.JInternalFrame {
     SimulationScope simulationScope;
     JXTreeTable table;
     CustomClocksChart customChart;
+    CustomTreeModel currentDataModel;
 
     /**
      * Creates new form Debugger
@@ -37,7 +42,7 @@ public class Debugger extends javax.swing.JInternalFrame {
         initComponents();
         simulationCanvas = simWin;
         simulationScope = simWin.simulationScope;
-
+        currentDataModel = simWin.debuggerModel;
         table = new JXTreeTable(simWin.debuggerModel);
         this.customChart = new CustomClocksChart(this);
         simWin.clockEventManagement.setCustomClocksChart(this.customChart);
@@ -58,7 +63,8 @@ public class Debugger extends javax.swing.JInternalFrame {
     public void refresh() {
         simulationCanvas.parent.debuggerRefresh = false;
         if (table != null) {
-            ((CustomTreeModel) (table.getTreeTableModel())).refresh();
+            if(currentDataModel != null)
+                currentDataModel.refresh();
 
             table.updateUI();
             DefaultMutableTreeNode root = (DefaultMutableTreeNode)simulationCanvas.debuggerModel.getRoot();
@@ -165,4 +171,14 @@ public class Debugger extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane scroll;
     private javax.swing.JScrollPane scroll1;
     // End of variables declaration//GEN-END:variables
+
+    public void saveVariablesIfNeeded(ArrayList<WatchModelEntry> modelData) {
+        this.customChart.saveVariablesIfNeeded(modelData);
+    }
+
+    void changeLogWatchEntries(List<WatchModelEntryDataLog> entries) {
+        if(this.currentDataModel == null)
+            return;
+        this.currentDataModel.changeCurrentLogEntries(entries, true);
+    }
 }

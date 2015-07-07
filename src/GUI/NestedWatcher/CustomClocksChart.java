@@ -5,7 +5,10 @@
  */
 package GUI.NestedWatcher;
 
+import GUI.Watcher.WatchModelEntry;
+import GUI.Watcher.WatchModelEntryDataLog;
 import Simulation.Elements.Inputs.ClockInput;
+import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -25,6 +28,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.SymbolAxis;
+import org.jfree.chart.event.ChartProgressEvent;
+import org.jfree.chart.event.ChartProgressListener;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
@@ -53,11 +58,14 @@ public class CustomClocksChart{
     final double domainDisplayRange = 10;
     final double domainMaxValueDifference = 1;
     int increaseHeightValue = 0;
-    
+    double lastValidSelectedValue = 0;
     
     List<Integer> rangeAxisClocksPosition;
     
     Map<Integer, ClockChartInformation> clocksInformationByClockId;
+    
+    Map<Double, List<WatchModelEntryDataLog>> dataEntriesByRangeValue;
+    private boolean needSaveVariables;
     
     public CustomClocksChart(Debugger debugger){
         this.initializeAndConfigureComponents();
@@ -70,6 +78,7 @@ public class CustomClocksChart{
     
     private void initializeAndConfigureComponents() {
         this.clocksInformationByClockId = new HashMap<Integer, ClockChartInformation>();
+        this.dataEntriesByRangeValue = new HashMap<Double, List<WatchModelEntryDataLog>>();
         this.rangeAxisClocksPosition = new ArrayList<Integer>();
         
         this.seriesCollection = new XYSeriesCollection();
@@ -132,6 +141,24 @@ public class CustomClocksChart{
     private JFreeChart createChart(){
         JFreeChart chart = new JFreeChart(null, new Font("Tahoma", 0, 18), this.chartPlot, true);
         chart.setBackgroundPaint(Color.WHITE);
+        chart.addProgressListener(new ChartProgressListener() {
+
+            @Override
+            public void chartProgress(ChartProgressEvent chartEvent) {
+                if (chartEvent.getType() != 2)
+                    return;
+                double xValue = chartPlot.getDomainCrosshairValue();
+                if(lastValidSelectedValue == xValue)
+                    return;
+                if(!dataEntriesByRangeValue.containsKey(xValue)){
+                    chartPlot.setDomainCrosshairValue(lastValidSelectedValue);
+                    return;
+                }
+                lastValidSelectedValue = xValue;
+                List<WatchModelEntryDataLog> entries = dataEntriesByRangeValue.get(xValue);
+                debugger.changeLogWatchEntries(entries);
+            }
+        });
         return chart;
     }
     
@@ -239,12 +266,16 @@ public class CustomClocksChart{
         XYSeries serie = clockInfo.getDomainSerie();
         
         if(clock.isOpen){
-            if(clock.isEnabled())
+            if(clock.isEnabled()){
+                this.needSaveVariables = true;
                 serie.add(xValue, topRangeIndex);
+            }
             serie.add(xValue, bottomRangeIndex);
         }else{
-            if(clock.isEnabled())
+            if(clock.isEnabled()){
+                this.needSaveVariables = true;
                 serie.add(xValue, bottomRangeIndex);
+            }
             serie.add(xValue, topRangeIndex);
         } 
         this.updateDomainRange();
@@ -270,6 +301,7 @@ public class CustomClocksChart{
             int yValue = clock.getClock().isOpen ? bottomIndex : bottomIndex + 2;
             series.add(domainMaxValue, yValue);
             clock.setMaxValue(domainMaxValue);
+            this.dataEntriesByRangeValue.clear();
         }
     }
 
@@ -306,5 +338,30 @@ public class CustomClocksChart{
         this.debugger.pack();
         JScrollBar vertical = debugger.getCustomChartScrollPane().getVerticalScrollBar();
         vertical.setValue( vertical.getMaximum());
+    }
+
+    public void saveVariablesIfNeeded(ArrayList<WatchModelEntry> modelData) {
+        if(!this.needSaveVariables)
+            return;
+        
+        this.needSaveVariables = false;
+        double currentMax = this.domainMaxValue;
+        if(dataEntriesByRangeValue.containsKey(currentMax))
+            return;
+        
+        List<WatchModelEntryDataLog> logEntries = new ArrayList<WatchModelEntryDataLog>();
+        for(WatchModelEntry entry : modelData){
+            if(entry.chip == null)
+                continue;
+            String userReference = entry.chip.getUserReference();
+            String moduleId = entry.moduleInstanceId;
+            String variableName = entry.variableName;
+            VariableInfo varInfo = this.debugger.simulationScope.getVariableInfo(moduleId, variableName);
+            if(varInfo == null)
+                continue;
+
+            logEntries.add(new WatchModelEntryDataLog(variableName, varInfo.value.value, userReference, varInfo.isArray));
+        }
+        this.dataEntriesByRangeValue.put(currentMax, logEntries);
     }
 }
