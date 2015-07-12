@@ -17,6 +17,8 @@ import java.awt.Font;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Rectangle2D;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,7 +27,6 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollBar;
 import javax.swing.border.CompoundBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -69,7 +70,9 @@ public class CustomClocksChart{
     Map<Double, List<WatchModelEntryDataLog>> dataEntriesByRangeValue;
     private boolean needSaveVariables;
     
-    public CustomClocksChart(Debugger debugger){
+    private DecimalFormat roundFormat;
+    
+    public CustomClocksChart(Debugger debugger){        
         this.initializeAndConfigureComponents();
         this.debugger = debugger;
     }
@@ -79,6 +82,8 @@ public class CustomClocksChart{
     }
     
     private void initializeAndConfigureComponents() {
+        this.roundFormat = new DecimalFormat("#.#");
+        this.roundFormat.setRoundingMode(RoundingMode.HALF_UP);
         this.clocksInformationByClockId = new HashMap<Integer, ClockChartInformation>();
         this.dataEntriesByRangeValue = new HashMap<Double, List<WatchModelEntryDataLog>>();
         this.rangeAxisClocksPosition = new ArrayList<Integer>();
@@ -149,7 +154,7 @@ public class CustomClocksChart{
             public void chartProgress(ChartProgressEvent chartEvent) {
                 if (chartEvent.getType() != 2)
                     return;
-                double xValue = chartPlot.getDomainCrosshairValue();
+                double xValue = Double.parseDouble(roundFormat.format(chartPlot.getDomainCrosshairValue()));
                 if(lastValidSelectedValue == xValue)
                     return;
                 if(!dataEntriesByRangeValue.containsKey(xValue)){
@@ -261,6 +266,7 @@ public class CustomClocksChart{
         
         double xValue;
         xValue = clockInfo.getMaxValue() + ((double)clock.getTimerInMiliSeconds()) / 1000;
+        xValue = Double.parseDouble(roundFormat.format(xValue));
         clockInfo.setMaxValue(xValue);
         if(xValue > this.domainMaxValue)
             this.domainMaxValue = xValue;
