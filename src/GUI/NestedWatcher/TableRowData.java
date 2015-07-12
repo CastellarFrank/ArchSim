@@ -12,6 +12,7 @@ public class TableRowData {
 
     private String variableName;
     private String stringValue;
+    private String nodeIdentifier;
     private int index = -1;
     private boolean isRoot;
     private boolean isCategory;
@@ -72,5 +73,13 @@ public class TableRowData {
 
     public boolean isRoot() {
         return isRoot;
+    }
+    
+    public void setNodeIdentifier(String nodeIdentifier){
+        this.nodeIdentifier = nodeIdentifier;
+    }
+
+    String getNodeIdentifier() {
+        return this.nodeIdentifier;
     }
 }

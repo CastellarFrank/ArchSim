@@ -28,7 +28,9 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="deleteAll" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="367" max="32767" attributes="0"/>
+              <EmptySpace pref="244" max="32767" attributes="0"/>
+              <Component id="ckbRealTime" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
           <Component id="jSplitPane1" alignment="0" max="32767" attributes="0"/>
       </Group>
@@ -37,9 +39,12 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="deleteAll" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="deleteAll" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="ckbRealTime" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jSplitPane1" pref="602" max="32767" attributes="0"/>
+              <Component id="jSplitPane1" pref="606" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -81,5 +86,14 @@
         </Container>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JCheckBox" name="ckbRealTime">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Real Time Variables"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ckbRealTimeActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

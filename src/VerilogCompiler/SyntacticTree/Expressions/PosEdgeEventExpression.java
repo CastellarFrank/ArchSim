@@ -65,6 +65,12 @@ public class PosEdgeEventExpression extends EventExpression {
                     if(newLongValue == 1)
                         return new ExpressionValue(1, 1);
                 }
+            }else{
+                if(newValue.xValue || newValue.zValue){
+                    this.isXorZvalue = true;
+                }else{
+                    this.previousValue = Long.parseLong(newValue.value.toString());
+                }
             }
         }
         return new ExpressionValue(0, 1);

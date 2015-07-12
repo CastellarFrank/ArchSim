@@ -8,6 +8,7 @@ package GUI.NestedWatcher;
 import GUI.Watcher.WatchModelEntry;
 import GUI.Watcher.WatchModelEntryDataLog;
 import Simulation.Elements.Inputs.ClockInput;
+import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.SemanticCheck.VariableInfo;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -24,6 +25,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollBar;
 import javax.swing.border.CompoundBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -359,8 +361,23 @@ public class CustomClocksChart{
             VariableInfo varInfo = this.debugger.simulationScope.getVariableInfo(moduleId, variableName);
             if(varInfo == null)
                 continue;
-
-            logEntries.add(new WatchModelEntryDataLog(variableName, varInfo.value.value, userReference, varInfo.isArray));
+            
+            if(varInfo.isArray){
+                Object[] values = (Object[]) this.debugger.simulationScope.getVariableValue(moduleId, variableName).value;
+                List<String> stringValues = new ArrayList<String>();
+                for (Object val : values) {
+                    if (val != null && !val.toString().matches("[xXzZ]"))
+                        val = this.debugger.simulationScope.padWithZeros(val, varInfo.signalSize);
+                    String stringValue = val == null ? "z" : val.toString();
+                    stringValues.add(stringValue);
+                }
+                logEntries.add(new WatchModelEntryDataLog(variableName, stringValues, userReference));
+            }else{
+                ExpressionValue infoValue = this.debugger.simulationScope.getVariableValue(moduleId, variableName);
+                Object val = infoValue == null ? null : infoValue.getValueAsString();
+                String stringValue = val == null ? "z" : this.debugger.simulationScope.getFormattedValue(moduleId, variableName);
+                logEntries.add(new WatchModelEntryDataLog(variableName, stringValue, userReference));
+            }
         }
         this.dataEntriesByRangeValue.put(currentMax, logEntries);
     }

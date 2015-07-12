@@ -66,6 +66,12 @@ public class NegEdgeEventExpression extends EventExpression {
                     if(newLongValue == 0)
                         return new ExpressionValue(1, 1);
                 }
+            }else{
+                if(newValue.xValue || newValue.zValue){
+                    this.isXorZValue = true;
+                }else{
+                    this.previousValue = Long.parseLong(newValue.value.toString());
+                }
             }
         }
         

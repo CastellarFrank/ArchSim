@@ -82,6 +82,16 @@ public class RangeExpression extends PrimaryExpression {
             case ERROR: case INTEGER: case ARRAY: return null;
             case VECTOR:
                 ExpressionValue complete = simulationScope.getVariableValue(moduleName, identifier);
+                
+                if(complete.xValue || complete.zValue){
+                    ExpressionValue result = new ExpressionValue();
+                    if(complete.zValue)
+                        result.setToZValue();
+                    else
+                        result.setToXValue();
+                    return result;
+                }
+                
                 ExpressionValue min = minValue.evaluate(simulationScope, moduleName);
                 ExpressionValue max = maxValue.evaluate(simulationScope, moduleName);
                 

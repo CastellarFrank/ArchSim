@@ -77,8 +77,16 @@ public class IndexExpression extends PrimaryExpression {
         switch (type) {
             case ERROR: case INTEGER: case ARRAY: return null;
             case VECTOR:
-                ExpressionValue complete = simulationScope.getVariableValue(moduleName, identifier);
+                ExpressionValue complete = simulationScope.getVariableValue(moduleName, identifier);                
                 ExpressionValue min = expression.evaluate(simulationScope, moduleName);
+                if(min.zValue || min.xValue){
+                    ExpressionValue result = new ExpressionValue();
+                    if(min.xValue)
+                        result.setToXValue();
+                    else
+                        result.setToZValue();
+                    return result;
+                }
                 
                 if (min.value != null) {                
                     Integer minLimit = Integer.parseInt(min.value.toString(), 2);

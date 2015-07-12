@@ -80,6 +80,10 @@ public class OneIndexLValue extends LValue {
             return;
         int intIndex = Convert.getInteger(index);
         ExpressionValue address = simulationScope.getScope(moduleInstanceId).getVariableValue(identifier);
+        if(value != null && !value.toString().matches("[xXzZ]")){
+            address.xValue = false;
+            address.zValue = false;
+        }
         ((Object[])address.value)[intIndex] = value;
     }
 

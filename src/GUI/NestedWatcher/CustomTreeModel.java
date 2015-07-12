@@ -43,14 +43,15 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     public final DefaultMutableTreeNode generateRoot() {
         DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(), true);
         ArrayList<WatchModelEntry> toDelete = new ArrayList<WatchModelEntry>();
-        
+
         HashMap<String, DefaultMutableTreeNode> categories = new HashMap<String, DefaultMutableTreeNode>();
         
         for (WatchModelEntry watchModelEntry : variables) {
             ModuleChip chip = watchModelEntry.chip;
             if (chip != null) {
                 if (categories.containsKey(chip.getUserReference())) continue;
-                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(chip.getUserReference()));
+                String userReference = chip.getUserReference();
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(userReference));
                 categories.put(chip.getUserReference(), node);
             }
         }
@@ -60,29 +61,38 @@ public class CustomTreeModel extends AbstractTreeTableModel {
             String variableName = watchModelEntry.variableName;
             ModuleChip chip = watchModelEntry.chip;
             
-            DefaultMutableTreeNode parent = categories.get(chip.getUserReference());
+            String userReference = chip.getUserReference();
+            DefaultMutableTreeNode parent = categories.get(userReference);
             
             VariableInfo info = scope.getVariableInfo(moduleId, variableName);
             if (info == null)
                 toDelete.add(watchModelEntry);
-            else
+            else{
+                String parentNameIdentifier = userReference + "_" + variableName;
                 if (info.isArray) {
-                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(variableName, true));
+                    TableRowData rowData = new TableRowData(variableName, true);
+                    rowData.setNodeIdentifier(parentNameIdentifier);
+                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(rowData);
                     Object[] values = (Object[]) scope.getVariableValue(moduleId, variableName).value;
                     for (int i = 0; i < values.length; i++) {
                         Object val = values[i];
                         if (val != null && !val.toString().matches("[xXzZ]"))
                             val = scope.padWithZeros(val, info.signalSize);
                         String stringValue = val == null ? "z" : val.toString();
-                        node.add(new DefaultMutableTreeNode(new TableRowData(variableName, stringValue, info.isArray, i), false));
+                        TableRowData childRowData = new TableRowData(variableName, stringValue, info.isArray, i);
+                        childRowData.setNodeIdentifier(parentNameIdentifier + "_" + variableName);
+                        node.add(new DefaultMutableTreeNode(childRowData, false));
                     }
                     parent.add(node);
                 } else {
                     ExpressionValue infoValue = scope.getVariableValue(moduleId, variableName);
                     Object val = infoValue == null ? null : infoValue.getValueAsString();
                     String stringValue = val == null ? "z" : scope.getFormattedValue(moduleId, variableName);
-                    parent.add(new DefaultMutableTreeNode(new TableRowData(variableName, stringValue, info.isArray)));
+                    TableRowData rowData = new TableRowData(variableName, stringValue, info.isArray);
+                    rowData.setNodeIdentifier(parentNameIdentifier);
+                    parent.add(new DefaultMutableTreeNode(rowData));
                 }
+            }
         }
         
         for (DefaultMutableTreeNode node : categories.values()) {
@@ -101,7 +111,7 @@ public class CustomTreeModel extends AbstractTreeTableModel {
         if(!this.useLogs){
             this.root = generateRoot();
             return;
-        }
+        }        
         
         if(this.logsLoaded)
             return;
@@ -235,9 +245,62 @@ public class CustomTreeModel extends AbstractTreeTableModel {
     void changeCurrentLogEntries(List<WatchModelEntryDataLog> entries, boolean useLogs) {
         this.variableLogs = entries;
         this.useLogs = useLogs;
+        this.logsLoaded = false;
     }
 
     private DefaultMutableTreeNode generateLogsRoot() {
-        return this.generateRoot();
-    }    
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new TableRowData(), true);
+        
+        HashMap<String, DefaultMutableTreeNode> categories = new HashMap<String, DefaultMutableTreeNode>();
+        if(this.variableLogs == null)
+            return rootNode;
+        for (WatchModelEntryDataLog watchModelEntry : this.variableLogs) {
+            if (categories.containsKey(watchModelEntry.userNameReference)) continue;
+            String userReference = watchModelEntry.userNameReference;
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TableRowData(userReference));
+            categories.put(userReference, node);
+        }
+        
+        for (WatchModelEntryDataLog watchModelEntry : this.variableLogs) {
+            String variableName = watchModelEntry.variableName;
+            String userReference = watchModelEntry.userNameReference;
+            DefaultMutableTreeNode parent = categories.get(userReference);
+            String parentNameIdentifier = userReference + "_" + variableName;
+            if (watchModelEntry.isArray) {
+                TableRowData rowData = new TableRowData(variableName, true);
+                rowData.setNodeIdentifier(parentNameIdentifier);
+                DefaultMutableTreeNode node = new DefaultMutableTreeNode(rowData);
+                List<String> values  = watchModelEntry.variableValues;
+                for (int i = 0; i < values.size(); i++) {
+                    String stringValue = values.get(i);
+                    TableRowData childRowData = new TableRowData(variableName, stringValue, watchModelEntry.isArray, i);
+                    childRowData.setNodeIdentifier(parentNameIdentifier + "_" + variableName);
+                    node.add(new DefaultMutableTreeNode(childRowData, false));
+                }
+                parent.add(node);
+            } else {
+                String stringValue = watchModelEntry.value;
+                TableRowData rowData = new TableRowData(variableName, stringValue, watchModelEntry.isArray);
+                rowData.setNodeIdentifier(parentNameIdentifier);
+                parent.add(new DefaultMutableTreeNode(rowData));
+            }
+        }
+        
+        for (DefaultMutableTreeNode node : categories.values()) {
+            rootNode.add(node);
+        }
+        return rootNode;
+    }
+    
+    public boolean needsRefresh(){
+        return !this.useLogs || !this.logsLoaded;
+    }
+
+    void stopUsingLogs() {
+        this.useLogs = false;
+    }
+
+    void startUsingLogs() {
+        this.useLogs = true;
+    }
 }
