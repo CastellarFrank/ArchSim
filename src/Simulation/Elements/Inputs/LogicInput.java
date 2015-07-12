@@ -25,25 +25,25 @@ public class LogicInput extends BasicSwitch {
     public LogicInput(int x, int y) {
         super(x, y);
         this.isOpen = true;
+        this.updateVoltage();
     }
 
     public LogicInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
-        this.isOpen = true;
+        this.isOpen = Boolean.parseBoolean(extraParams[0]);
+        this.updateVoltage();
     }
 
     public LogicInput(int x, int y, int x2, int y2, int flags) {
         super(x, y, x2, y2, flags);
         this.isOpen = true;
+        this.updateVoltage();
     }
 
     @Override
     public void toggle() {
-        if (isOpen)
-            voltages[0] = Configuration.LOGIC_1_VOLTAGE + 1;
-        else
-            voltages[0] = 0.0;
         isOpen = !isOpen;
+        this.updateVoltage();
     }
 
     @Override
@@ -168,5 +168,12 @@ public class LogicInput extends BasicSwitch {
         
         boolean tempSelected = verticalRect.intersects(r) || horizontalRect.intersects(r);
         this.setSelected(tempSelected);
+    }
+
+    private void updateVoltage() {
+        if (isOpen)
+            voltages[0] = 0.0;
+        else
+            voltages[0] = Configuration.LOGIC_1_VOLTAGE + 1;
     }
 }

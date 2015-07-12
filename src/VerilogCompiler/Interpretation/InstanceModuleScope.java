@@ -52,6 +52,10 @@ public class InstanceModuleScope {
         }
     }
     
+    void cleanNonBlockingAssigns() {
+        this.nonBlockingValuesToAssign.clear();
+    }
+    
     public String dumpToString() {
         String result = "";
         for (Map.Entry<String, VariableInfo> variable : declaredVariables.entrySet()) {

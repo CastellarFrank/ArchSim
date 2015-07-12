@@ -356,6 +356,7 @@ public class ModuleChip extends BaseElement {
 
     @Override
     public void doStep() {
+        containerPanel.simulationScope.cleanScheduleNonBlockingSingals();
         if (!isInitialized) {
             moduleInstance.initModule(containerPanel.simulationScope, moduleInstanceId);
             isInitialized = true;

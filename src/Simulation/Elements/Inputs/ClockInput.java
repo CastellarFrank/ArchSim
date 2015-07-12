@@ -41,12 +41,14 @@ public class ClockInput extends BasicSwitch {
     public ClockInput(int x, int y) throws ArchException {
         super(x, y);
         this.isOpen = true;
+        this.updateVoltage();
         this.toggleAtClicking = false;
     }
 
     public ClockInput(int x, int y, int x2, int y2, String[] extraParams) throws ArchException {
         super(x, y, x2, y2, extraParams);
         this.isOpen = Boolean.parseBoolean(extraParams[0]);
+        this.updateVoltage();
         this.enabled = Boolean.parseBoolean(extraParams[1]);
         this.timerInMiliSeconds = Long.parseLong(extraParams[2]);
         this.userReference = extraParams[3];
@@ -56,12 +58,14 @@ public class ClockInput extends BasicSwitch {
     public ClockInput(int x, int y, int x2, int y2, int flags) throws ArchException {
         super(x, y, x2, y2, flags);
         this.isOpen = true;
+        this.updateVoltage();
         this.toggleAtClicking = false;
     }
     
     @Override
     public void toggle() {
         this.isOpen = !isOpen;
+        this.updateVoltage();
     }
     
     @Override
@@ -287,5 +291,12 @@ public class ClockInput extends BasicSwitch {
 
     public String getUserReference() {
         return this.userReference;
+    }
+
+    private void updateVoltage() {
+        if (isOpen)
+            voltages[0] = 0.0;
+        else
+            voltages[0] = Configuration.LOGIC_1_VOLTAGE + 1;
     }
 }

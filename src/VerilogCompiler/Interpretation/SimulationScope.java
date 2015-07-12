@@ -122,4 +122,10 @@ public class SimulationScope {
             variable.getValue().getExpressionValue().setToZValue();
         }
     }
+
+    public void cleanScheduleNonBlockingSingals() {
+        for (Map.Entry<String, InstanceModuleScope> scope : scopes.entrySet()) {
+            scope.getValue().cleanNonBlockingAssigns();
+        }
+    }
 }
