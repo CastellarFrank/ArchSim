@@ -73,8 +73,7 @@ public class SettingsEditor extends javax.swing.JInternalFrame {
         }
         
         if (needsReload) {
-            Loader.getInstance().loadModules();
-            parent.needsRefresh = true;
+            parent.refreshModules();
         }
         
         Configuration.USE_CUSTOM_MODULE_NAME = shModName.isSelected();

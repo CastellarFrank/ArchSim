@@ -5,6 +5,7 @@
 package GUI;
 
 import DataStructures.CircuitGenerator;
+import DataStructures.ModuleRepository;
 import GUI.NestedWatcher.CustomTreeModel;
 import GUI.NestedWatcher.Debugger;
 import GUI.Watcher.WatchesTableModel;
@@ -622,7 +623,12 @@ public class ContainerPanel extends JCanvas {
         printThings();
         
         if (!isPaused && needsRun) {
-            runStep();
+            ModuleRepository.registeringModuleLock.readLock().lock();
+            try{
+                runStep();
+            }finally{
+                ModuleRepository.registeringModuleLock.readLock().unlock();
+            }
             //analyze();
             if (watchesTableModel != null) {
                 watchesTableModel.updateValues();
@@ -739,6 +745,9 @@ public class ContainerPanel extends JCanvas {
                 clockEventManagement.removeClock((ClockInput)element);
             return;
         }
+        if(element instanceof ModuleChip)
+            ((ModuleChip)element).setNeedsRefresh(this.refreshModules);
+        
         elements.add(element);
     }
 
@@ -1514,8 +1523,12 @@ public class ContainerPanel extends JCanvas {
                 ((Wire)element).clearJoinInput();
             }else{
                 if(refreshNeeded && element instanceof ModuleChip){
-                    if(((ModuleChip)element).needsRefresh()){
+                    ModuleChip moduleChip = (ModuleChip)element;
+                    if(moduleChip.needsRefresh()){
                         newList.add(element);
+                    }else{
+                        simulationScope.unregister(moduleChip.getModuleInstanceId());
+                        ModuleRepository.getInstance().unregisterModuleChip(moduleChip.getModuleName(), moduleChip);
                     }
                 }else{
                     newList.add(element);

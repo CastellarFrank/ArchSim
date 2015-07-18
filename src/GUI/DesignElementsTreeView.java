@@ -69,6 +69,7 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         treeElement = new javax.swing.JTree();
+        btnReLoadModules = new javax.swing.JButton();
 
         setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
@@ -77,22 +78,43 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
 
         jScrollPane1.setViewportView(treeElement);
 
+        btnReLoadModules.setText("Re - Load Modules");
+        btnReLoadModules.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReLoadModulesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(btnReLoadModules)
+                .addGap(0, 113, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addComponent(btnReLoadModules)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 475, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         setBounds(0, 0, 250, 550);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnReLoadModulesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReLoadModulesActionPerformed
+        this.parent.refreshModules();
+        this.parent.popUpModuleErrors();
+    }//GEN-LAST:event_btnReLoadModulesActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnReLoadModules;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTree treeElement;
@@ -106,6 +128,8 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
             if(menuElement != null)
                 this.moduleSection.add(menuElement);
         }
+        
+        this.treeElement.updateUI();
     }
     
     DefaultMutableTreeNode getTreeNodeFromMenuInfo(MenuInfo menu){

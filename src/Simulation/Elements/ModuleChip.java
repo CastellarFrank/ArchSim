@@ -318,6 +318,15 @@ public class ModuleChip extends BaseElement {
         if(this.refresh){
             this.refresh = false;
             this.newInit(x, y, moduleName);
+            ModuleRepository.registeringModuleLock.readLock().lock();
+            try{
+                moduleInstance = ModuleRepository.getInstance().getModuleLogic(moduleName);
+                //moduleInstanceId = ModuleInstanceIdGenerator.generate();
+                InstanceModuleScope scope = moduleInstance.getScope();
+                this.containerPanel.simulationScope.register(moduleInstanceId, scope);
+            }finally{
+                ModuleRepository.registeringModuleLock.readLock().unlock();
+            }
         }
         
         super.clearForAnalysis();

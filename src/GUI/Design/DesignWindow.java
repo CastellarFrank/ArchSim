@@ -194,6 +194,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         
         boolean saveMetadataFile = false;
         ModuleDecl module = compileWithoutSemantics();
+        File moduleDirectoryFile = new File(Configuration.MODULES_DIRECTORY_PATH);
+        boolean isChildPath = FileUtils.CheckIfPathIsChild(moduleDirectoryFile, newTarget);
         if(module == null){
             int response = JOptionPane.showConfirmDialog(
                     this, 
@@ -205,15 +207,13 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                 return;
         }else{
             String moduleName = module.getModuleName();
-            File moduleDirectoryFile = new File(Configuration.MODULES_DIRECTORY_PATH);
-            boolean isChildPath = FileUtils.CheckIfPathIsChild(moduleDirectoryFile, newTarget);
             if(isChildPath){
                 File currentFile = new File(this.filePath);
                 boolean isSameFile = currentFile.compareTo(target) == 0 || currentFile.compareTo(newTarget) == 0;
                 if(isSameFile){
                     if(ModuleRepository.getInstance().isModuleBeingUsed(moduleName)){
                         int response = JOptionPane.showConfirmDialog(
-                                this, 
+                                this,
                                 "The module: [" + moduleName + "] is being used.\nDo you want to save the module?, module instances will be automatically updated.", 
                                 "Module is being used", 
                                 JOptionPane.YES_NO_OPTION, 
@@ -227,7 +227,6 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                         return;
                     }
                 }
-                
                 saveMetadataFile = true;
             }
         }
@@ -268,11 +267,13 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         addFilenameToTitle(newTarget.getName());
         modified = false;
         
-        if (!Configuration.COMPILE_ON_SAVE || !saveMetadataFile)
-            return;
+        if(saveMetadataFile && Configuration.COMPILE_ON_SAVE)
+        {
+            saveModuleMetadata(module);
+        }
         
-        parent.needsRefresh = saveModuleMetadata(module);
-        
+        if(isChildPath)
+            this.parent.refreshModules();
     }
     
     public static boolean saveModuleMetadata(ModuleDecl module) {
@@ -332,6 +333,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         compiled = true;
         
         NodeList elements = document.getElementsByTagName("element");
+        if(elements == null || elements.getLength() == 0)
+            return;
         
         for (int i = 0; i < elements.getLength(); i++) {
             Element element = (Element) elements.item(i);
@@ -359,7 +362,9 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                 ((ChipRectangule) baseElement).init(module.getPortList(), element);
                 preview.addElement(baseElement);
             } catch (ModuleDesignNotFoundException ex) {
-                Logger.getLogger(DesignWindow.class.getName()).log(Level.WARNING, null, ex);
+                //No pudo compilar el modulo.
+            }catch(Exception ex){
+                //No pudo compilar el modulo.
             }
         }
     }
@@ -379,7 +384,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
             SemanticCheck.getInstance().resetAll();
             parser parser = new parser(new VerilogLexer(new StringReader(newSource.getProgram())));
             Symbol result = parser.parse();
-            if (result == null) {
+            if (result == null || result.value == null) {
                 if (ErrorHandler.getInstance().hasErrors()) {
                     showErrorPanel(ErrorHandler.getInstance().getErrors());
                     showClickableErrors(ErrorHandler.getInstance().getErrorList());
@@ -429,6 +434,8 @@ public class DesignWindow extends javax.swing.JInternalFrame {
                 generateCircuitFromModule(module);
                 tabs.setSelectedIndex(0);
                 compiled = true;
+                if(this.newSource != null)
+                    this.newSource.clearLogs();
             }
         } else {
         }

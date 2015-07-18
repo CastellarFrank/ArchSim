@@ -85,10 +85,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
             java.util.logging.Logger.getLogger(MainWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
-        if (parent.needsRefresh) {
-            parent.refreshModules();
-        }
                 
         canvas = new SimulationCanvas(parent);
         this.setContentPane(canvas);
@@ -99,8 +95,6 @@ public class SimulationWindow extends javax.swing.JInternalFrame implements Acti
         if (canvas.isPaused) {
             pauseContinueMenu.setText(this.startExecutionText);
         }
-        
-        this.refreshSimulationMenuStructure();
     }
     
     public void refreshSimulationMenuStructure() {

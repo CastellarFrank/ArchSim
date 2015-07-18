@@ -68,6 +68,7 @@ public class MainWindow extends javax.swing.JFrame {
         Loader.getInstance().loadModules();
         prepareModuleMenu();
         this.elementsTreeView.updateModuleSection(this.moduleMenus);
+        this.updateSimulationWindowsMenus();
     }
     
     public void updateSimulationWindowsMenus(){
@@ -244,6 +245,7 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void simWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_simWindowActionPerformed
         SimulationWindow simulationWindow = new SimulationWindow(this);
+        simulationWindow.refreshSimulationMenuStructure();
         this.simulationWindows.add(simulationWindow);
         desktopPane.add(simulationWindow);
         
@@ -307,6 +309,7 @@ public class MainWindow extends javax.swing.JFrame {
         SimulationWindow simulationWindow = new SimulationWindow(this);
         simulationWindow.loadFromDocument(document);
         simulationWindow.addFilenameToTitle(fileName);
+        simulationWindow.refreshSimulationMenuStructure();
         
         this.desktopPane.add(simulationWindow);
         simulationWindow.setVisible(true);
@@ -387,7 +390,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
-    private void popUpModuleErrors() {
+    public void popUpModuleErrors() {
         List<ModuleLoadingError> errors = Loader.getInstance().getLoadingErrors();
         if(!errors.isEmpty()){
             ErrorLoadedModules errorWindow = new ErrorLoadedModules(errors);
