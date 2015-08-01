@@ -6,6 +6,7 @@ package VerilogCompiler.SyntacticTree.Expressions;
 
 import Exceptions.UnsuportedFeature;
 import Simulation.Configuration;
+import VerilogCompiler.Interpretation.Convert;
 import VerilogCompiler.Interpretation.ExpressionValue;
 import VerilogCompiler.Interpretation.InstanceModuleScope;
 import VerilogCompiler.Interpretation.MathHelper;
@@ -57,21 +58,37 @@ public class Concatenation extends LValue {
 
     @Override
     public void setValue(SimulationScope simulationScope, 
-            String moduleName, Object value) {
+            String moduleName, ExpressionValue expressionValue) {
+        Object value = expressionValue.value;
+        
         if (Configuration.DEBUG_MODE)
             System.out.println("binary number " + value);
+        
+        boolean zValue = expressionValue.zValue;
+        boolean xValue = expressionValue.xValue;
         long intValue = 0;
-        if (value instanceof Integer) {
-            intValue = (Integer) value;
-        } else if (value instanceof Long) {
-            intValue = (Long) value;
-        } else if (value instanceof BigInteger) {
-            BigInteger tmp = (BigInteger) value;
-            BigInteger s2 = new BigInteger(tmp.toString(), 2);
-            intValue = s2.longValue();
-        }else if(value instanceof String){
-            intValue = new BigInteger(value.toString(), 2).longValue();
+        if(!zValue && !xValue){
+            int base = Convert.baseToRadix(expressionValue.base);
+            if (value instanceof Integer) {
+                intValue = (Integer) value;
+            } else if (value instanceof Long) {
+                intValue = (Long) value;
+            } else if (value instanceof BigInteger) {
+                BigInteger tmp = (BigInteger) value;
+                BigInteger s2 = new BigInteger(tmp.toString(), base);
+                intValue = s2.longValue();
+            }else if(value instanceof String){
+                String stringValue = value.toString();
+                if(stringValue.matches("[xX]")){
+                    xValue = true;
+                }else if(stringValue.matches("[zZ]")){
+                    zValue = true;
+                }else{
+                    intValue = new BigInteger(value.toString(), base).longValue();
+                }
+            }
         }
+        
         int currentPos = 0;
         int maxQuantityToConsume = 64;
         for (int i = expressionList.size() - 1; i >= 0; i--) {
@@ -82,14 +99,20 @@ public class Concatenation extends LValue {
             VariableInfo varInfo = simulationScope.getVariableInfo(moduleName, expression.getIdentifier());
             ExpressionValue loc = simulationScope.getVariableValue(moduleName, expression.getIdentifier());
             
-            int quantity = currentPos + 1 + varInfo.signalSize > maxQuantityToConsume
+            if(xValue){
+                loc.setToXValue();
+            }else if(zValue){
+                loc.setToZValue();
+            }else{
+                int quantity = currentPos + 1 + varInfo.signalSize > maxQuantityToConsume
                            ? maxQuantityToConsume - (currentPos + 1)
                            :varInfo.signalSize;
             
-            long portion = MathHelper.getBitSelection(intValue, currentPos, quantity);
-            loc.value = new BigInteger(Long.toBinaryString(portion));
-            
-            currentPos += varInfo.signalSize;
+                long portion = MathHelper.getBitSelection(intValue, currentPos, quantity);
+                loc.value = Long.toBinaryString(portion);
+
+                currentPos += varInfo.signalSize;
+            }
         }
     }
 

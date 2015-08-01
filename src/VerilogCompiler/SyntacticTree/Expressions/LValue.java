@@ -20,7 +20,7 @@ public abstract class LValue extends VNode {
     }
     
     public abstract void setValue(SimulationScope simulationScope, 
-            String moduleName, Object value);
+            String moduleName, ExpressionValue value);
     
     public abstract void setValue(InstanceModuleScope scope, ExpressionValue value);
 }

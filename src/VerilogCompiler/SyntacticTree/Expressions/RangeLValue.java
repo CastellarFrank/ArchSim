@@ -66,7 +66,7 @@ public class RangeLValue extends LValue {
     }
 
     @Override
-    public void setValue(SimulationScope simulationScope, String moduleName, Object value) {
+    public void setValue(SimulationScope simulationScope, String moduleName, ExpressionValue value) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

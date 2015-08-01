@@ -58,7 +58,7 @@ public class BlockingStatement extends Statement {
         //System.out.println(expression);
         ExpressionValue value = expression.evaluate(simulationScope, moduleName);
         if (value != null) {
-            lvalue.setValue(simulationScope, moduleName, value.value);
+            lvalue.setValue(simulationScope, moduleName, value);
         }
     }
 

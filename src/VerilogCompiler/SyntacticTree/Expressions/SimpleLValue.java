@@ -64,46 +64,65 @@ public class SimpleLValue extends LValue {
     }
 
     @Override
-    public void setValue(SimulationScope simulationScope, String instanceModuleId, Object value) {
+    public void setValue(SimulationScope simulationScope, String instanceModuleId, ExpressionValue expressionValue) {
         ExpressionValue address = simulationScope.getVariableValue(instanceModuleId, identifier);
         VariableInfo info = simulationScope.getVariableInfo(instanceModuleId, identifier);
         int size = info.signalSize;
         String format = "%0" + size + "d";
-        if (value != null) {
-            try {  
-                Integer realVal = 0;
-                String adjustedValue = null;
-                if (value instanceof String) {
-                    realVal = new BigInteger(value.toString()).intValue();
-                    adjustedValue = value.toString();
-                } else if (value instanceof Integer) {
-                    realVal = (Integer) value;
-                } else if (value instanceof BigInteger) {
-                    realVal = ((BigInteger) value).intValue();
-                    adjustedValue = ((BigInteger) value).toString();
-                }
-                if (adjustedValue == null)
-                    adjustedValue = realVal.toString();
-                
-                if (size != value.toString().length()) {
-                    adjustedValue = String.format("%1$" + size + "s", adjustedValue).replace(' ', '0');
-                    //adjustedValue = String.format(format, realVal);
-                }
-                
-                int index = adjustedValue.toString().length() - size;
-                
-                String portion = adjustedValue.toString().substring(adjustedValue.toString().length() - size);
-                
-                //Integer newVal = Integer.parseInt(portion);
-                address.setValue(portion);
-            }catch (Exception e) {
-                System.out.println("error format: " + format);
-                System.out.println(value);
-                e.printStackTrace();
-                System.exit(0);
-            }
-        } else {
+        boolean xValue = expressionValue.xValue, zValue = expressionValue.zValue;
+        
+        if(xValue){
+            address.setToXValue();
+            return;
+        }else if(zValue){
+            address.setToZValue();
+            return;
+        }
+        
+        Object value = expressionValue.value;
+        if(value == null){
             address.setValue(value);
+            return;
+        }
+        
+        try {  
+            Integer realVal = 0;
+            String adjustedValue = null;
+            if (value instanceof String) {
+                String stringValue = value.toString();
+                if(stringValue.matches("[xX]")){
+                    address.setToXValue();
+                    return;
+                }else if(stringValue.matches("[zZ]")){
+                    address.setToZValue();
+                    return;
+                }
+                realVal = new BigInteger(stringValue, 2).intValue();
+                adjustedValue = value.toString();
+            } else if (value instanceof Integer) {
+                realVal = (Integer) value;
+            } else if (value instanceof BigInteger) {
+                realVal = ((BigInteger) value).intValue();
+                adjustedValue = ((BigInteger) value).toString();
+            }
+            if (adjustedValue == null)
+                adjustedValue = realVal.toString();
+
+            if (size != value.toString().length()) {
+                adjustedValue = String.format("%1$" + size + "s", adjustedValue).replace(' ', '0');
+                //adjustedValue = String.format(format, realVal);
+            }
+
+            int index = adjustedValue.toString().length() - size;
+
+            String portion = adjustedValue.toString().substring(adjustedValue.toString().length() - size);
+
+            //Integer newVal = Integer.parseInt(portion);
+            address.setValue(portion);
+        }catch (Exception e) {
+            System.out.println("error format: " + format);
+            System.out.println(value);
+            e.printStackTrace();
         }
     }
 

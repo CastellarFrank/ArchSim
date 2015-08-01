@@ -394,9 +394,13 @@ public class DesignWindow extends javax.swing.JInternalFrame {
 
             ModuleDecl module = (ModuleDecl) result.value;
             return module;
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             System.err.println(ex.getMessage());
-            showClickableErrors(ErrorHandler.getInstance().getErrorList());
+            ArrayList errors = ErrorHandler.getInstance().getErrorList();
+            if(errors.isEmpty())
+                errors.add(ex.getMessage());
+            
+            showClickableErrors(errors);
             return null;
         }
     }
@@ -426,7 +430,7 @@ public class DesignWindow extends javax.swing.JInternalFrame {
         if (module != null) {
             module.validateSemantics();
             if (ErrorHandler.getInstance().hasErrors()) {
-                //showErrorPanel(ErrorHandler.getInstance().getErrors());
+                showErrorPanel(ErrorHandler.getInstance().getErrors());
                 showClickableErrors(ErrorHandler.getInstance().getErrorList());
             }
             else {

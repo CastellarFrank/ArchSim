@@ -83,18 +83,16 @@ public class ContainerPanel extends JCanvas {
     protected int gridSize, gridMask, gridRound;
     protected double temporalVoltageMatrix[][], speed = 172.0;
     protected String temporalMultibitsMatrix[][];
-    protected double stepTime, totalTime = 0;
     protected int circuitPermute[];
     protected double temporalRightSideVoltages[], rightSideVoltages[];
     protected String temporalRightSideMultibits[], rightSideMultibitsValues[];
-    protected int draggingPost = -1, steps = 0, frames = 0;
+    protected int draggingPost = -1;
     protected Rectangle selectedArea = null;
     protected MouseMode defaultMouseMode = MouseMode.SELECT, currentMouseMode = MouseMode.SELECT;
-    protected long lastTimeStamp = 0, lastFrameTimeStamp = 0, subIterations;
     protected boolean needsAnalysis = false, needsJointsAnalyze = false;
-    protected boolean runnable = true, circuitNonLinear, converged, refreshModules;
-    //</editor-fold>
+    protected boolean runnable = true, refreshModules;
     protected boolean runWithoutAnalysis;
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Methods">
     /**
@@ -440,14 +438,6 @@ public class ContainerPanel extends JCanvas {
         }
     }
 
-    double getIterationRate() {
-        if (speed == 0) {
-            return 0;
-        }
-        return .1 * Math.exp((speed - 61) / 24.);
-    }
-    long lastIterationTime;
-
     /**
      * Method that executes the behaviour of every
      * <code>BaseElement</code> in this container.<p> For example: if the
@@ -458,74 +448,35 @@ public class ContainerPanel extends JCanvas {
         if (elements == null || elements.isEmpty() || !runnable) {
             return;
         }
-
-        double iterationRate = getIterationRate();
-        long stepRate = (long) (160 * iterationRate);
-        long temporalLastTimeStamp = System.currentTimeMillis();
-        long temporalLastIterationTime = lastIterationTime;
         
-        if (1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)) {
-            return;
+        System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
+                temporalRightSideVoltages.length);
+
+        System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0,
+                temporalRightSideMultibits.length);
+
+        //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
+
+        if (!isPaused) {
+            for (int i = 0; i < this.highestPropagationLevel; i++) {
+                if(i == 0)
+                    this.setJoinValues();
+                //joining the values of the components in case there is new inputs values to be joined
+                this.prepareAndCalculateMatrixValues();
+                setJoinValues();
+            }                    
         }
 
-        int iteration = 0;
-        int iter;
-        for (iter = 1; iter < 2; iter++) {
-            int maxSubIteration = 1;
-            steps++;
-            for (; iteration < maxSubIteration; iteration++) {
-                subIterations = iteration;
-                converged = true;
-
-                System.arraycopy(temporalRightSideVoltages, 0, rightSideVoltages, 0,
-                        temporalRightSideVoltages.length);
-
-                System.arraycopy(temporalRightSideMultibits, 0, rightSideMultibitsValues, 0,
-                        temporalRightSideMultibits.length);
-
-                //<editor-fold defaultstate="collapsed" desc="Sub Iteration logic">
-                
-                if (!isPaused) {
-                    for (int i = 0; i < this.highestPropagationLevel; i++) {
-                        if(i == 0)
-                            this.setJoinValues();
-                        //joining the values of the components in case there is new inputs values to be joined
-                        this.prepareAndCalculateMatrixValues();
-                        setJoinValues();
-                    }                    
+        for (BaseElement baseElement : elements) {
+            baseElement.doStep();
+            if(baseElement.needsPropagation()){
+                for (int i = 0; i < this.highestPropagationLevel + 1; i++) {
+                    this.prepareAndCalculateMatrixValues();
+                    setJoinValues();
                 }
-                
-                for (BaseElement baseElement : elements) {
-                    baseElement.doStep();
-                    if(baseElement.needsPropagation()){
-                        for (int i = 0; i < this.highestPropagationLevel + 1; i++) {
-                            this.prepareAndCalculateMatrixValues();
-                            setJoinValues();
-                        }
-                    }
-                }
-                if (isPaused) {
-                    return;
-                }  
-                
-                //</editor-fold>   
-                if (!circuitNonLinear) {
-                    break;
-                }
-            }
-            if (iteration == maxSubIteration) {
-                System.out.println("STOP!");
-                break;
-            }
-            totalTime += stepTime;
-            temporalLastTimeStamp = System.currentTimeMillis();
-            temporalLastIterationTime = temporalLastTimeStamp;
-            if (iter * 1000 >= stepRate * (temporalLastTimeStamp - lastIterationTime)
-                    || (temporalLastTimeStamp - lastFrameTimeStamp > 500)) {
-                break;
             }
         }
-        lastIterationTime = temporalLastIterationTime;
+        //</editor-fold>   
     }
 
     private void setJoinValues() {
@@ -543,10 +494,6 @@ public class ContainerPanel extends JCanvas {
                 multibits = rightSideMultibitsValues[rowInfo.mappedColumn];
             }
             
-            if (Double.isNaN(newVoltage)) {
-                converged = false;
-                break;
-            }
             if (rowIndex < joints.size() - 1) {
                 Joint joint = joints.elementAt(rowIndex + 1);
                 for (JointReference jointRef : joint.references) {
@@ -581,7 +528,6 @@ public class ContainerPanel extends JCanvas {
      * Resets the execution.
      */
     public void reset() {
-        totalTime = 0;
         isPaused = true;
         this.clockEventManagement.simulationReseted();
         for (BaseElement element : elements) {
@@ -636,16 +582,6 @@ public class ContainerPanel extends JCanvas {
                     this.debugger.saveVariablesIfNeeded(watchesTableModel.getModelData());
                 }
             }
-            
-            long sysTime = System.currentTimeMillis();
-            if (sysTime - secTime >= 1000) {
-                frames = 0;
-                steps = 0;
-                secTime = sysTime;
-            }
-            lastTimeStamp = sysTime;
-        } else {
-            lastTimeStamp = 0;
         }
 
         //System.out.println("After step");
@@ -689,20 +625,6 @@ public class ContainerPanel extends JCanvas {
 
             g.setColor(old);
         }
-
-        frames++;
-
-//        if (!isPaused && temporalVoltageMatrix != null) {
-//            long delay = 1000 / 50 - (System.currentTimeMillis() - lastFrameTimeStamp);
-//            if (delay > 0) {
-//                try {
-//                    Thread.sleep(delay);
-//                } catch (InterruptedException e) {
-//                }
-//            }
-//            repaint(0);
-//        }
-//        lastFrameTimeStamp = lastTimeStamp;
     }
     
     public void drawPostWithMargin(Graphics g, int x0, int y0, Color pointColor) {
@@ -1260,7 +1182,6 @@ public class ContainerPanel extends JCanvas {
         this.analyzePropagationLevels();
         
         voltageSourceElements = new BaseElement[totalVoltageSourceCount];
-        circuitNonLinear = false;
 
         totalVoltageSourceCount = 0;
         int ivs;

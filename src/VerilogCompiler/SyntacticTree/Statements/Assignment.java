@@ -63,7 +63,7 @@ public class Assignment {
     
     public void execute(SimulationScope simulationScope, String moduleInstanceId) {
         ExpressionValue value = expression.evaluate(simulationScope, moduleInstanceId);
-        lvalue.setValue(simulationScope, moduleInstanceId, value.value);
+        lvalue.setValue(simulationScope, moduleInstanceId, value);
     }
     
     public void scheduleAssign(SimulationScope simulationScope, String moduleInstanceId) {

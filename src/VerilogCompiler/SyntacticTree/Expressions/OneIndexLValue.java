@@ -74,16 +74,17 @@ public class OneIndexLValue extends LValue {
     }
 
     @Override
-    public void setValue(SimulationScope simulationScope, String moduleInstanceId, Object value) {
+    public void setValue(SimulationScope simulationScope, String moduleInstanceId, ExpressionValue expressionValue) {
         ExpressionValue index = expression.evaluate(simulationScope, moduleInstanceId);
         if (index.xValue || index.zValue)
             return;
+        Object value = expressionValue.value;
         int intIndex = Convert.getInteger(index);
         ExpressionValue address = simulationScope.getScope(moduleInstanceId).getVariableValue(identifier);
         if(value != null && !value.toString().matches("[xXzZ]")){
             address.xValue = false;
             address.zValue = false;
-        } 
+        }
         ((Object[])address.value)[intIndex] = value;
     }
 

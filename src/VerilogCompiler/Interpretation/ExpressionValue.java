@@ -18,8 +18,10 @@ public class ExpressionValue {
     public Base base = Base.BINARY;
 
     public ExpressionValue(boolean zValue, boolean xValue) {
-        this.zValue = zValue;
-        this.xValue = xValue;
+        if(xValue)
+            this.setToXValue();
+        else
+            this.setToZValue();
     }
     
     public ExpressionValue() {
@@ -80,7 +82,7 @@ public class ExpressionValue {
         }
     }
     
-    public void setToZValue(){
+    public final void setToZValue(){
         if(this.value instanceof Object[]){
             Object[] values = (Object[]) value;
             for(int i = 0; i<values.length; i++)
@@ -94,7 +96,7 @@ public class ExpressionValue {
         this.zValue = true;
     }
     
-    public void setToXValue(){
+    public final void setToXValue(){
         if(this.value instanceof Object[]){
             Object[] values = (Object[]) value;
             for(int i = 0; i<values.length; i++)
@@ -124,5 +126,4 @@ public class ExpressionValue {
     public String toString() {
         return "ExpressionValue{" + "value=" + value + ", bits=" + bits + ", zValue=" + zValue + ", xValue=" + xValue + ", base=" + base + '}';
     }
-
 }
