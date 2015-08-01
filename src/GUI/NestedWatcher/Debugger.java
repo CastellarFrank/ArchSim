@@ -129,6 +129,7 @@ public class Debugger extends javax.swing.JInternalFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
         setMaximizable(true);
         setResizable(true);
+        setTitle("Variable Watcher");
 
         deleteAll.setText("Delete All Variables");
         deleteAll.addActionListener(new java.awt.event.ActionListener() {

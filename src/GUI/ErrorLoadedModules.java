@@ -54,6 +54,7 @@ public class ErrorLoadedModules extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Loading Modules");
 
         modulesList.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         modulesList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);

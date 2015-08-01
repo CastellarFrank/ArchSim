@@ -120,13 +120,13 @@ public class MainWindow extends javax.swing.JFrame {
         exitMenuItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         changeSettingsMenu = new javax.swing.JMenuItem();
-        helpMenu = new javax.swing.JMenu();
-        aboutMenuItem = new javax.swing.JMenuItem();
         windowMenu = new javax.swing.JMenu();
         designPaletteMenu = new javax.swing.JMenuItem();
+        helpMenu = new javax.swing.JMenu();
+        aboutMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("ArchSim: A hardware design and simulation tool");
+        setTitle("ArchSim 2.0: A hardware design and simulation tool");
 
         desktopPane.setPreferredSize(new java.awt.Dimension(1280, 800));
 
@@ -173,6 +173,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuBar.add(fileMenu);
 
+        jMenu1.setMnemonic('s');
         jMenu1.setText("Settings");
 
         changeSettingsMenu.setText("Change Settings");
@@ -184,6 +185,20 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu1.add(changeSettingsMenu);
 
         menuBar.add(jMenu1);
+
+        windowMenu.setMnemonic('w');
+        windowMenu.setText("Window");
+
+        designPaletteMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+        designPaletteMenu.setText("Show Design Palette");
+        designPaletteMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                designPaletteMenuActionPerformed(evt);
+            }
+        });
+        windowMenu.add(designPaletteMenu);
+
+        menuBar.add(windowMenu);
 
         helpMenu.setMnemonic('h');
         helpMenu.setText("Help");
@@ -198,19 +213,6 @@ public class MainWindow extends javax.swing.JFrame {
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
-
-        windowMenu.setText("Window");
-
-        designPaletteMenu.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
-        designPaletteMenu.setText("Show Design Palette");
-        designPaletteMenu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                designPaletteMenuActionPerformed(evt);
-            }
-        });
-        windowMenu.add(designPaletteMenu);
-
-        menuBar.add(windowMenu);
 
         setJMenuBar(menuBar);
 

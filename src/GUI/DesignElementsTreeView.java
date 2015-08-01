@@ -78,7 +78,7 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
 
         jScrollPane1.setViewportView(treeElement);
 
-        btnReLoadModules.setText("Re - Load Modules");
+        btnReLoadModules.setLabel("Refresh Modules");
         btnReLoadModules.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnReLoadModulesActionPerformed(evt);
@@ -92,7 +92,7 @@ public class DesignElementsTreeView extends javax.swing.JInternalFrame {
             .addComponent(jScrollPane1)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(btnReLoadModules)
-                .addGap(0, 113, Short.MAX_VALUE))
+                .addGap(0, 121, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

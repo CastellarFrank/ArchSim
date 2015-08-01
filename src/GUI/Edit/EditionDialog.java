@@ -124,6 +124,7 @@ public class EditionDialog extends javax.swing.JDialog {
         errormsg = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Configuration");
         setMinimumSize(new java.awt.Dimension(274, 212));
         setResizable(false);
 
